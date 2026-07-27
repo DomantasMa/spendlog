@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Spendlog</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -327,6 +330,23 @@
   .login input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(99,91,255,0.12); background: #fff; }
   .login .btn-primary { margin-top: 10px; width: 100%; }
   .login .status { font-size: 13px; color: var(--muted); margin-top: 12px; min-height: 18px; }
+  .login .ordiv {
+    display: flex; align-items: center; gap: 12px; margin-top: 14px;
+    color: var(--muted); font-size: 12px; font-weight: 600;
+  }
+  .login .ordiv::before, .login .ordiv::after {
+    content: ''; flex: 1; height: 1px; background: var(--grid);
+  }
+  .btn-google {
+    width: 100%; margin-top: 14px;
+    font: inherit; font-size: 14.5px; font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    background: #fff; color: var(--ink);
+    border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 13px; cursor: pointer;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-google:active { transform: translateY(1px); }
 
   /* ---------- sync dot ---------- */
   .syncdot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); display: inline-block; }
@@ -407,6 +427,11 @@
     <p>Enter your email and we&rsquo;ll send you a sign-in link &mdash; no password needed. Your expenses sync securely across your devices.</p>
     <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" enterkeyhint="go">
     <button class="btn-primary" id="loginSend">Send me a sign-in link</button>
+    <div class="ordiv"><span>or</span></div>
+    <button class="btn-google" id="loginGoogle">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C41 35.4 44 30.2 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>
+      Continue with Google
+    </button>
     <div class="status" id="loginStatus"></div>
   </div>
 
@@ -570,6 +595,7 @@ let memberNames = {};       // user_id -> display name (current space)
 let memberCount = 1;
 let range = 'month';
 let loading = false;
+let catFilter = null; // drill-down: selected category id or null
 
 /* ================= sync dot ================= */
 function setDot(state) { // ok | busy | warn
@@ -679,6 +705,11 @@ async function sendLink() {
   st.textContent = error ? ('Could not send: ' + error.message) : 'Link sent — check your email (and spam) on this device, then tap it.';
 }
 document.getElementById('loginSend').onclick = sendLink;
+document.getElementById('loginGoogle').onclick = async () => {
+  const st = document.getElementById('loginStatus');
+  const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+  if (error) st.textContent = 'Google sign-in isn’t enabled yet — use the email link instead.';
+};
 document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') sendLink(); });
 
 async function bootstrap() {
@@ -778,7 +809,20 @@ function parseMulti(raw) {
     }
     segs = out;
   }
-  return segs.map(parseUtterance).filter(Boolean);
+  return segs.map(parseUtterance).filter(Boolean).map(p => {
+    if (p.type !== 'income') {
+      const learned = learnedCategory(p.merchant);
+      if (learned) p.cat = learned;
+    }
+    return p;
+  });
+}
+
+/* learning: your own history beats the dictionary — correct a merchant once and it sticks */
+function learnedCategory(merchant) {
+  const m = merchant.toLowerCase().trim();
+  const hit = entries.find(e => e.type !== 'income' && e.merchant.toLowerCase().trim() === m);
+  return hit ? hit.cat : null;
 }
 
 const CMD_DELETE = /^(please\s+)?(delete|remove|undo)\s*(the\s+)?last(\s+(entry|one|expense|item))?\s*$/;
@@ -1053,11 +1097,14 @@ function render() {
   barsEl.textContent = '';
   document.getElementById('catEmpty').style.display = sorted.length ? 'none' : 'block';
   document.getElementById('catSub').textContent = sorted.length ? RANGES.find(r => r.id === range).label : '';
+  if (catFilter && !byCat[catFilter]) catFilter = null; // filtered category vanished from this range
   const max = sorted.length ? sorted[0][1] : 1;
   sorted.forEach(([cid, amt]) => {
     const c = catById(cid);
     const row = document.createElement('div');
     row.className = 'catrow';
+    row.style.cursor = 'pointer';
+    if (catFilter && cid !== catFilter) row.style.opacity = '0.35';
     const name = document.createElement('div');
     name.className = 'name';
     const dot = document.createElement('span');
@@ -1073,7 +1120,8 @@ function render() {
     val.className = 'val'; val.textContent = fmtGBP(amt);
     wrapEl.appendChild(bar); wrapEl.appendChild(val);
     row.appendChild(name); row.appendChild(wrapEl);
-    row.addEventListener('pointerdown', ev => showTip(ev.clientX, ev.clientY, fmtGBP(amt), c.name + (total ? ' · ' + Math.round(amt / total * 100) + '%' : '')));
+    row.addEventListener('pointerdown', ev => showTip(ev.clientX, ev.clientY, fmtGBP(amt), c.name + (total ? ' · ' + Math.round(amt / total * 100) + '%' : '') + ' — tap to drill down'));
+    row.addEventListener('click', () => { catFilter = (catFilter === cid ? null : cid); closeEditor(); render(); });
     barsEl.appendChild(row);
   });
 
@@ -1130,12 +1178,28 @@ function render() {
     xlab.appendChild(sp);
   });
 
-  /* entries list */
+  /* entries list (respects category drill-down) */
   const list = document.getElementById('entriesList');
   list.textContent = '';
-  const recent = cur.slice().sort((a, bb) => bb.dateISO.localeCompare(a.dateISO)).slice(0, 30);
+  const pool = catFilter ? cur.filter(e => e.type !== 'income' && e.cat === catFilter) : cur;
+  const recent = pool.slice().sort((a, bb) => bb.dateISO.localeCompare(a.dateISO)).slice(0, 30);
   document.getElementById('entriesEmpty').style.display = recent.length || loading ? 'none' : 'block';
-  document.getElementById('entriesTitle').textContent = (cur.length > 30 ? 'Latest 30 of ' + cur.length + ' entries' : 'Entries');
+  const titleEl = document.getElementById('entriesTitle');
+  titleEl.textContent = '';
+  if (catFilter) {
+    const dotSel = document.createElement('span');
+    dotSel.className = 'dot';
+    dotSel.style.cssText = 'display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:' + catColor(catFilter);
+    titleEl.appendChild(dotSel);
+    titleEl.appendChild(document.createTextNode(catById(catFilter).name + ' · ' + fmtGBP(pool.reduce((s, e) => s + e.amount, 0))));
+    const clear = document.createElement('button');
+    clear.textContent = 'Show all ✕';
+    clear.style.cssText = 'font:inherit;font-size:12px;font-weight:600;color:var(--accent);background:none;border:none;cursor:pointer;margin-left:10px;padding:2px;';
+    clear.onclick = () => { catFilter = null; render(); };
+    titleEl.appendChild(clear);
+  } else {
+    titleEl.textContent = (pool.length > 30 ? 'Latest 30 of ' + pool.length + ' entries' : 'Entries');
+  }
   recent.forEach(e => {
     const row = document.createElement('div');
     row.className = 'entry';
@@ -1330,6 +1394,11 @@ async function openSheet(mode) {
   sheet.appendChild(out);
 }
 document.getElementById('settingsBtn').onclick = () => openSheet('menu');
+
+/* ================= PWA ================= */
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 
 /* ================= boot ================= */
 setDot('busy');
