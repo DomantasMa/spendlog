@@ -407,6 +407,34 @@
   }
   .sheet .sheet-item.danger { color: var(--bad); }
   .member-row { font-size: 14px; color: var(--ink-2); padding: 9px 0; border-bottom: 1px solid var(--grid); font-weight: 500; }
+
+  /* ---------- invite banners ---------- */
+  .invitecard {
+    background: var(--surface); border: 1.5px solid var(--accent);
+    border-radius: 16px; padding: 14px 16px; margin-top: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .invitecard .itxt { font-size: 14px; font-weight: 650; }
+  .invitecard .irow { display: flex; gap: 8px; margin-top: 10px; }
+  .invitecard .iaccept {
+    flex: 1; font: inherit; font-size: 13.5px; font-weight: 700;
+    background: var(--brand); color: #fff; border: none; border-radius: 10px;
+    padding: 10px; cursor: pointer;
+  }
+  .invitecard .idecline {
+    font: inherit; font-size: 13.5px; font-weight: 600;
+    background: none; color: var(--ink-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 16px; cursor: pointer;
+  }
+
+  /* ---------- voice language toggle ---------- */
+  .langtoggle { display: inline-flex; gap: 2px; background: var(--page); border-radius: 999px; padding: 3px; margin-top: 12px; }
+  .langtoggle .lt {
+    font: inherit; font-size: 11.5px; font-weight: 700;
+    color: var(--muted); background: none; border: none;
+    border-radius: 999px; padding: 5px 12px; cursor: pointer;
+  }
+  .langtoggle .lt.sel { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
 </style>
 </head>
 <body>
@@ -439,6 +467,7 @@
 
   <!-- spaces -->
   <div class="spacesbar" id="spacesBar"></div>
+  <div id="inviteBanners"></div>
 
   <!-- capture -->
   <div class="card capture">
@@ -450,6 +479,10 @@
       </svg>
     </button>
     <div class="hint" id="micHint">Tap and say: &ldquo;240 at Lidl&rdquo;</div>
+    <div class="langtoggle" id="langToggle">
+      <button class="lt" data-l="en-GB">EN</button>
+      <button class="lt" data-l="lt-LT">LT</button>
+    </div>
     <div class="transcript" id="transcript"></div>
     <div class="typeline">
       <input type="text" id="typeInput" placeholder="or type: 12.50 at Greggs" enterkeyhint="done" autocomplete="off">
@@ -714,20 +747,74 @@ document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.k
 
 async function bootstrap() {
   await loadSpaces();
+  // heal duplicate "Personal" spaces created by the old multi-bootstrap bug: delete empty extras
+  const dups = spaces.filter(s2 => s2.name === 'Personal' && s2.created_by === session.user.id)
+    .sort((a, b2) => (a.created_at || '').localeCompare(b2.created_at || ''));
+  let healed = false;
+  for (let i = 1; i < dups.length; i++) {
+    const { count } = await sb.from('transactions').select('id', { count: 'exact', head: true }).eq('space_id', dups[i].id);
+    if (count === 0) { await sb.from('spaces').delete().eq('id', dups[i].id); healed = true; }
+  }
+  if (healed) await loadSpaces();
   if (!spaces.length) {
     const s = await createSpace('Personal', 'personal');
     if (!s) return;
   }
   const saved = lsGet('spendlog.space', null);
   currentSpaceId = spaces.some(s => s.id === saved) ? saved : spaces[0].id;
-  await Promise.all([loadTx(), loadMembers()]);
+  await Promise.all([loadTx(), loadMembers(), refreshInvites()]);
   renderSpaces(); render(); flushOutbox();
 }
 
+/* ================= invitations ================= */
+async function refreshInvites() {
+  try {
+    const { data } = await sb.rpc('my_invites');
+    renderInvites(data || []);
+  } catch (e) { /* older schema */ }
+}
+function renderInvites(list) {
+  const box = document.getElementById('inviteBanners');
+  box.textContent = '';
+  list.forEach(inv => {
+    const card = document.createElement('div');
+    card.className = 'invitecard';
+    const txt = document.createElement('div');
+    txt.className = 'itxt';
+    txt.textContent = (inv.inviter || 'Someone') + ' invited you to “' + inv.space_name + '”';
+    const row = document.createElement('div');
+    row.className = 'irow';
+    const acc = document.createElement('button');
+    acc.className = 'iaccept'; acc.textContent = 'Accept';
+    const dec = document.createElement('button');
+    dec.className = 'idecline'; dec.textContent = 'Decline';
+    acc.onclick = async () => {
+      acc.disabled = true;
+      const { error } = await sb.rpc('respond_invite', { p_invite: inv.id, p_accept: true });
+      if (!error) { await loadSpaces(); renderSpaces(); }
+      refreshInvites();
+    };
+    dec.onclick = async () => {
+      dec.disabled = true;
+      await sb.rpc('respond_invite', { p_invite: inv.id, p_accept: false });
+      refreshInvites();
+    };
+    row.appendChild(acc); row.appendChild(dec);
+    card.appendChild(txt); card.appendChild(row);
+    box.appendChild(card);
+  });
+}
+
+let booted = false; // guard: auth fires several events per sign-in; bootstrap only once
 sb.auth.onAuthStateChange((_ev, s) => {
   session = s;
-  if (s) { loginCard.style.display = 'none'; appView.style.display = 'block'; bootstrap(); }
-  else { loginCard.style.display = 'block'; appView.style.display = 'none'; }
+  if (s) {
+    loginCard.style.display = 'none'; appView.style.display = 'block';
+    if (!booted) { booted = true; bootstrap(); }
+  } else {
+    booted = false;
+    loginCard.style.display = 'block'; appView.style.display = 'none';
+  }
 });
 
 /* ================= spaces bar ================= */
@@ -752,8 +839,9 @@ function renderSpaces() {
 }
 
 /* ================= parsing ================= */
-const FILLER = new Set(['i','ive',"i've",'just','spent','spend','paid','pay','bought','it','was','a','an','the','pounds','pound','quid','gbp','today','on','for','at','in','to','from','and','cost','me','my','we','earned','received','got','income','made']);
-const INCOME_RE = /\b(earned|income|received|got paid|salary|wage|wages|payout|invoice paid|made)\b/;
+const FILLER = new Set(['i','ive',"i've",'just','spent','spend','paid','pay','bought','it','was','a','an','the','pounds','pound','quid','gbp','today','on','for','at','in','to','from','and','cost','me','my','we','earned','received','got','income','made',
+  'išleidau','isleidau','už','uz','eurų','euru','eurai','eur','svarų','svaru','svarai','svarą','svara','šiandien','siandien','vakar','sumokėjau','sumokejau','mokėjau','mokejau','pirkau','nupirkau','parduotuvėje','parduotuveje','gavau','uždirbau','uzdirbau']);
+const INCOME_RE = /\b(earned|income|received|got paid|salary|wage|wages|payout|invoice paid|made|gavau|uždirbau|uzdirbau|alga|algą|atlyginimas|atlyginimą|pajamos)\b/;
 
 function parseUtterance(raw) {
   let text = (raw || '').toLowerCase().replace(/[£$€]/g, ' ').replace(/,/g, '.').trim();
@@ -766,7 +854,7 @@ function parseUtterance(raw) {
   const type = INCOME_RE.test(text) ? 'income' : 'expense';
 
   let date = new Date();
-  if (text.includes('yesterday')) { date.setDate(date.getDate() - 1); text = text.replace(/yesterday/g, ' '); }
+  if (text.includes('yesterday') || /\bvakar\b/.test(text)) { date.setDate(date.getDate() - 1); text = text.replace(/yesterday|\bvakar\b/g, ' '); }
 
   let merchant = '';
   const after = text.slice(text.indexOf(amtMatch[1]) + amtMatch[1].length);
@@ -839,12 +927,35 @@ function handleInput(raw) {
     return;
   }
   const list = parseMulti(t);
-  if (!list.length) {
-    transcriptEl.textContent = 'Couldn’t find an amount in “' + t + '” — try “240 at Lidl”.';
-    return;
-  }
+  if (!list.length) { aiParse(t); return; } // rules can't read it (e.g. Lithuanian number words) — let AI try
   if (list.length === 1) showConfirm(list[0]);
   else showConfirmMulti(list);
+}
+
+/* AI fallback: a private Supabase function (holding the OpenAI key) parses what the rules can't */
+async function aiParse(text) {
+  transcriptEl.textContent = 'Thinking…';
+  try {
+    const { data, error } = await sb.functions.invoke('parse-expense', { body: { text } });
+    if (error || !data || !Array.isArray(data.entries) || !data.entries.length) throw new Error('no parse');
+    const today = new Date();
+    const list = data.entries.map(e => {
+      const amount = parseFloat(e.amount);
+      if (!(amount > 0)) return null;
+      const d = new Date(today);
+      d.setDate(d.getDate() - (parseInt(e.days_ago) || 0));
+      const type = e.type === 'income' ? 'income' : 'expense';
+      const merchant = String(e.merchant || (type === 'income' ? 'Income' : 'Unknown')).slice(0, 60);
+      let cat = CATEGORIES.some(c => c.id === e.category) ? e.category : guessCategory(merchant);
+      if (type !== 'income') { const l = learnedCategory(merchant); if (l) cat = l; }
+      return { amount, merchant, cat: type === 'income' ? 'income' : cat, type, dateISO: d.toISOString().slice(0, 10) };
+    }).filter(Boolean);
+    if (!list.length) throw new Error('no valid entries');
+    transcriptEl.textContent = '';
+    if (list.length === 1) showConfirm(list[0]); else showConfirmMulti(list);
+  } catch (e) {
+    transcriptEl.textContent = 'Couldn’t understand that — try “240 at Lidl” or “Lidl 240”.';
+  }
 }
 
 const fmtGBP = n => '£' + n.toLocaleString('en-GB', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
@@ -953,6 +1064,18 @@ document.getElementById('cSave').onclick = async () => {
   else insertTx(p);
 };
 
+/* ================= voice language ================= */
+let recLang = lsGet('spendlog.lang', 'en-GB');
+function renderLang() {
+  document.querySelectorAll('#langToggle .lt').forEach(b => {
+    b.classList.toggle('sel', b.dataset.l === recLang);
+    b.onclick = () => { recLang = b.dataset.l; lsSet('spendlog.lang', recLang); renderLang(); };
+  });
+  const hint = document.getElementById('micHint');
+  if (hint) hint.textContent = recLang === 'lt-LT' ? 'Spausk ir sakyk: „Lidl 240“' : 'Tap and say: “240 at Lidl”';
+}
+renderLang();
+
 /* ================= voice ================= */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('micBtn');
@@ -967,7 +1090,7 @@ if (!SR) {
   micBtn.onclick = () => {
     if (listening) { rec && rec.stop(); return; }
     rec = new SR();
-    rec.lang = 'en-GB'; rec.interimResults = true; rec.maxAlternatives = 1;
+    rec.lang = recLang; rec.interimResults = true; rec.maxAlternatives = 1;
     listening = true; micBtn.classList.add('listening');
     transcriptEl.textContent = 'Listening…';
     let finalText = '';
@@ -1320,20 +1443,25 @@ async function openSheet(mode) {
     memList.appendChild(r);
   });
   sheet.appendChild(memList);
+  /* pending invitations for this space */
+  const { data: pendingInv } = await sb.from('invites').select('email').eq('space_id', currentSpaceId).eq('status', 'pending');
+  (pendingInv || []).forEach(pi => {
+    memList.appendChild(el('div', 'member-row', pi.email + ' · invited, waiting for accept'));
+  });
+
   const isOwner = space && space.created_by === session.user.id;
   if (isOwner) {
     const inviteRow = el('div', 'erow');
-    const emIn = el('input'); emIn.placeholder = 'Add member by email'; emIn.type = 'email';
-    const emBtn = el('button', 'sheet-primary small', 'Add');
+    const emIn = el('input'); emIn.placeholder = 'Invite by email to ' + (space ? space.name : 'this space'); emIn.type = 'email';
+    const emBtn = el('button', 'sheet-primary small', 'Invite');
     const emSt = el('p', 'sheet-sub', '');
     emBtn.onclick = async () => {
       const email = emIn.value.trim().toLowerCase();
       if (!email.includes('@')) return;
-      const { data: prof } = await sb.from('profiles').select('id').eq('email', email).maybeSingle();
-      if (!prof) { emSt.textContent = 'No account with that email yet — ask them to sign in to Spendlog once first, then add them.'; return; }
-      const { error } = await sb.from('space_members').insert({ space_id: currentSpaceId, user_id: prof.id });
-      emSt.textContent = error ? (error.code === '23505' ? 'Already a member.' : 'Could not add: ' + error.message) : 'Added!';
-      await loadMembers(); openSheet('menu');
+      const { error } = await sb.from('invites').insert({ space_id: currentSpaceId, email });
+      emSt.textContent = error ? ('Could not invite: ' + error.message)
+        : 'Invitation sent — when they open Spendlog signed in with ' + email + ', they’ll get an Accept/Decline banner.';
+      emIn.value = '';
     };
     inviteRow.appendChild(emIn); inviteRow.appendChild(emBtn);
     sheet.appendChild(inviteRow); sheet.appendChild(emSt);
@@ -1388,6 +1516,25 @@ async function openSheet(mode) {
     document.body.appendChild(a); a.click(); a.remove();
   };
   sheet.appendChild(exp);
+
+  if (isOwner && spaces.length > 1) {
+    const delSpace = el('button', 'sheet-item danger', 'Delete this space…');
+    let armed = false;
+    delSpace.onclick = async () => {
+      if (!armed) {
+        armed = true;
+        delSpace.textContent = 'Tap again to delete “' + (space ? space.name : '') + '” and ALL its entries';
+        return;
+      }
+      await sb.from('spaces').delete().eq('id', currentSpaceId);
+      await loadSpaces();
+      currentSpaceId = spaces.length ? spaces[0].id : null;
+      lsSet('spendlog.space', currentSpaceId);
+      closeSheet(); renderSpaces();
+      if (currentSpaceId) { await Promise.all([loadTx(), loadMembers()]); render(); }
+    };
+    sheet.appendChild(delSpace);
+  }
 
   const out = el('button', 'sheet-item danger', 'Sign out');
   out.onclick = async () => { closeSheet(); await sb.auth.signOut(); };
