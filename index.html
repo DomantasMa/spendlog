@@ -706,7 +706,10 @@ async function insertTx(p) {
   const { data, error } = await sb.from('transactions').insert(payload).select().single();
   if (error) {
     entries = entries.filter(e => e.id !== temp.id);
-    pushOutbox(payload); render();
+    // only queue for retry when genuinely offline — retrying flaky online errors risks duplicates
+    if (!navigator.onLine) pushOutbox(payload);
+    else { alertMsg('Could not save — check connection and try again.'); setDot('warn'); }
+    render();
   } else {
     const i = entries.findIndex(e => e.id === temp.id);
     if (i >= 0) entries[i] = mapRow(data);
@@ -867,7 +870,12 @@ function parseUtterance(raw) {
   merchant = merchant.replace(/\s+/g, ' ').trim();
   merchant = merchant.split(/\s+/).filter(w => !FILLER.has(w)).join(' ').trim();
   if (!merchant) merchant = type === 'income' ? 'Income' : 'Unknown';
-  const pretty = merchant.split(' ').map(w => w.length > 2 ? w[0].toUpperCase() + w.slice(1) : w.toUpperCase()).join(' ');
+
+  // fix common speech-engine mishearings ("Lidl" heard as "level" etc.)
+  const ALIAS = { 'level': 'Lidl', 'lido': 'Lidl', 'liddle': 'Lidl', 'b and q': 'B&Q', 'bandq': 'B&Q', 'screw fix': 'Screwfix', 'aldis': 'Aldi' };
+  let pretty;
+  if (ALIAS[merchant]) { pretty = ALIAS[merchant]; merchant = pretty.toLowerCase(); }
+  else pretty = merchant.split(' ').map(w => w.length > 2 ? w[0].toUpperCase() + w.slice(1) : w.toUpperCase()).join(' ');
 
   return { amount, merchant: pretty, cat: guessCategory(merchant), type, dateISO: date.toISOString().slice(0, 10) };
 }
@@ -1026,7 +1034,7 @@ function showConfirmMulti(list) {
 function showConfirm(parsed) {
   pending = parsed;
   document.getElementById('typeToggle').style.display = '';
-  document.getElementById('cSave').textContent = 'Save expense';
+  document.getElementById('cSave').textContent = parsed.type === 'income' ? 'Save income' : 'Save expense';
   const chipsReset = document.getElementById('cChips');
   chipsReset.style.flexDirection = '';
   chipsReset.style.alignItems = '';
@@ -1072,7 +1080,7 @@ function renderLang() {
     b.onclick = () => { recLang = b.dataset.l; lsSet('spendlog.lang', recLang); renderLang(); };
   });
   const hint = document.getElementById('micHint');
-  if (hint) hint.textContent = recLang === 'lt-LT' ? 'Spausk ir sakyk: „Lidl 240“' : 'Tap and say: “240 at Lidl”';
+  if (hint) hint.textContent = recLang === 'lt-LT' ? 'Spausk, sakyk „Lidl 240“ — spausk dar kartą baigus' : 'Tap, say “240 at Lidl” — tap again when done';
 }
 renderLang();
 
@@ -1091,8 +1099,9 @@ if (!SR) {
     if (listening) { rec && rec.stop(); return; }
     rec = new SR();
     rec.lang = recLang; rec.interimResults = true; rec.maxAlternatives = 1;
+    rec.continuous = true; // don't cut the user off at the first pause — tap the mic again to finish
     listening = true; micBtn.classList.add('listening');
-    transcriptEl.textContent = 'Listening…';
+    transcriptEl.textContent = 'Listening… tap the mic again when done';
     let finalText = '';
     rec.onresult = ev => {
       let interim = '';
