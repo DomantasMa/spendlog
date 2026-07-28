@@ -456,6 +456,58 @@
   .projrow { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 11px 0; border-bottom: 1px solid var(--line); }
   .projrow .pl { color: var(--ink-2); font-weight: 500; }
   .projrow .pv { font-weight: 700; white-space: nowrap; }
+
+  /* ---------- subpages (budgets / projection) ---------- */
+  .subhead { display: flex; justify-content: space-between; align-items: center; padding: 20px 0 0; }
+  .backlink, .resetlink { font: inherit; font-size: 15.5px; font-weight: 600; color: var(--ink-2); background: none; border: none; cursor: pointer; padding: 4px 0; }
+  .pagesub { font-size: 14.5px; color: var(--muted); margin: -6px 0 6px; font-weight: 500; }
+  .bcard { background: var(--card); border-radius: 22px; padding: 18px; margin-top: 14px; box-shadow: var(--shadow); }
+  .bcard .btop { display: flex; align-items: center; gap: 12px; }
+  .bcard .bname { flex: 1; font-size: 16.5px; font-weight: 650; }
+  .bcard .bstat { font-size: 15px; font-weight: 650; color: var(--ink-2); white-space: nowrap; }
+  .bcard .bstat.over { color: var(--terra); }
+  .bcard .bbar { height: 8px; background: var(--paper); border-radius: 4px; margin-top: 14px; }
+  .bcard .bfill { height: 8px; border-radius: 4px; min-width: 0; }
+  .bcard .bfoot { display: flex; justify-content: space-between; margin-top: 12px; font-size: 13.5px; color: var(--muted); font-weight: 500; }
+  .bcard .badjust { font: inherit; font-size: 13.5px; font-weight: 650; color: var(--ink-2); background: none; border: none; cursor: pointer; padding: 0; }
+  .bcard .bedit { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+  .bcard .bedit input { flex: 1; font: inherit; font-size: 14.5px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .bcard .bedit button { font: inherit; font-size: 13px; font-weight: 700; border: none; border-radius: 999px; padding: 11px 15px; cursor: pointer; }
+  .bcard .bedit .bsave { background: var(--ink); color: #fff; }
+  .bcard .bedit .bclear { background: none; color: var(--bad); border: 1px solid var(--line); }
+
+  .projdark { background: var(--dark); color: var(--dark-ink); border-radius: 24px; padding: 22px; margin-top: 14px; }
+  .projdark .klab { display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; color: rgba(242,241,234,0.55); }
+  .projdark .kept { font-family: "Fraunces", Georgia, serif; font-size: 46px; font-weight: 600; color: #7FAF83; margin-top: 10px; letter-spacing: -0.01em; display: inline-block; }
+  .projdark .kept.neg { color: #D98A6E; }
+  .projdark .keptsub { font-size: 14px; color: rgba(242,241,234,0.7); margin-left: 10px; }
+  .projdark .knarr { font-size: 15px; color: rgba(242,241,234,0.85); margin-top: 12px; line-height: 1.5; }
+  .projdark .kchartlab { font-size: 11.5px; font-weight: 700; letter-spacing: 0.1em; color: rgba(242,241,234,0.55); margin-top: 20px; }
+  .projdark .kplot { display: flex; align-items: flex-end; gap: 6px; height: 120px; margin-top: 12px; }
+  .projdark .kcol { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .projdark .kbar { width: 100%; background: #5F8F63; border-radius: 6px; min-height: 3px; }
+  .projdark .kbar.neg { background: #C4694A; }
+  .projdark .klet { font-size: 10.5px; color: rgba(242,241,234,0.5); margin-top: 6px; }
+  .projdark .krange { display: flex; justify-content: space-between; font-size: 12.5px; color: rgba(242,241,234,0.5); margin-top: 8px; }
+  .projdark .kstats { display: flex; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(242,241,234,0.15); }
+  .projdark .kstats > div { flex: 1; }
+  .projdark .ksl { font-size: 12.5px; color: rgba(242,241,234,0.55); font-weight: 600; }
+  .projdark .ksv { font-size: 19px; font-weight: 700; margin-top: 4px; }
+  .assumphead { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .assumphead .at { font-size: 16.5px; font-weight: 700; }
+  .assumphead .as { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .stepper { display: flex; align-items: center; gap: 10px; flex: none; }
+  .stepbtn { width: 44px; height: 44px; border-radius: 14px; font: inherit; font-size: 20px; font-weight: 600; background: var(--paper); color: var(--ink); border: 1px solid var(--line); cursor: pointer; }
+  .stepval { font-size: 15.5px; font-weight: 700; min-width: 46px; text-align: center; }
+  .assumprow { padding: 16px 0 4px; border-bottom: 1px solid var(--line); }
+  .assumprow:last-child { border-bottom: none; }
+  .assumprow .artop { display: flex; align-items: center; gap: 12px; }
+  .assumprow .arname { flex: 1; min-width: 0; }
+  .assumprow .arn { font-size: 15.5px; font-weight: 650; }
+  .assumprow .arv { font-size: 13px; color: var(--muted); margin-top: 2px; font-weight: 500; }
+  .assumprow .arv b { color: var(--ink); }
+  .assumprow .arbar { height: 6px; background: var(--paper); border-radius: 3px; margin-top: 12px; margin-bottom: 8px; }
+  .assumprow .arfill { height: 6px; border-radius: 3px; min-width: 4px; }
 </style>
 </head>
 <body>
@@ -611,6 +663,44 @@
     <div class="insbtns">
       <button class="insbtn light" id="budgetsBtn">Budgets</button>
       <button class="insbtn dark" id="projectBtn">Project forward</button>
+    </div>
+  </section>
+
+  <!-- ===== BUDGETS PAGE ===== -->
+  <section class="tab" id="tab-budgetspage">
+    <div class="subhead">
+      <button class="backlink" id="budgetsBack">‹ Back</button>
+    </div>
+    <div class="pagetitle" style="padding-top:6px;">Budgets</div>
+    <div class="pagesub" id="budgetsSubT"></div>
+    <div id="budgetsCards"></div>
+  </section>
+
+  <!-- ===== PROJECTION PAGE ===== -->
+  <section class="tab" id="tab-projectionpage">
+    <div class="subhead">
+      <button class="backlink" id="projBack">‹ Back</button>
+      <button class="resetlink" id="projReset">Reset</button>
+    </div>
+    <div class="pagetitle" style="padding-top:6px;">Projection</div>
+    <div class="projdark" id="projDark"></div>
+    <div class="chartcard">
+      <div class="assumphead">
+        <span>
+          <span class="at">Income next year</span><br>
+          <span class="as">Expecting a rise? Adjust the percentage.</span>
+        </span>
+        <span class="stepper">
+          <button class="stepbtn" id="incMinus">−</button>
+          <span class="stepval" id="incPct">+0%</span>
+          <button class="stepbtn" id="incPlus">+</button>
+        </span>
+      </div>
+    </div>
+    <div class="chartcard">
+      <h2>Spending assumptions</h2>
+      <div class="sub">Per category, per month. Groceries up 3%? Nudge it.</div>
+      <div id="assumpRows"></div>
     </div>
   </section>
 
@@ -1223,8 +1313,9 @@ typeInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitTyped(
 /* ================= tabs ================= */
 function switchTab(name) {
   currentTab = name;
+  const hl = (name === 'budgetspage' || name === 'projectionpage') ? 'insights' : name;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
-  document.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('sel', b.dataset.tab === name));
+  document.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('sel', b.dataset.tab === hl));
   window.scrollTo(0, 0);
   render();
 }
@@ -1325,6 +1416,8 @@ function render() {
   renderActivity();
   renderInsights();
   renderSettings();
+  if (currentTab === 'budgetspage') renderBudgetsPage();
+  if (currentTab === 'projectionpage') renderProjectionPage();
 }
 
 function renderHome() {
@@ -1534,7 +1627,7 @@ function renderInsights() {
     } else if (s.kind === 'nobudget') {
       const [lab, title, body] = TONES[tone].nobudget();
       addCard('var(--sage)', lab, title, body, [
-        ['Set budgets', () => openSheet('budgets'), true],
+        ['Set budgets', () => switchTab('budgetspage'), true],
         ['Dismiss', () => dismiss('nobudget'), false],
       ]);
     }
@@ -1653,8 +1746,191 @@ function renderInsights() {
   });
 }
 
-/* ---------- projection ---------- */
-function computeProjection() {
+/* ---------- budgets page ---------- */
+function renderBudgetsPage() {
+  const space = spaces.find(s => s.id === currentSpaceId);
+  const cur = monthEntries(0).filter(e => e.type !== 'income');
+  const byCat = {};
+  cur.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
+  const withLimits = CATEGORIES.filter(c => budgets[c.id]);
+  const overs = withLimits.filter(c => (byCat[c.id] || 0) > budgets[c.id]).length;
+  document.getElementById('budgetsSubT').textContent = budgetsUnavailable
+    ? 'Temporarily unavailable — try again shortly'
+    : (withLimits.length
+      ? overs + ' of ' + withLimits.length + (withLimits.length === 1 ? ' category' : ' categories') + ' over plan · ' + (space ? space.name : '')
+      : 'No limits yet — tap Adjust on a category to set one · ' + (space ? space.name : ''));
+  const box = document.getElementById('budgetsCards');
+  box.textContent = '';
+  CATEGORIES.forEach(c => {
+    const spent = byCat[c.id] || 0;
+    const limit = budgets[c.id] || 0;
+    const card = el('div', 'bcard');
+    const top = el('div', 'btop');
+    const chip = el('span', 'catchip', c.letter);
+    chip.style.background = c.tint; chip.style.color = c.tx;
+    top.appendChild(chip);
+    top.appendChild(el('span', 'bname', c.name));
+    let stat;
+    if (!limit) stat = el('span', 'bstat', spent ? fmtGBP(spent) + ' spent' : 'No limit');
+    else if (spent > limit) { stat = el('span', 'bstat over', fmtGBP(spent - limit) + ' over'); }
+    else stat = el('span', 'bstat', fmtGBP(limit - spent) + ' left');
+    top.appendChild(stat);
+    card.appendChild(top);
+    const bar = el('div', 'bbar');
+    const fill = el('div', 'bfill');
+    if (limit) {
+      fill.style.width = Math.min(100, Math.round(spent / limit * 100)) + '%';
+      fill.style.background = spent > limit ? 'var(--terra)' : 'var(--s' + c.slot + ')';
+    } else fill.style.width = '0%';
+    bar.appendChild(fill);
+    card.appendChild(bar);
+    const foot = el('div', 'bfoot');
+    foot.appendChild(el('span', null, limit ? fmtGBP(spent) + ' of ' + fmtGBP(limit) : 'No monthly limit set'));
+    const adj = el('button', 'badjust', 'Adjust');
+    foot.appendChild(adj);
+    card.appendChild(foot);
+    adj.onclick = () => {
+      if (card.querySelector('.bedit')) { card.querySelector('.bedit').remove(); return; }
+      const ed = el('div', 'bedit');
+      const inp = el('input'); inp.type = 'number'; inp.min = '0'; inp.placeholder = 'Monthly limit £';
+      if (limit) inp.value = limit;
+      const save = el('button', 'bsave', 'Save');
+      save.onclick = async () => {
+        const v = parseFloat(inp.value);
+        if (v > 0) await saveBudget(c.id, v);
+        else if (limit) await clearBudget(c.id);
+        renderBudgetsPage();
+      };
+      ed.appendChild(inp); ed.appendChild(save);
+      if (limit) {
+        const clr = el('button', 'bclear', 'Remove');
+        clr.onclick = async () => { await clearBudget(c.id); renderBudgetsPage(); };
+        ed.appendChild(clr);
+      }
+      card.appendChild(ed);
+      inp.focus();
+    };
+    box.appendChild(card);
+  });
+}
+
+/* ---------- projection page (interactive what-if modeller) ---------- */
+let projIncomePct = 0;
+let projCatPct = {};
+function projBase() {
+  const base = [];
+  for (let off = -1; off >= -5; off--) {
+    const ms = monthEntries(off);
+    if (ms.length) base.push(ms);
+  }
+  const src = base.length ? base.flat() : monthEntries(0);
+  const n = Math.max(1, base.length);
+  const income = src.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0) / n;
+  const byCat = {};
+  src.filter(e => e.type !== 'income').forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount / n; });
+  return { n: base.length, income, byCat };
+}
+function renderProjectionPage() {
+  const b = projBase();
+  const adjIncome = b.income * (1 + projIncomePct / 100);
+  let adjSpend = 0;
+  const catList = Object.entries(b.byCat).sort((x, y) => y[1] - x[1]);
+  catList.forEach(([cid, avg]) => { adjSpend += avg * (1 + (projCatPct[cid] || 0) / 100); });
+  const kept = adjIncome - adjSpend;
+  const pctKept = adjIncome > 0 ? Math.round(kept / adjIncome * 100) : 0;
+  const now = new Date();
+  const horizon = new Date(now.getFullYear(), now.getMonth() + 12, 1);
+  const horizonLabel = horizon.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  const dark = document.getElementById('projDark');
+  dark.textContent = '';
+  const klab = el('div', 'klab');
+  klab.appendChild(document.createTextNode('KEPT PER MONTH'));
+  dark.appendChild(klab);
+  const keptEl = el('span', 'kept' + (kept < 0 ? ' neg' : ''), (kept < 0 ? '−' : '') + fmt0(Math.abs(kept)));
+  dark.appendChild(keptEl);
+  dark.appendChild(el('span', 'keptsub', adjIncome > 0 ? Math.abs(pctKept) + '% of income ' + (kept >= 0 ? 'kept' : 'overspent') : 'no income recorded'));
+  dark.appendChild(el('div', 'knarr', kept >= 0
+    ? 'Keep this up and you will have ' + fmt0(kept * 12) + ' put aside by ' + horizonLabel + '.'
+    : 'At this pace you will be ' + fmt0(Math.abs(kept) * 12) + ' short over the next 12 months.'));
+  dark.appendChild(el('div', 'kchartlab', 'RUNNING TOTAL · NEXT 12 MONTHS'));
+  const plot = el('div', 'kplot');
+  const maxCum = Math.abs(kept) * 12 || 1;
+  for (let i = 1; i <= 12; i++) {
+    const col = el('div', 'kcol');
+    const bar = el('div', 'kbar' + (kept < 0 ? ' neg' : ''));
+    bar.style.height = Math.max(3, Math.round(Math.abs(kept) * i / maxCum * 100)) + '%';
+    col.appendChild(bar);
+    const m = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    col.appendChild(el('div', 'klet', m.toLocaleDateString('en-GB', { month: 'short' })[0]));
+    plot.appendChild(col);
+  }
+  dark.appendChild(plot);
+  const range = el('div', 'krange');
+  const m1 = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  range.appendChild(el('span', null, m1.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })));
+  range.appendChild(el('span', null, horizon.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })));
+  dark.appendChild(range);
+  const stats = el('div', 'kstats');
+  const mkS = (l, v) => {
+    const d = el('div');
+    d.appendChild(el('div', 'ksl', l));
+    d.appendChild(el('div', 'ksv', v));
+    stats.appendChild(d);
+  };
+  mkS('Income', fmt0(adjIncome));
+  mkS('Spend', fmt0(adjSpend));
+  mkS('12 months', (kept < 0 ? '−' : '') + fmt0(Math.abs(kept) * 12));
+  dark.appendChild(stats);
+
+  document.getElementById('incPct').textContent = (projIncomePct >= 0 ? '+' : '') + projIncomePct + '%';
+
+  const rowsBox = document.getElementById('assumpRows');
+  rowsBox.textContent = '';
+  const arMax = catList.length ? catList[0][1] * 1.5 : 1;
+  catList.forEach(([cid, avg]) => {
+    const c = catById(cid);
+    const pct = projCatPct[cid] || 0;
+    const adj = avg * (1 + pct / 100);
+    const row = el('div', 'assumprow');
+    const top = el('div', 'artop');
+    const chip = el('span', 'catchip', c.letter);
+    chip.style.background = c.tint; chip.style.color = c.tx;
+    top.appendChild(chip);
+    const nm = el('div', 'arname');
+    nm.appendChild(el('div', 'arn', c.name));
+    const arv = el('div', 'arv');
+    arv.appendChild(document.createTextNode(fmt0(avg) + ' → '));
+    const bEl = document.createElement('b');
+    bEl.textContent = fmt0(adj);
+    arv.appendChild(bEl);
+    nm.appendChild(arv);
+    top.appendChild(nm);
+    const st = el('span', 'stepper');
+    const minus = el('button', 'stepbtn', '−');
+    const val = el('span', 'stepval', (pct >= 0 ? '+' : '') + pct + '%');
+    const plus = el('button', 'stepbtn', '+');
+    minus.onclick = () => { projCatPct[cid] = (projCatPct[cid] || 0) - 1; renderProjectionPage(); };
+    plus.onclick = () => { projCatPct[cid] = (projCatPct[cid] || 0) + 1; renderProjectionPage(); };
+    st.appendChild(minus); st.appendChild(val); st.appendChild(plus);
+    top.appendChild(st);
+    row.appendChild(top);
+    const arbar = el('div', 'arbar');
+    const arfill = el('div', 'arfill');
+    arfill.style.width = Math.min(100, Math.round(adj / arMax * 100)) + '%';
+    arfill.style.background = 'var(--s' + c.slot + ')';
+    arbar.appendChild(arfill);
+    row.appendChild(arbar);
+    rowsBox.appendChild(row);
+  });
+}
+document.getElementById('incMinus').onclick = () => { projIncomePct -= 1; renderProjectionPage(); };
+document.getElementById('incPlus').onclick = () => { projIncomePct += 1; renderProjectionPage(); };
+document.getElementById('projReset').onclick = () => { projIncomePct = 0; projCatPct = {}; renderProjectionPage(); };
+document.getElementById('projBack').onclick = () => switchTab('insights');
+document.getElementById('budgetsBack').onclick = () => switchTab('insights');
+
+function computeProjectionLegacy() {
   // completed months (1–5 back) that have any activity — the honest base for averages
   const base = [];
   for (let off = -1; off >= -5; off--) {
@@ -1711,8 +1987,8 @@ function openProjection() {
     mkRow('Your budgets allow', fmt0(totalBudget) + '/month · ' + fmt0(totalBudget * 12) + '/year');
   }
 }
-document.getElementById('budgetsBtn').onclick = () => openSheet('budgets');
-document.getElementById('projectBtn').onclick = openProjection;
+document.getElementById('budgetsBtn').onclick = () => switchTab('budgetspage');
+document.getElementById('projectBtn').onclick = () => switchTab('projectionpage');
 
 /* ---------- settings ---------- */
 function renderSettings() {
@@ -1722,7 +1998,7 @@ function renderSettings() {
   document.getElementById('setBudgetsSub').textContent = budgetsUnavailable ? 'Temporarily unavailable' : (set ? set + ' set' + (overs ? ' · ' + overs + ' over plan' : '') : 'Set monthly limits per category');
 }
 document.getElementById('setSpaces').onclick = () => openSheet('menu');
-document.getElementById('setBudgets').onclick = () => openSheet('budgets');
+document.getElementById('setBudgets').onclick = () => switchTab('budgetspage');
 document.getElementById('setLang').onclick = () => { recLang = recLang === 'lt-LT' ? 'en-GB' : 'lt-LT'; lsSet('spendlog.lang', recLang); renderLang(); };
 document.getElementById('setSignOut').onclick = async () => { await sb.auth.signOut(); };
 document.getElementById('setCsvOut').onclick = () => exportCsv();
