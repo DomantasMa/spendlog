@@ -833,7 +833,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer">Kaupa &mdash; made by Domantas &amp; Claude.</div>
+    <div class="footer">Kaupa v2.8 &mdash; made by Domantas &amp; Claude.</div>
   </section>
 
 </div>
@@ -1201,7 +1201,9 @@ function learnedCategory(merchant) {
 }
 const CMD_DELETE = /^(please\s+)?(delete|remove|undo)\s*(the\s+)?last(\s+(entry|one|expense|item))?\s*$/;
 function handleInput(raw) {
-  const t = (raw || '').trim();
+  // safety net: collapse consecutively repeated words ("aldi aldi 25" → "aldi 25"),
+  // whatever the speech engine got up to
+  let t = (raw || '').trim().replace(/(\S+)(\s+\1\b)+/gi, '$1');
   if (!t) return;
   const cmd = t.toLowerCase().replace(/[.!?]/g, '').trim();
   if (CMD_DELETE.test(cmd)) {
@@ -1345,41 +1347,60 @@ if (!SR) {
   document.getElementById('voiceNote').style.display = 'block';
   micBtn.onclick = () => { document.getElementById('typeLine').classList.add('open'); document.getElementById('typeInput').focus(); };
 } else {
-  micBtn.onclick = () => {
-    if (listening) { rec && rec.stop(); return; }
+  /* One clean phrase per recognition round (Android's continuous mode delivers
+     progressive REVISIONS as separate finals — unusable). Auto-restart between
+     rounds so long input still works; tap the mic again to finish. */
+  let sessionParts = [];
+  let emptyRounds = 0;
+  function finishVoice() {
+    listening = false;
+    micBtn.classList.remove('listening');
+    micLabel.textContent = 'Tap to add';
+    const text = sessionParts.join(', ').trim();
+    sessionParts = [];
+    if (text) handleInput(text);
+    else transcriptEl.textContent = '';
+  }
+  function startRound() {
     rec = new SR();
     rec.lang = recLang; rec.interimResults = true; rec.maxAlternatives = 1;
-    rec.continuous = true;
-    listening = true; micBtn.classList.add('listening');
-    micLabel.textContent = 'Tap to finish';
-    transcriptEl.textContent = 'Listening…';
-    let finalText = '';
+    rec.continuous = false;
+    let roundFinal = '';
     rec.onresult = ev => {
-      // rebuild from the full result list every time, skipping consecutive
-      // duplicates — Android re-delivers finished phrases in continuous mode
-      const finals = [];
       let interim = '';
       for (let i = 0; i < ev.results.length; i++) {
         const t = (ev.results[i][0].transcript || '').trim();
         if (!t) continue;
-        if (ev.results[i].isFinal) {
-          if (t !== finals[finals.length - 1]) finals.push(t);
-        } else interim += t + ' ';
+        if (ev.results[i].isFinal) roundFinal = t; // one utterance per round — last final wins
+        else interim = t;
       }
-      finalText = finals.join(' ');
-      transcriptEl.textContent = '“' + (finalText + ' ' + interim).trim() + '”';
+      const shown = (sessionParts.concat(roundFinal || interim || []).filter(Boolean)).join(', ');
+      if (shown) transcriptEl.textContent = '“' + shown + '”';
     };
     rec.onerror = ev => {
-      transcriptEl.textContent = ev.error === 'not-allowed'
-        ? 'Microphone blocked — allow mic access in your browser settings.'
-        : 'Didn’t catch that — try again or type it.';
+      if (ev.error === 'not-allowed') {
+        transcriptEl.textContent = 'Microphone blocked — allow mic access in your browser settings.';
+        finishVoice();
+      }
+      // 'no-speech' and friends fall through to onend, which decides
     };
     rec.onend = () => {
-      listening = false; micBtn.classList.remove('listening');
-      micLabel.textContent = 'Tap to add';
-      if (finalText) handleInput(finalText);
+      if (roundFinal) { sessionParts.push(roundFinal); emptyRounds = 0; }
+      else emptyRounds++;
+      if (!listening) { finishVoice(); return; }
+      if (emptyRounds >= 3) { finishVoice(); return; } // ~long silence: wrap up on their behalf
+      try { startRound(); } catch (e) { finishVoice(); }
     };
     rec.start();
+  }
+  micBtn.onclick = () => {
+    if (listening) { listening = false; try { rec && rec.stop(); } catch (e) { finishVoice(); } return; }
+    sessionParts = []; emptyRounds = 0;
+    listening = true;
+    micBtn.classList.add('listening');
+    micLabel.textContent = 'Tap to finish';
+    transcriptEl.textContent = 'Listening…';
+    startRound();
   };
 }
 document.getElementById('typePill').onclick = () => {
@@ -2556,21 +2577,37 @@ function showImportSheet() {
   sheetBack.style.display = 'flex';
   sheet.appendChild(el('h3', null, 'Bank statement import'));
 }
+const PDFJS_SOURCES = [
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
+  'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build',
+  'https://unpkg.com/pdfjs-dist@3.11.174/build',
+];
 async function loadPdfJs() {
   if (window.pdfjsLib) return window.pdfjsLib;
-  await new Promise((res, rej) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    s.onload = res; s.onerror = rej;
-    document.head.appendChild(s);
-  });
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  return window.pdfjsLib;
+  let lastErr;
+  for (const base of PDFJS_SOURCES) {
+    try {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = base + '/pdf.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+        setTimeout(rej, 15000);
+      });
+      if (window.pdfjsLib) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = base + '/pdf.worker.min.js';
+        return window.pdfjsLib;
+      }
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('reader unavailable');
 }
-async function extractPdfLines(file) {
-  const pdfjs = await loadPdfJs();
+async function extractPdfLines(file, password) {
+  let pdfjs;
+  try { pdfjs = await loadPdfJs(); }
+  catch (e) { const err = new Error('reader-load'); err.stage = 'load'; throw err; }
   const buf = await file.arrayBuffer();
-  const doc = await pdfjs.getDocument({ data: buf }).promise;
+  const doc = await pdfjs.getDocument(password ? { data: buf, password } : { data: buf }).promise;
   const lines = [];
   for (let p = 1; p <= Math.min(doc.numPages, 12); p++) {
     const page = await doc.getPage(p);
@@ -2594,18 +2631,36 @@ async function openBankImport(file) {
   if (error) { showImportSheet(); sheet.appendChild(el('p', 'sheet-sub', error)); return; }
   await showImportReview(rows, true);
 }
-async function openPdfImport(file) {
+async function openPdfImport(file, password) {
   showImportSheet();
   const status = el('p', 'sheet-sub', 'Reading PDF…');
   sheet.appendChild(status);
   let lines;
-  try { lines = await extractPdfLines(file); }
-  catch (e) { status.textContent = 'Couldn’t read this PDF — check your connection and try again, or export the statement as CSV.'; return; }
-  if (!lines || lines.join('').length < 100) { status.textContent = 'This PDF looks scanned or image-based — use your bank’s CSV export instead.'; return; }
+  try { lines = await extractPdfLines(file, password); }
+  catch (e) {
+    const msg = (e && (e.name + ' ' + (e.message || ''))) || '';
+    if (/password/i.test(msg)) {
+      status.textContent = password
+        ? 'That password didn’t unlock it — try again.'
+        : 'This PDF is password-protected (banks often do this — the password is usually in the email, or your date of birth/postcode).';
+      const pwIn = el('input'); pwIn.type = 'password'; pwIn.placeholder = 'PDF password';
+      const pwGo = el('button', 'sheet-primary', 'Unlock and read');
+      pwGo.onclick = () => openPdfImport(file, pwIn.value);
+      pwIn.addEventListener('keydown', ev => { if (ev.key === 'Enter') pwGo.click(); });
+      sheet.appendChild(pwIn); sheet.appendChild(pwGo);
+      return;
+    }
+    if (e && e.stage === 'load') { status.textContent = 'Couldn’t load the PDF reader — check your internet connection and try again.'; return; }
+    status.textContent = 'Couldn’t open this PDF (' + (e && (e.message || e.name) || 'unknown error') + ') — try your bank’s CSV export instead.';
+    return;
+  }
+  if (!lines || lines.join('').length < 100) { status.textContent = 'This PDF has no readable text — it looks scanned or image-based. Use your bank’s CSV export instead.'; return; }
   status.textContent = 'Asking AI to read ' + lines.length + ' lines…';
   try {
     const { data, error } = await sb.functions.invoke('parse-expense', { body: { statement_lines: lines.slice(0, 400) } });
-    if (error || !data || !Array.isArray(data.items) || !data.items.length) throw new Error('no items');
+    if (error) { status.textContent = 'The AI reader failed (' + (error.message || 'network error') + ') — try again in a minute.'; return; }
+    if (data && data.error) { status.textContent = 'The AI reader failed (' + String(data.error).slice(0, 80) + ') — try again in a minute.'; return; }
+    if (!data || !Array.isArray(data.items) || !data.items.length) throw new Error('no items');
     const rows = data.items.map(it => {
       const amount = parseFloat(it.amount);
       const dateISO = /^\d{4}-\d{2}-\d{2}$/.test(it.date) ? it.date : null;
