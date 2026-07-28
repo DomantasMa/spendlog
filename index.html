@@ -508,6 +508,52 @@
   .assumprow .arv b { color: var(--ink); }
   .assumprow .arbar { height: 6px; background: var(--paper); border-radius: 3px; margin-top: 12px; margin-bottom: 8px; }
   .assumprow .arfill { height: 6px; border-radius: 3px; min-width: 4px; }
+
+  /* ---------- home: alert actions / donut / history / latest / import ---------- */
+  .alertrow { display: flex; gap: 8px; margin-top: 16px; }
+  .alertact { flex: 1.6; font: inherit; font-size: 14px; font-weight: 700; background: var(--dark-ink); color: var(--dark); border: none; border-radius: 999px; padding: 13px; cursor: pointer; }
+  .alertdis { flex: 1; font: inherit; font-size: 14px; font-weight: 600; background: transparent; color: var(--dark-ink); border: 1px solid rgba(242,241,234,0.3); border-radius: 999px; padding: 13px; cursor: pointer; }
+  .cardhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .cardlink { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; padding: 2px; }
+  .donutrow { display: flex; align-items: center; gap: 20px; margin-top: 16px; }
+  .donutwrap { position: relative; width: 148px; height: 148px; flex: none; }
+  .donutwrap svg { width: 148px; height: 148px; transform: rotate(-90deg); }
+  .dcenter { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .dpct { font-family: "Fraunces", Georgia, serif; font-size: 25px; font-weight: 600; }
+  .dcat { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 0.09em; margin-top: 2px; }
+  .leg { flex: 1; display: grid; gap: 12px; min-width: 0; }
+  .legrow { display: flex; align-items: center; gap: 9px; font-size: 14.5px; }
+  .legrow .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .legrow .ln { flex: 1; font-weight: 600; color: var(--ink); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .legrow .lv { font-weight: 700; white-space: nowrap; }
+  .histnav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; }
+  .histchev { width: 46px; height: 46px; border-radius: 15px; background: var(--card); border: 1px solid var(--line); font-size: 19px; color: var(--ink-2); cursor: pointer; }
+  .histchev:disabled { opacity: 0.3; }
+  .histlab { text-align: center; }
+  .hl1 { font-size: 17.5px; font-weight: 700; }
+  .hl2 { font-size: 12.5px; color: var(--muted); min-height: 16px; }
+  .histstats { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; margin-top: 18px; }
+  .histstats .hol { font-size: 12px; font-weight: 700; letter-spacing: 0.09em; color: var(--muted); }
+  .histstats .hov { font-family: "Fraunces", Georgia, serif; font-size: 34px; font-weight: 600; margin-top: 4px; letter-spacing: -0.01em; }
+  .histstats .hi { display: grid; gap: 5px; }
+  .histstats .hir { display: flex; gap: 14px; justify-content: flex-end; align-items: baseline; font-size: 14px; }
+  .histstats .hlab { color: var(--muted); font-weight: 500; }
+  .histstats .hval { font-weight: 700; }
+  .histbarrow { padding: 12px 0 2px; }
+  .histbarrow .hbt { display: flex; justify-content: space-between; font-size: 14.5px; font-weight: 650; }
+  .histbarrow .hbb { height: 6px; background: var(--paper); border-radius: 3px; margin-top: 9px; }
+  .histbarrow .hbf { height: 6px; border-radius: 3px; min-width: 5px; }
+  .latesthead { display: flex; justify-content: space-between; align-items: center; padding: 24px 4px 10px; }
+  .lt1 { font-size: 19px; font-weight: 700; }
+  .importcard {
+    display: flex; align-items: center; gap: 14px; width: 100%;
+    font: inherit; text-align: left; color: var(--ink);
+    background: none; border: 1.5px dashed #C9C7BC; border-radius: 20px;
+    padding: 18px; margin-top: 20px; cursor: pointer;
+  }
+  .pdfbox { width: 52px; height: 52px; border-radius: 12px; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); flex: none; }
+  .it1 { font-size: 16px; font-weight: 700; }
+  .it2 { font-size: 13px; color: var(--muted); font-weight: 500; }
 </style>
 </head>
 <body>
@@ -600,10 +646,49 @@
       </div>
     </div>
 
-    <button class="darkcard" id="alertCard" style="display:none;">
+    <div class="darkcard" id="alertCard" style="display:none; cursor:default;">
       <div class="klab"><span class="d" style="background:var(--terra)"></span><span id="alertLab">ALERT</span></div>
       <div class="ktitle serif" id="alertTitle"></div>
       <div class="kbody" id="alertBody"></div>
+      <div class="alertrow" id="alertActions"></div>
+    </div>
+
+    <div class="chartcard">
+      <div class="cardhead"><h2>Where it went</h2><button class="cardlink" id="wiwLink">Insights</button></div>
+      <div class="donutrow" id="donutRow"></div>
+      <div class="empty" id="wiwEmpty" style="display:none;">No spending this month yet.</div>
+    </div>
+
+    <div class="chartcard">
+      <div class="cardhead"><h2>History</h2>
+        <span class="toneseg" id="histSeg">
+          <button data-m="month" class="sel">Month</button>
+          <button data-m="year">Year</button>
+          <button data-m="all">All years</button>
+        </span>
+      </div>
+      <div class="histnav">
+        <button class="histchev" id="histPrev">‹</button>
+        <div class="histlab">
+          <div class="hl1" id="histLabel"></div>
+          <div class="hl2" id="histSub"></div>
+        </div>
+        <button class="histchev" id="histNext">›</button>
+      </div>
+      <div class="histstats" id="histStats"></div>
+      <div id="histBars"></div>
+    </div>
+
+    <div class="latesthead"><span class="lt1">Latest</span><button class="cardlink" id="latestLink">All activity</button></div>
+    <div class="groupcard" id="latestList"></div>
+    <div class="empty" id="latestEmpty" style="display:none;">Nothing yet &mdash; tap the mic above.</div>
+
+    <button class="importcard" id="importCard">
+      <span class="pdfbox">PDF</span>
+      <span class="importtxt">
+        <span class="it1">Import a bank statement</span><br>
+        <span class="it2">Barclays, Monzo, Revolut, HSBC &middot; PDF or CSV</span>
+      </span>
     </button>
 
     <div class="footer">Synced to your private Kaupa cloud &mdash; only space members can see this data.</div>
@@ -1270,17 +1355,19 @@ if (!SR) {
     transcriptEl.textContent = 'Listening…';
     let finalText = '';
     rec.onresult = ev => {
-      // rebuild from the full result list every time — Android re-delivers
-      // finished phrases in continuous mode, so appending would duplicate them
-      let final = '', interim = '';
+      // rebuild from the full result list every time, skipping consecutive
+      // duplicates — Android re-delivers finished phrases in continuous mode
+      const finals = [];
+      let interim = '';
       for (let i = 0; i < ev.results.length; i++) {
-        const t = ev.results[i][0].transcript;
+        const t = (ev.results[i][0].transcript || '').trim();
+        if (!t) continue;
         if (ev.results[i].isFinal) {
-          if (!final.endsWith(t.trim())) final += t + ' ';
-        } else interim += t;
+          if (t !== finals[finals.length - 1]) finals.push(t);
+        } else interim += t + ' ';
       }
-      finalText = final.trim();
-      transcriptEl.textContent = '“' + (finalText || interim).trim() + '”';
+      finalText = finals.join(' ');
+      transcriptEl.textContent = '“' + (finalText + ' ' + interim).trim() + '”';
     };
     rec.onerror = ev => {
       transcriptEl.textContent = ev.error === 'not-allowed'
@@ -1447,10 +1534,170 @@ function renderHome() {
     document.getElementById('alertLab').textContent = lab.toUpperCase();
     document.getElementById('alertTitle').textContent = title;
     document.getElementById('alertBody').textContent = body;
+    const acts = document.getElementById('alertActions');
+    acts.textContent = '';
+    const raise = el('button', 'alertact', 'Raise limit to ' + fmt0(Math.ceil(sug.spent)));
+    raise.onclick = async () => { await saveBudget(sug.cat.id, Math.ceil(sug.spent)); };
+    const notNow = el('button', 'alertdis', 'Not now');
+    notNow.onclick = () => dismiss('over', sug.cat.id);
+    acts.appendChild(raise); acts.appendChild(notNow);
     ac.style.display = 'block';
-    ac.onclick = () => switchTab('insights');
   } else ac.style.display = 'none';
+
+  /* where it went — donut + legend */
+  const byCatH = {};
+  cur.filter(e => e.type !== 'income').forEach(e => { byCatH[e.cat] = (byCatH[e.cat] || 0) + e.amount; });
+  const sortedH = Object.entries(byCatH).sort((a, b) => b[1] - a[1]);
+  const dRow = document.getElementById('donutRow');
+  dRow.textContent = '';
+  document.getElementById('wiwEmpty').style.display = sortedH.length ? 'none' : 'block';
+  if (sortedH.length) {
+    const totalH = sortedH.reduce((s, x) => s + x[1], 0);
+    const wrap = el('div', 'donutwrap');
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    const R = 38, C = 2 * Math.PI * R;
+    let acc = 0;
+    sortedH.forEach(([cid, amt]) => {
+      const frac = amt / totalH;
+      const seg = document.createElementNS(NS, 'circle');
+      seg.setAttribute('cx', '50'); seg.setAttribute('cy', '50'); seg.setAttribute('r', String(R));
+      seg.setAttribute('fill', 'none');
+      seg.setAttribute('stroke', 'var(--s' + catById(cid).slot + ')');
+      seg.setAttribute('stroke-width', '13');
+      const len = Math.max(0.5, frac * C - (sortedH.length > 1 ? 2 : 0));
+      seg.setAttribute('stroke-dasharray', len + ' ' + C);
+      seg.setAttribute('stroke-dashoffset', String(-acc * C));
+      seg.setAttribute('stroke-linecap', sortedH.length > 1 ? 'round' : 'butt');
+      svg.appendChild(seg);
+      acc += frac;
+    });
+    wrap.appendChild(svg);
+    const center = el('div', 'dcenter');
+    center.appendChild(el('div', 'dpct serif', Math.round(sortedH[0][1] / totalH * 100) + '%'));
+    center.appendChild(el('div', 'dcat', catById(sortedH[0][0]).name.toUpperCase().slice(0, 12)));
+    wrap.appendChild(center);
+    dRow.appendChild(wrap);
+    const leg = el('div', 'leg');
+    sortedH.slice(0, 4).forEach(([cid, amt]) => {
+      const c = catById(cid);
+      const lr = el('div', 'legrow');
+      const dot = el('span', 'dot'); dot.style.background = 'var(--s' + c.slot + ')';
+      lr.appendChild(dot);
+      lr.appendChild(el('span', 'ln', c.name));
+      lr.appendChild(el('span', 'lv', fmt0(amt)));
+      leg.appendChild(lr);
+    });
+    dRow.appendChild(leg);
+  }
+
+  renderHistory();
+  renderLatest();
 }
+
+/* ---------- home: history card ---------- */
+let histMode = 'month';
+let histOffset = 0;
+function periodEntries() {
+  if (histMode === 'month') return monthEntries(histOffset);
+  if (histMode === 'year') {
+    const y = String(new Date().getFullYear() + histOffset);
+    return entries.filter(e => e.dateISO.slice(0, 4) === y);
+  }
+  return entries;
+}
+function renderHistory() {
+  document.querySelectorAll('#histSeg button').forEach(b => {
+    b.classList.toggle('sel', b.dataset.m === histMode);
+  });
+  const now = new Date();
+  let label = '', sub = '';
+  if (histMode === 'month') {
+    const d = new Date(now.getFullYear(), now.getMonth() + histOffset, 1);
+    label = d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    sub = histOffset === 0 ? 'in progress' : '';
+  } else if (histMode === 'year') {
+    label = String(now.getFullYear() + histOffset);
+    sub = histOffset === 0 ? 'in progress' : '';
+  } else { label = 'All time'; sub = ''; }
+  document.getElementById('histLabel').textContent = label;
+  document.getElementById('histSub').textContent = sub;
+  document.getElementById('histPrev').disabled = histMode === 'all';
+  document.getElementById('histNext').disabled = histMode === 'all' || histOffset >= 0;
+
+  const per = periodEntries();
+  const out = per.filter(e => e.type !== 'income').reduce((s, e) => s + e.amount, 0);
+  const inn = per.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const net = inn - out;
+  const stats = document.getElementById('histStats');
+  stats.textContent = '';
+  const left = el('div', 'ho');
+  left.appendChild(el('div', 'hol', 'OUT'));
+  left.appendChild(el('div', 'hov serif', fmt0(out)));
+  const right = el('div', 'hi');
+  const r1 = el('div', 'hir');
+  r1.appendChild(el('span', 'hlab', 'In'));
+  r1.appendChild(el('span', 'hval', fmt0(inn)));
+  const r2 = el('div', 'hir');
+  r2.appendChild(el('span', 'hlab', 'Net'));
+  const nv = el('span', 'hval', (net >= 0 ? '+' : '−') + fmt0(Math.abs(net)));
+  nv.style.color = net >= 0 ? 'var(--good)' : 'var(--terra)';
+  r2.appendChild(nv);
+  right.appendChild(r1); right.appendChild(r2);
+  stats.appendChild(left); stats.appendChild(right);
+
+  const bars = document.getElementById('histBars');
+  bars.textContent = '';
+  const byCatP = {};
+  per.filter(e => e.type !== 'income').forEach(e => { byCatP[e.cat] = (byCatP[e.cat] || 0) + e.amount; });
+  const sortedP = Object.entries(byCatP).sort((a, b) => b[1] - a[1]);
+  const pMax = sortedP.length ? sortedP[0][1] : 1;
+  sortedP.forEach(([cid, amt]) => {
+    const c = catById(cid);
+    const row = el('div', 'histbarrow');
+    const top = el('div', 'hbt');
+    top.appendChild(el('span', null, c.name));
+    top.appendChild(el('span', null, fmt0(amt)));
+    const bb = el('div', 'hbb');
+    const bf = el('div', 'hbf');
+    bf.style.width = Math.max(4, Math.round(amt / pMax * 100)) + '%';
+    bf.style.background = 'var(--s' + c.slot + ')';
+    bb.appendChild(bf);
+    row.appendChild(top); row.appendChild(bb);
+    bars.appendChild(row);
+  });
+}
+function renderLatest() {
+  const list = document.getElementById('latestList');
+  list.textContent = '';
+  const latest = entries.slice(0, 4);
+  document.getElementById('latestEmpty').style.display = latest.length ? 'none' : 'block';
+  document.getElementById('latestList').style.display = latest.length ? 'block' : 'none';
+  latest.forEach(e => {
+    const row = el('div', 'entry');
+    const c = e.type === 'income' ? INCOME_CHIP : catById(e.cat);
+    const chip = el('span', 'catchip', c.letter);
+    chip.style.background = c.tint; chip.style.color = c.tx;
+    const mid = el('div', 'mid');
+    mid.appendChild(el('div', 'mname', e.merchant));
+    const who = session && e.user_id === session.user.id ? 'You' : (memberNames[e.user_id] || 'Member');
+    const dLab = new Date(e.dateISO + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    mid.appendChild(el('div', 'msub', (e.type === 'income' ? 'Income' : catById(e.cat).name) + ' · ' + dLab + ' · ' + who));
+    const amt = el('div', 'amt', (e.type === 'income' ? '+' : '−') + fmtGBP(e.amount));
+    if (e.type === 'income') amt.style.color = 'var(--good)';
+    row.appendChild(chip); row.appendChild(mid); row.appendChild(amt);
+    row.onclick = () => switchTab('activity');
+    list.appendChild(row);
+  });
+}
+document.querySelectorAll('#histSeg button').forEach(b => {
+  b.onclick = () => { histMode = b.dataset.m; histOffset = 0; renderHistory(); };
+});
+document.getElementById('histPrev').onclick = () => { histOffset -= 1; renderHistory(); };
+document.getElementById('histNext').onclick = () => { if (histOffset < 0) { histOffset += 1; renderHistory(); } };
+document.getElementById('wiwLink').onclick = () => switchTab('insights');
+document.getElementById('latestLink').onclick = () => switchTab('activity');
 
 /* ---------- activity ---------- */
 let editorEl = null;
@@ -2008,6 +2255,7 @@ bankInput.type = 'file'; bankInput.accept = '.csv,.pdf,text/csv,application/pdf'
 document.body.appendChild(bankInput);
 bankInput.onchange = () => { if (bankInput.files[0]) { openBankImport(bankInput.files[0]); bankInput.value = ''; } };
 document.getElementById('setBank').onclick = () => bankInput.click();
+document.getElementById('importCard').onclick = () => bankInput.click();
 
 const csvInput = document.createElement('input');
 csvInput.type = 'file'; csvInput.accept = '.csv,text/csv'; csvInput.style.display = 'none';
