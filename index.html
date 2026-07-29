@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Kaupa</title>
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192_1.png">
+<link rel="icon" type="image/png" href="icon-192_1.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -833,7 +833,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer">Kaupa v2.8 &mdash; made by Domantas &amp; Claude.</div>
+    <div class="footer">Kaupa v3.0 &mdash; made by Domantas &amp; Claude.</div>
   </section>
 
 </div>
@@ -891,7 +891,75 @@ const CATEGORIES = [
   { id: 'other',     name: 'Other',            slot: 8, letter: 'O', tint: '#EAE9E2', tx: '#6C6A60' },
 ];
 const INCOME_CHIP = { letter: '+', tint: '#DEEBDA', tx: '#4C7A50' };
-const catById = id => CATEGORIES.find(c => c.id === id) || CATEGORIES[7];
+
+/* --- custom categories (user-created, saved per space) --- */
+let customCats = [];
+const CUSTOM_PAL = [
+  { tint: '#DEEBDA', tx: '#4C7A50' }, { tint: '#DCE4F5', tx: '#4A66A8' },
+  { tint: '#D8ECEA', tx: '#2F7F78' }, { tint: '#F7E8D2', tx: '#A87A2E' },
+  { tint: '#F5DEE7', tx: '#A8517A' }, { tint: '#E6E0F5', tx: '#6A55A8' },
+  { tint: '#F0E0DC', tx: '#A85D4A' }, { tint: '#EAE9E2', tx: '#6C6A60' },
+];
+function catSlug(name) { return String(name).toLowerCase().trim().replace(/[^a-z0-9]+/g, '').slice(0, 24); }
+function catMeta(id, name) {
+  let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  const p = CUSTOM_PAL[h % CUSTOM_PAL.length];
+  return { id, name, slot: (h % 8) + 1, letter: (String(name)[0] || '?').toUpperCase(), tint: p.tint, tx: p.tx, custom: true };
+}
+function allCats() { return CATEGORIES.concat(customCats); }
+function saveLocalCats() { if (currentSpaceId) lsSet('kaupa.cats.' + currentSpaceId, customCats.map(c => ({ id: c.id, name: c.name }))); }
+function addCustomCat(name) {
+  const clean = String(name || '').trim().slice(0, 30);
+  const id = catSlug(clean);
+  if (!id || id === 'income') return null;
+  const existing = allCats().find(c => c.id === id || c.name.toLowerCase() === clean.toLowerCase());
+  if (existing) return existing;
+  const meta = catMeta(id, clean);
+  customCats.push(meta);
+  saveLocalCats();
+  return meta;
+}
+function prettyCat(id) { return id.charAt(0).toUpperCase() + id.slice(1); }
+function syncCustomCats() {
+  const seen = {};
+  (lsGet('kaupa.cats.' + currentSpaceId, []) || []).forEach(c => {
+    if (c && c.id && !CATEGORIES.some(b => b.id === c.id)) seen[c.id] = catMeta(c.id, c.name || prettyCat(c.id));
+  });
+  entries.forEach(e => {
+    const id = e.cat;
+    if (id && id !== 'income' && !CATEGORIES.some(b => b.id === id) && !seen[id]) seen[id] = catMeta(id, prettyCat(id));
+  });
+  Object.keys(budgets).forEach(id => {
+    if (id !== 'income' && !CATEGORIES.some(b => b.id === id) && !seen[id]) seen[id] = catMeta(id, prettyCat(id));
+  });
+  customCats = Object.values(seen).sort((a, b) => a.name.localeCompare(b.name));
+  saveLocalCats();
+}
+function promptNewCategory() {
+  const name = window.prompt('New category name (e.g. Holidays, Pets, Kids)');
+  if (!name || !name.trim()) return null;
+  return addCustomCat(name);
+}
+function fillCatSelect(sel, selectedId, onPick) {
+  sel.textContent = '';
+  allCats().forEach(c => {
+    const o = el('option', null, c.name); o.value = c.id;
+    if (c.id === selectedId) o.selected = true;
+    sel.appendChild(o);
+  });
+  const nw = el('option', null, '+ New category…'); nw.value = '__new';
+  sel.appendChild(nw);
+  sel.onchange = () => {
+    if (sel.value === '__new') {
+      const meta = promptNewCategory();
+      if (meta) { selectedId = meta.id; onPick(meta.id); }
+      fillCatSelect(sel, selectedId, onPick);
+    } else { selectedId = sel.value; onPick(sel.value); }
+  };
+}
+const aiCatIds = () => allCats().map(c => c.id);
+
+const catById = id => allCats().find(c => c.id === id) || CATEGORIES[7];
 const catColor = id => 'var(--s' + catById(id).slot + ')';
 
 const MERCHANT_MAP = [
@@ -1064,6 +1132,7 @@ async function bootstrap() {
   currentSpaceId = spaces.some(s => s.id === saved) ? saved : spaces[0].id;
   fillProfile();
   await Promise.all([loadTx(), loadMembers(), loadBudgets(), refreshInvites()]);
+  syncCustomCats();
   render(); flushOutbox();
 }
 function fillProfile() {
@@ -1092,6 +1161,7 @@ async function switchSpace(id) {
   currentSpaceId = id; lsSet('spendlog.space', id);
   closeSheet(); catFilter = null;
   await Promise.all([loadTx(), loadMembers(), loadBudgets()]);
+  syncCustomCats();
   render();
 }
 
@@ -1221,7 +1291,7 @@ function handleInput(raw) {
 async function aiParse(text) {
   transcriptEl.textContent = 'Thinking…';
   try {
-    const { data, error } = await sb.functions.invoke('parse-expense', { body: { text } });
+    const { data, error } = await sb.functions.invoke('parse-expense', { body: { text, categories: aiCatIds() } });
     if (error || !data || !Array.isArray(data.entries) || !data.entries.length) throw new Error('no parse');
     const today = new Date();
     const list = data.entries.map(e => {
@@ -1231,7 +1301,7 @@ async function aiParse(text) {
       d.setDate(d.getDate() - (parseInt(e.days_ago) || 0));
       const type = e.type === 'income' ? 'income' : 'expense';
       const merchant = String(e.merchant || (type === 'income' ? 'Income' : 'Unknown')).slice(0, 60);
-      let cat = CATEGORIES.some(c => c.id === e.category) ? e.category : guessCategory(merchant);
+      let cat = allCats().some(c => c.id === e.category) ? e.category : guessCategory(merchant);
       if (type !== 'income') { const l = learnedCategory(merchant); if (l) cat = l; }
       return { amount, merchant, cat: type === 'income' ? 'income' : cat, type, dateISO: d.toISOString().slice(0, 10) };
     }).filter(Boolean);
@@ -1268,12 +1338,7 @@ function showConfirmMulti(list) {
     if (p.type === 'income') {
       const o = el('option', null, 'Income'); o.value = 'income'; sel.appendChild(o);
     } else {
-      CATEGORIES.forEach(c => {
-        const o = el('option', null, c.name); o.value = c.id;
-        if (c.id === p.cat) o.selected = true;
-        sel.appendChild(o);
-      });
-      sel.onchange = () => { p.cat = sel.value; };
+      fillCatSelect(sel, p.cat, v => { p.cat = v; });
     }
     const rm = el('button', 'mrm', '✕');
     rm.onclick = () => {
@@ -1307,13 +1372,17 @@ function showConfirm(parsed) {
   chips.textContent = '';
   chips.style.display = parsed.type === 'income' ? 'none' : 'flex';
   if (parsed.type !== 'income') {
-    CATEGORIES.forEach(c => {
+    allCats().forEach(c => {
       const b = el('button', 'chip' + (c.id === parsed.cat ? ' sel' : ''));
       const d = el('span', 'dot'); d.style.background = 'var(--s' + c.slot + ')';
       b.appendChild(d); b.appendChild(document.createTextNode(c.name));
       b.onclick = () => { pending.cat = c.id; showConfirm(pending); };
       chips.appendChild(b);
     });
+    const nb = el('button', 'chip');
+    nb.appendChild(document.createTextNode('+ New'));
+    nb.onclick = () => { const m = promptNewCategory(); if (m) { pending.cat = m.id; } showConfirm(pending); };
+    chips.appendChild(nb);
   }
   confirmEl.classList.add('open');
   confirmEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1730,11 +1799,7 @@ function openEditor(entry, afterRow) {
   const merIn = el('input'); merIn.type = 'text'; merIn.value = entry.merchant;
   const amtIn = el('input'); amtIn.type = 'number'; amtIn.step = '0.01'; amtIn.value = entry.amount;
   const sel = el('select');
-  CATEGORIES.forEach(c => {
-    const o = el('option', null, c.name); o.value = c.id;
-    if (c.id === entry.cat) o.selected = true;
-    sel.appendChild(o);
-  });
+  fillCatSelect(sel, entry.cat, () => {});
   const row = el('div', 'erow');
   const save = el('button', 'save', 'Save changes');
   save.onclick = () => {
@@ -1778,7 +1843,7 @@ function renderActivity() {
     pills.appendChild(b);
   };
   mk('Everything', null);
-  CATEGORIES.forEach(c => mk(c.name, c.id));
+  allCats().forEach(c => mk(c.name, c.id));
 
   const q = searchQ.toLowerCase().trim();
   const filtered = entries.filter(e => {
@@ -2020,7 +2085,7 @@ function renderBudgetsPage() {
   const cur = monthEntries(0).filter(e => e.type !== 'income');
   const byCat = {};
   cur.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
-  const withLimits = CATEGORIES.filter(c => budgets[c.id]);
+  const withLimits = allCats().filter(c => budgets[c.id]);
   const overs = withLimits.filter(c => (byCat[c.id] || 0) > budgets[c.id]).length;
   document.getElementById('budgetsSubT').textContent = budgetsUnavailable
     ? 'Temporarily unavailable — try again shortly'
@@ -2029,7 +2094,7 @@ function renderBudgetsPage() {
       : 'No limits yet — tap Adjust on a category to set one · ' + (space ? space.name : ''));
   const box = document.getElementById('budgetsCards');
   box.textContent = '';
-  CATEGORIES.forEach(c => {
+  allCats().forEach(c => {
     const spent = byCat[c.id] || 0;
     const limit = budgets[c.id] || 0;
     const card = el('div', 'bcard');
@@ -2080,6 +2145,11 @@ function renderBudgetsPage() {
     };
     box.appendChild(card);
   });
+  const addCatBtn = el('button', 'badjust', '+ New category');
+  addCatBtn.style.display = 'block';
+  addCatBtn.style.margin = '14px auto 4px';
+  addCatBtn.onclick = () => { if (promptNewCategory()) { render(); renderBudgetsPage(); } };
+  box.appendChild(addCatBtn);
 }
 
 /* ---------- projection page (interactive what-if modeller) ---------- */
@@ -2312,7 +2382,8 @@ async function importOwnCsv(f) {
     else { [d, mer, catName, amt] = parts; }
     const amount = parseFloat(amt);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !(amount > 0)) continue;
-    const cat = CATEGORIES.find(c => c.name.toLowerCase() === (catName || '').toLowerCase());
+    let cat = allCats().find(c => c.name.toLowerCase() === (catName || '').toLowerCase());
+    if (!cat && catName && catName.trim() && catName.toLowerCase() !== 'income' && type !== 'income') cat = addCustomCat(catName);
     rows.push({ dateISO: d, merchant: mer || 'Unknown', rawDesc: mer || 'Unknown', amount, type: type === 'income' ? 'income' : 'expense', cat: type === 'income' ? 'income' : (cat ? cat.id : guessCategory(mer || '')) });
   }
   if (!rows.length) { sheet.appendChild(el('p', 'sheet-sub', 'No valid rows found.')); return; }
@@ -2383,7 +2454,7 @@ async function openSheet(mode) {
     if (budgetsUnavailable) { sheet.appendChild(el('p', 'sheet-sub', 'Budgets are being set up — try again shortly.')); return; }
     sheet.appendChild(el('p', 'sheet-sub', 'Monthly limits for “' + (space ? space.name : '') + '”. Leave empty for no limit.'));
     const inputs = {};
-    CATEGORIES.forEach(c => {
+    allCats().forEach(c => {
       const row = el('div', 'budgetrow');
       const bn = el('span', 'bn');
       const d = el('span', 'dot'); d.style.background = 'var(--s' + c.slot + ')';
@@ -2397,7 +2468,7 @@ async function openSheet(mode) {
     const save = el('button', 'sheet-primary', 'Save budgets');
     save.onclick = async () => {
       save.disabled = true; save.textContent = 'Saving…';
-      for (const c of CATEGORIES) {
+      for (const c of allCats()) {
         const v = parseFloat(inputs[c.id].value);
         if (v > 0) await saveBudget(c.id, v);
         else if (budgets[c.id]) await clearBudget(c.id);
@@ -2559,7 +2630,7 @@ async function aiCategorizeBatch(rows) {
   const unknown = [...new Set(rows.filter(r => r.type !== 'income' && r.cat === 'other').map(r => r.rawDesc))].slice(0, 150);
   if (!unknown.length) return;
   try {
-    const { data, error } = await sb.functions.invoke('parse-expense', { body: { descriptions: unknown } });
+    const { data, error } = await sb.functions.invoke('parse-expense', { body: { descriptions: unknown, categories: aiCatIds() } });
     if (error || !data || !Array.isArray(data.items)) return;
     const map = {};
     data.items.forEach(it => { if (unknown[it.i] != null) map[unknown[it.i]] = it; });
@@ -2567,7 +2638,7 @@ async function aiCategorizeBatch(rows) {
       const hit = map[r.rawDesc];
       if (hit && r.type !== 'income' && r.cat === 'other') {
         if (hit.merchant) r.merchant = String(hit.merchant).slice(0, 60);
-        if (CATEGORIES.some(c => c.id === hit.category)) r.cat = hit.category;
+        if (allCats().some(c => c.id === hit.category)) r.cat = hit.category;
       }
     });
   } catch (e) {}
@@ -2657,8 +2728,13 @@ async function openPdfImport(file, password) {
   if (!lines || lines.join('').length < 100) { status.textContent = 'This PDF has no readable text — it looks scanned or image-based. Use your bank’s CSV export instead.'; return; }
   status.textContent = 'Asking AI to read ' + lines.length + ' lines…';
   try {
-    const { data, error } = await sb.functions.invoke('parse-expense', { body: { statement_lines: lines.slice(0, 400) } });
-    if (error) { status.textContent = 'The AI reader failed (' + (error.message || 'network error') + ') — try again in a minute.'; return; }
+    const { data, error } = await sb.functions.invoke('parse-expense', { body: { statement_lines: lines.slice(0, 400), categories: aiCatIds() } });
+    if (error) {
+      let detail = '';
+      try { if (error.context && error.context.clone) detail = await error.context.clone().text(); } catch (e2) {}
+      status.textContent = 'The AI reader failed — ' + (detail ? detail.slice(0, 160) : (error.message || 'network error')) + ' — show this message to Claude.';
+      return;
+    }
     if (data && data.error) { status.textContent = 'The AI reader failed (' + String(data.error).slice(0, 80) + ') — try again in a minute.'; return; }
     if (!data || !Array.isArray(data.items) || !data.items.length) throw new Error('no items');
     const rows = data.items.map(it => {
@@ -2667,7 +2743,7 @@ async function openPdfImport(file, password) {
       if (!(amount > 0) || !dateISO) return null;
       const type = it.type === 'income' ? 'income' : 'expense';
       let merchant = String(it.merchant || 'Unknown').slice(0, 60);
-      let cat = type === 'income' ? 'income' : (CATEGORIES.some(c => c.id === it.category) ? it.category : guessCategory(merchant));
+      let cat = type === 'income' ? 'income' : (allCats().some(c => c.id === it.category) ? it.category : guessCategory(merchant));
       if (type !== 'income') { const l = learnedCategory(merchant); if (l) cat = l; }
       return { dateISO, merchant, rawDesc: merchant, amount, type, cat };
     }).filter(Boolean);
@@ -2697,12 +2773,7 @@ async function showImportReview(rows, runAiBatch) {
       const mer = el('span', 'mmer', r.merchant + ' · ' + r.dateISO.slice(5));
       const sel = el('select', 'msel');
       if (r.type === 'income') { sel.appendChild(el('option', null, 'Income')); }
-      else CATEGORIES.forEach(c => {
-        const o = el('option', null, c.name); o.value = c.id;
-        if (c.id === r.cat) o.selected = true;
-        sel.appendChild(o);
-      });
-      sel.onchange = () => { r.cat = sel.value; };
+      else fillCatSelect(sel, r.cat, v => { r.cat = v; });
       const rm = el('button', 'mrm', '✕');
       rm.onclick = () => { keep.splice(idx, 1); renderRows(); go.textContent = 'Import ' + keep.length + ' entries'; };
       row.appendChild(amt); row.appendChild(mer); row.appendChild(sel); row.appendChild(rm);
