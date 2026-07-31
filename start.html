@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get Kaupa</title>
+<meta name="description" content="Kaupa — money, spoken plainly. Track spending by voice, in your language.">
+<style>
+  :root { --paper:#EDECE6; --card:#fff; --ink:#191813; --ink2:#4a4842; --muted:#8a887e; --sage:#5F8F63; --terra:#C4694A; --line:#dcdad2; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif; line-height:1.55; }
+  .wrap { max-width:560px; margin:0 auto; padding:48px 22px 70px; }
+  .brand { font-family:"Fraunces",Georgia,serif; font-size:40px; font-weight:600; letter-spacing:-0.01em; }
+  .brand span { color:var(--sage); }
+  .tag { font-size:17px; color:var(--ink2); margin:6px 0 26px; }
+  .feats { display:flex; flex-direction:column; gap:9px; margin:0 0 30px; padding:0; list-style:none; }
+  .feats li { font-size:15px; color:var(--ink2); padding-left:26px; position:relative; }
+  .feats li::before { content:"•"; color:var(--sage); position:absolute; left:8px; font-weight:800; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:22px; box-shadow:0 6px 20px rgba(25,24,19,0.06); }
+  .card h2 { font-size:17px; margin:0 0 4px; }
+  .card .os { font-size:12.5px; color:var(--muted); font-weight:700; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:10px; }
+  .btn { display:block; text-align:center; font:inherit; font-size:16px; font-weight:700; background:var(--ink); color:#fff; border:none; border-radius:999px; padding:15px 22px; cursor:pointer; text-decoration:none; margin-top:6px; }
+  .btn.sage { background:var(--sage); }
+  ol { margin:6px 0 0; padding-left:20px; }
+  ol li { font-size:15px; margin:8px 0; color:var(--ink2); }
+  .shareicon { display:inline-flex; vertical-align:middle; width:20px; height:20px; margin:0 2px; }
+  .note { font-size:12.5px; color:var(--muted); margin-top:14px; }
+  .switch { text-align:center; margin-top:18px; font-size:13px; color:var(--muted); }
+  .switch a { color:var(--sage); cursor:pointer; }
+  .foot { margin-top:34px; text-align:center; font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Kaupa<span>.</span></div>
+  <div class="tag">Money, spoken plainly. Track spending by voice &mdash; in English or Lithuanian.</div>
+  <ul class="feats">
+    <li>Just say &ldquo;Lidl 240&rdquo; &mdash; it logs it, categorised.</li>
+    <li>Weekly recaps and cheeky reminders (your choice of tone).</li>
+    <li>Share a space with your household. Ask it questions about your money.</li>
+  </ul>
+
+  <div class="card" id="installCard"><div class="os">Detecting your phone…</div></div>
+
+  <div class="switch" id="switch"></div>
+  <div class="foot">Kaupa &mdash; made by Domantas.</div>
+</div>
+<script>
+  var APP_URL = 'https://domantasma.github.io/spendlog/';
+  // When your Play Store listing is live, paste its URL here and Android will link straight to it:
+  var PLAY_URL = '';
+
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/.test(ua);
+  var card = document.getElementById('installCard');
+  var sw = document.getElementById('switch');
+
+  var shareSVG = '<svg class="shareicon" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7"/></svg>';
+
+  function iosView() {
+    return '<div class="os">On iPhone / iPad</div>' +
+      '<h2>Add Kaupa to your Home Screen</h2>' +
+      '<ol>' +
+      '<li>Open this page in <b>Safari</b> (not Chrome).</li>' +
+      '<li>Tap the <b>Share</b> button ' + shareSVG + ' at the bottom of Safari.</li>' +
+      '<li>Scroll down and tap <b>Add to Home Screen</b>.</li>' +
+      '<li>Tap <b>Add</b> &mdash; Kaupa now opens like a normal app.</li>' +
+      '</ol>' +
+      '<a class="btn sage" href="' + APP_URL + '">Open Kaupa in Safari</a>' +
+      '<div class="note">The first time you open it, allow notifications to get your weekly recap and reminders.</div>';
+  }
+  function androidView() {
+    if (PLAY_URL) {
+      return '<div class="os">On Android</div><h2>Get Kaupa on Google Play</h2>' +
+        '<a class="btn" href="' + PLAY_URL + '">Install from Google Play</a>' +
+        '<div class="note">Free. Two-tap install like any app.</div>';
+    }
+    return '<div class="os">On Android</div>' +
+      '<h2>Install Kaupa</h2>' +
+      '<a class="btn" href="' + APP_URL + '">Open Kaupa</a>' +
+      '<div class="note">In Chrome, tap the menu (⋮) then <b>Install app</b> / <b>Add to Home screen</b>. Allow notifications on first open for recaps and reminders.</div>';
+  }
+  function desktopView() {
+    return '<div class="os">On computer</div><h2>Open Kaupa</h2>' +
+      '<a class="btn" href="' + APP_URL + '">Open in your browser</a>' +
+      '<div class="note">Kaupa works great on a phone too &mdash; open this page on your phone to install it.</div>';
+  }
+
+  function render(mode) {
+    card.innerHTML = mode === 'ios' ? iosView() : mode === 'android' ? androidView() : desktopView();
+    var other = mode === 'ios' ? 'android' : 'ios';
+    sw.innerHTML = 'On ' + (mode === 'ios' ? 'Android' : mode === 'android' ? 'iPhone' : 'a phone') + ' instead? ' +
+      '<a onclick="render(\'' + other + '\')">' + (mode === 'ios' ? 'Android steps' : 'iPhone steps') + '</a>';
+  }
+  window.render = render;
+  render(isIOS ? 'ios' : isAndroid ? 'android' : 'desktop');
+</script>
+</body>
+</html>
