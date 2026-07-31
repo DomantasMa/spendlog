@@ -868,6 +868,10 @@
         <span><span class="st">App language</span><br><span class="ss">All screens and labels</span></span>
         <span class="sa" id="setAppLangVal">English</span>
       </button>
+      <button class="setrow" id="setAiVoice">
+        <span><span class="st" id="aiVoiceTitle">High-accuracy voice</span><br><span class="ss" id="aiVoiceSub">AI transcription &mdash; better in Lithuanian, uses data</span></span>
+        <span class="sa" id="setAiVoiceVal">Off</span>
+      </button>
     </div>
     <div class="setcard">
       <button class="setrow" id="setBank">
@@ -889,7 +893,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer">Kaupa v3.5 &mdash; made by Domantas &amp; Claude.</div>
+    <div class="footer">Kaupa v3.6 &mdash; made by Domantas &amp; Claude.</div>
   </section>
 
 </div>
@@ -1076,6 +1080,9 @@ en: {
   justYou: 'Just you', sharedPeople: 'Shared · {n} people',
   tapToAdd: 'Tap to add', tapToFinish: 'Tap to finish', listening: 'Listening…',
   micBlocked: 'Microphone blocked — allow mic access in your browser settings.',
+  transcribing: 'Transcribing…', aiVoiceFail: 'Voice transcription failed ({msg}) — try again, or switch off high-accuracy voice in Settings.',
+  on: 'On', off: 'Off', voiceNoteShort: 'Recording isn’t supported on this device — use typing.',
+  aiVoiceTitle: 'High-accuracy voice', aiVoiceSub: 'AI transcription — better in Lithuanian, uses data',
   voiceNote: 'Voice isn’t supported in this browser — use typing (the keyboard mic works too).',
   typeInstead: 'Type it instead', typePh: '12.50 at Greggs', add: 'Add',
   expense: 'Expense', income: 'Income', cancel: 'Cancel',
@@ -1182,6 +1189,9 @@ lt: {
   justYou: 'Tik tu', sharedPeople: 'Bendra · {n} žm.',
   tapToAdd: 'Spausk ir kalbėk', tapToFinish: 'Spausk, kai baigsi', listening: 'Klausausi…',
   micBlocked: 'Mikrofonas užblokuotas — leisk mikrofoną naršyklės nustatymuose.',
+  transcribing: 'Atpažįstama…', aiVoiceFail: 'Nepavyko atpažinti balso ({msg}) — bandyk dar kartą arba išjunk tikslų balsą Nustatymuose.',
+  on: 'Įjungta', off: 'Išjungta', voiceNoteShort: 'Įrašymas šiame įrenginyje nepalaikomas — rašyk ranka.',
+  aiVoiceTitle: 'Tikslus balso atpažinimas', aiVoiceSub: 'DI transkripcija — geriau lietuviškai, naudoja duomenis',
   voiceNote: 'Balsas šioje naršyklėje nepalaikomas — rašyk ranka (veikia ir klaviatūros mikrofonas).',
   typeInstead: 'Verčiau įrašyti ranka', typePh: '12.50 Lidl', add: 'Pridėti',
   expense: 'Išlaida', income: 'Pajamos', cancel: 'Atšaukti',
@@ -1288,6 +1298,9 @@ de: {
   justYou: 'Nur du', sharedPeople: 'Geteilt · {n} Personen',
   tapToAdd: 'Tippen zum Hinzufügen', tapToFinish: 'Tippen zum Beenden', listening: 'Ich höre zu…',
   micBlocked: 'Mikrofon blockiert — erlaube den Zugriff in den Browser-Einstellungen.',
+  transcribing: 'Wird transkribiert…', aiVoiceFail: 'Sprachtranskription fehlgeschlagen ({msg}) — versuch es erneut oder schalte die hochpräzise Sprache in den Einstellungen aus.',
+  on: 'Ein', off: 'Aus', voiceNoteShort: 'Aufnahme wird auf diesem Gerät nicht unterstützt — tippe stattdessen.',
+  aiVoiceTitle: 'Hochpräzise Sprache', aiVoiceSub: 'KI-Transkription — besser auf Litauisch, verbraucht Daten',
   voiceNote: 'Sprache wird in diesem Browser nicht unterstützt — tippe stattdessen (das Tastatur-Mikrofon geht auch).',
   typeInstead: 'Lieber eintippen', typePh: '12,50 bei Lidl', add: 'Hinzufügen',
   expense: 'Ausgabe', income: 'Einnahmen', cancel: 'Abbrechen',
@@ -1394,6 +1407,9 @@ es: {
   justYou: 'Solo tú', sharedPeople: 'Compartido · {n} personas',
   tapToAdd: 'Toca para añadir', tapToFinish: 'Toca para terminar', listening: 'Escuchando…',
   micBlocked: 'Micrófono bloqueado: permite el acceso en los ajustes del navegador.',
+  transcribing: 'Transcribiendo…', aiVoiceFail: 'Falló la transcripción de voz ({msg}): inténtalo de nuevo o desactiva la voz de alta precisión en Ajustes.',
+  on: 'Activado', off: 'Desactivado', voiceNoteShort: 'La grabación no es compatible en este dispositivo: escribe.',
+  aiVoiceTitle: 'Voz de alta precisión', aiVoiceSub: 'Transcripción con IA: mejor en lituano, usa datos',
   voiceNote: 'La voz no funciona en este navegador: escribe (el micrófono del teclado también sirve).',
   typeInstead: 'Escribirlo', typePh: '12,50 en Lidl', add: 'Añadir',
   expense: 'Gasto', income: 'Ingresos', cancel: 'Cancelar',
@@ -1650,6 +1666,7 @@ const STATIC_I18N = [
   ['#setBudgets .st', 'budgets'], ['#setBudgets .sa', 'open'],
   ['#setLang .st', 'voiceLanguage'], ['#setLang .ss', 'speechSub'],
   ['#setAppLang .st', 'appLanguage'], ['#setAppLang .ss', 'appLangSub'],
+  ['#aiVoiceTitle', 'aiVoiceTitle'], ['#aiVoiceSub', 'aiVoiceSub'],
   ['#setBank .st', 'importBank'], ['#setBank .ss', 'pdfCsvBank'], ['#setBank .sa', 'importLbl'],
   ['#setCsvIn .st', 'importKaupaCsv'], ['#setCsvIn .ss', 'exportedFile'], ['#setCsvIn .sa', 'importLbl'],
   ['#setCsvOut .st', 'exportCsvLbl'], ['#setCsvOut .ss', 'forPowerBi'], ['#setCsvOut .sa', 'exportLbl'],
@@ -2082,6 +2099,7 @@ document.getElementById('cSave').onclick = async () => {
 
 /* ================= voice ================= */
 let recLang = lsGet('spendlog.lang', 'en-GB');
+let aiVoice = lsGet('kaupa.aivoice', false);
 function renderLang() {
   document.querySelectorAll('#langToggle .lt').forEach(b => {
     b.classList.toggle('sel', b.dataset.l === recLang);
@@ -2095,64 +2113,135 @@ const micBtn = document.getElementById('micBtn');
 const micLabel = document.getElementById('micLabel');
 const transcriptEl = document.getElementById('transcript');
 let rec = null, listening = false;
-if (!SR) {
+
+/* ===== AI voice (Whisper): record audio, transcribe on the server ===== */
+const canRecord = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+let mediaRec = null, mediaStream = null, audioChunks = [], recActive = false, recTimer = null;
+function pickAudioMime() {
+  const opts = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
+  for (const m of opts) { try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; } catch (e) {} }
+  return '';
+}
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onloadend = () => { const s = String(r.result || ''); resolve(s.slice(s.indexOf(',') + 1)); };
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+function stopMicTracks() { try { mediaStream && mediaStream.getTracks().forEach(tr => tr.stop()); } catch (e) {} mediaStream = null; }
+async function aiVoiceStart() {
+  try { mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (e) { transcriptEl.textContent = t('micBlocked'); return; }
+  audioChunks = [];
+  const mime = pickAudioMime();
+  try { mediaRec = mime ? new MediaRecorder(mediaStream, { mimeType: mime }) : new MediaRecorder(mediaStream); }
+  catch (e) { try { mediaRec = new MediaRecorder(mediaStream); } catch (e2) { transcriptEl.textContent = t('voiceNoteShort'); stopMicTracks(); return; } }
+  const usedMime = (mediaRec && mediaRec.mimeType) || mime || 'audio/webm';
+  mediaRec.ondataavailable = ev => { if (ev.data && ev.data.size) audioChunks.push(ev.data); };
+  mediaRec.onstop = () => aiVoiceFinalize(usedMime);
+  recActive = true; listening = true;
+  micBtn.classList.add('listening');
+  micLabel.textContent = t('tapToFinish');
+  transcriptEl.textContent = t('listening');
+  try { mediaRec.start(); } catch (e) { recActive = false; listening = false; micBtn.classList.remove('listening'); stopMicTracks(); return; }
+  recTimer = setTimeout(() => { if (recActive) aiVoiceStop(); }, 20000);
+}
+function aiVoiceStop() {
+  if (!recActive) return;
+  recActive = false;
+  if (recTimer) { clearTimeout(recTimer); recTimer = null; }
+  micBtn.classList.remove('listening');
+  micLabel.textContent = t('tapToAdd');
+  transcriptEl.textContent = t('transcribing');
+  try { mediaRec && mediaRec.state !== 'inactive' && mediaRec.stop(); } catch (e) { aiVoiceFinalize('audio/webm'); }
+}
+async function aiVoiceFinalize(mime) {
+  listening = false;
+  stopMicTracks();
+  const blob = new Blob(audioChunks, { type: mime });
+  audioChunks = [];
+  if (!blob.size) { transcriptEl.textContent = ''; return; }
+  try {
+    const b64 = await blobToBase64(blob);
+    const { data, error } = await sb.functions.invoke('parse-expense', {
+      body: { audio_base64: b64, mime: mime, lang: (recLang || 'en').slice(0, 2) },
+    });
+    if (error) {
+      let detail = '';
+      try { if (error.context && error.context.clone) detail = await error.context.clone().text(); } catch (e2) {}
+      throw new Error(detail ? detail.slice(0, 140) : (error.message || 'network'));
+    }
+    if (!data || data.error) throw new Error((data && String(data.error).slice(0, 140)) || 'no text');
+    const text = String(data.text || '').trim();
+    if (!text) { transcriptEl.textContent = t('couldntUnderstand'); return; }
+    handleInput(text);
+  } catch (e) {
+    transcriptEl.textContent = t('aiVoiceFail', { msg: e.message || 'error' });
+  }
+}
+
+/* ===== phone voice (Web Speech API): one clean phrase per round, auto-restart ===== */
+let sessionParts = [];
+let emptyRounds = 0;
+function finishVoice() {
+  listening = false;
+  micBtn.classList.remove('listening');
+  micLabel.textContent = t('tapToAdd');
+  const text = sessionParts.join(', ').trim();
+  sessionParts = [];
+  if (text) handleInput(text);
+  else transcriptEl.textContent = '';
+}
+function startRound() {
+  rec = new SR();
+  rec.lang = recLang; rec.interimResults = true; rec.maxAlternatives = 1;
+  rec.continuous = false;
+  let roundFinal = '';
+  rec.onresult = ev => {
+    let interim = '';
+    for (let i = 0; i < ev.results.length; i++) {
+      const tx = (ev.results[i][0].transcript || '').trim();
+      if (!tx) continue;
+      if (ev.results[i].isFinal) roundFinal = tx;
+      else interim = tx;
+    }
+    const shown = (sessionParts.concat(roundFinal || interim || []).filter(Boolean)).join(', ');
+    if (shown) transcriptEl.textContent = '“' + shown + '”';
+  };
+  rec.onerror = ev => {
+    if (ev.error === 'not-allowed') { transcriptEl.textContent = t('micBlocked'); finishVoice(); }
+  };
+  rec.onend = () => {
+    if (roundFinal) { sessionParts.push(roundFinal); emptyRounds = 0; }
+    else emptyRounds++;
+    if (!listening) { finishVoice(); return; }
+    if (emptyRounds >= 3) { finishVoice(); return; }
+    try { startRound(); } catch (e) { finishVoice(); }
+  };
+  rec.start();
+}
+function phoneVoiceStart() {
+  sessionParts = []; emptyRounds = 0;
+  listening = true;
+  micBtn.classList.add('listening');
+  micLabel.textContent = t('tapToFinish');
+  transcriptEl.textContent = t('listening');
+  startRound();
+}
+
+/* ===== unified mic button: routes to AI (Whisper) or phone engine ===== */
+if (!SR && !canRecord) {
   document.getElementById('voiceNote').style.display = 'block';
   micBtn.onclick = () => { document.getElementById('typeLine').classList.add('open'); document.getElementById('typeInput').focus(); };
 } else {
-  /* One clean phrase per recognition round (Android's continuous mode delivers
-     progressive REVISIONS as separate finals — unusable). Auto-restart between
-     rounds so long input still works; tap the mic again to finish. */
-  let sessionParts = [];
-  let emptyRounds = 0;
-  function finishVoice() {
-    listening = false;
-    micBtn.classList.remove('listening');
-    micLabel.textContent = t('tapToAdd');
-    const text = sessionParts.join(', ').trim();
-    sessionParts = [];
-    if (text) handleInput(text);
-    else transcriptEl.textContent = '';
-  }
-  function startRound() {
-    rec = new SR();
-    rec.lang = recLang; rec.interimResults = true; rec.maxAlternatives = 1;
-    rec.continuous = false;
-    let roundFinal = '';
-    rec.onresult = ev => {
-      let interim = '';
-      for (let i = 0; i < ev.results.length; i++) {
-        const t = (ev.results[i][0].transcript || '').trim();
-        if (!t) continue;
-        if (ev.results[i].isFinal) roundFinal = t; // one utterance per round — last final wins
-        else interim = t;
-      }
-      const shown = (sessionParts.concat(roundFinal || interim || []).filter(Boolean)).join(', ');
-      if (shown) transcriptEl.textContent = '“' + shown + '”';
-    };
-    rec.onerror = ev => {
-      if (ev.error === 'not-allowed') {
-        transcriptEl.textContent = t('micBlocked');
-        finishVoice();
-      }
-      // 'no-speech' and friends fall through to onend, which decides
-    };
-    rec.onend = () => {
-      if (roundFinal) { sessionParts.push(roundFinal); emptyRounds = 0; }
-      else emptyRounds++;
-      if (!listening) { finishVoice(); return; }
-      if (emptyRounds >= 3) { finishVoice(); return; } // ~long silence: wrap up on their behalf
-      try { startRound(); } catch (e) { finishVoice(); }
-    };
-    rec.start();
-  }
   micBtn.onclick = () => {
+    if (recActive) { aiVoiceStop(); return; }
     if (listening) { listening = false; try { rec && rec.stop(); } catch (e) { finishVoice(); } return; }
-    sessionParts = []; emptyRounds = 0;
-    listening = true;
-    micBtn.classList.add('listening');
-    micLabel.textContent = t('tapToFinish');
-    transcriptEl.textContent = t('listening');
-    startRound();
+    const useAi = (aiVoice || !SR) && canRecord;
+    if (useAi) aiVoiceStart();
+    else phoneVoiceStart();
   };
 }
 document.getElementById('typePill').onclick = () => {
@@ -3021,12 +3110,18 @@ function renderSettings() {
   const set = Object.keys(budgets).length;
   const overs = computeSuggestions().filter(s => s.kind === 'over').length;
   document.getElementById('setBudgetsSub').textContent = budgetsUnavailable ? t('tempUnavailable') : (set ? t('nSet', { n: set }) + (overs ? t('nOverPlan', { n: overs }) : '') : t('setLimitsSub'));
+  const av = document.getElementById('setAiVoiceVal');
+  if (av) av.textContent = aiVoice ? t('on') : t('off');
 }
 document.getElementById('setSpaces').onclick = () => openSheet('menu');
 document.getElementById('setBudgets').onclick = () => switchTab('budgetspage');
 const REC_LANGS = ['en-GB', 'lt-LT', 'de-DE', 'es-ES'];
 document.getElementById('setLang').onclick = () => { recLang = REC_LANGS[(REC_LANGS.indexOf(recLang) + 1) % REC_LANGS.length]; lsSet('spendlog.lang', recLang); renderLang(); };
 document.getElementById('setAppLang').onclick = () => { setUiLang(UI_LANGS[(UI_LANGS.indexOf(uiLang) + 1) % UI_LANGS.length]); };
+document.getElementById('setAiVoice').onclick = () => {
+  if (!canRecord) { alertMsg(t('voiceNoteShort')); return; }
+  aiVoice = !aiVoice; lsSet('kaupa.aivoice', aiVoice); renderSettings();
+};
 document.getElementById('setSignOut').onclick = async () => { await sb.auth.signOut(); };
 document.getElementById('setCsvOut').onclick = () => exportCsv();
 
