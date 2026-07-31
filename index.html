@@ -306,9 +306,47 @@
     font: inherit; font-size: 13.5px; font-weight: 600; background: var(--card); color: var(--ink-2);
     border: 1px solid var(--line); border-radius: 999px; padding: 11px 18px; cursor: pointer;
   }
+  .bslider {
+    -webkit-appearance: none; appearance: none; width: 100%; margin-top: 12px;
+    height: 22px; background: transparent; cursor: pointer;
+  }
+  .bslider::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--paper); }
+  .bslider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--sage); border: 3px solid var(--card); box-shadow: 0 1px 4px rgba(25,24,19,0.25);
+    margin-top: -8px;
+  }
+  .bslider::-moz-range-track { height: 6px; border-radius: 3px; background: var(--paper); }
+  .bslider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--sage); border: 3px solid var(--card); box-shadow: 0 1px 4px rgba(25,24,19,0.25); }
   .chartcard { background: var(--card); border-radius: 22px; padding: 20px; margin-top: 16px; box-shadow: var(--shadow); }
   .chartcard h2 { font-size: 15px; font-weight: 700; }
   .chartcard h2 + .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .askline { display: flex; gap: 8px; margin-top: 14px; }
+  .askline input {
+    flex: 1; min-width: 0; font: inherit; font-size: 14.5px;
+    background: var(--paper); color: var(--ink);
+    border: 1.5px solid var(--line); border-radius: 999px;
+    padding: 12px 16px; outline: none;
+  }
+  .askline input:focus { border-color: var(--sage); }
+  .askline button {
+    font: inherit; font-size: 14px; font-weight: 700;
+    background: var(--ink); color: #fff;
+    border: none; border-radius: 999px; padding: 0 20px; cursor: pointer;
+  }
+  .askline button:disabled { opacity: 0.5; }
+  .askhints { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .askhints button {
+    font: inherit; font-size: 12px; font-weight: 600; color: var(--ink-2);
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 999px; padding: 7px 12px; cursor: pointer;
+  }
+  .askanswer {
+    display: none; margin-top: 14px; font-size: 14px; line-height: 1.6;
+    color: var(--ink); white-space: pre-wrap; background: var(--paper);
+    border-radius: 14px; padding: 14px 16px;
+  }
+  .askanswer.show { display: block; }
   .catbars { margin-top: 16px; display: grid; gap: 12px; }
   .catrow { display: grid; grid-template-columns: 124px 1fr; gap: 9px; align-items: center; }
   .catrow .name { font-size: 11.5px; color: var(--ink-2); font-weight: 600; display: flex; align-items: center; gap: 7px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
@@ -569,7 +607,7 @@
     <div class="ordiv"><span>or</span></div>
     <button class="btn-google" id="loginGoogle">
       <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C41 35.4 44 30.2 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>
-      Continue with Google
+      <span id="loginGoogleTxt">Continue with Google</span>
     </button>
     <div class="status" id="loginStatus"></div>
   </div>
@@ -609,6 +647,8 @@
       <div class="langtoggle" id="langToggle">
         <button class="lt" data-l="en-GB">EN</button>
         <button class="lt" data-l="lt-LT">LT</button>
+        <button class="lt" data-l="de-DE">DE</button>
+        <button class="lt" data-l="es-ES">ES</button>
       </div>
       <div class="transcript" id="transcript"></div>
       <div class="voice-note" id="voiceNote">Voice isn&rsquo;t supported in this browser &mdash; use typing (the keyboard mic works too).</div>
@@ -635,12 +675,12 @@
 
     <div class="tiles">
       <div class="tile">
-        <div class="lab"><span class="d" style="background:var(--terra)"></span>SPENT</div>
+        <div class="lab"><span class="d" style="background:var(--terra)"></span><span id="lblSpent">SPENT</span></div>
         <div class="val serif" id="spentVal">£0</div>
         <div class="sub" id="spentSub"></div>
       </div>
       <div class="tile">
-        <div class="lab"><span class="d" style="background:var(--sage)"></span>EARNED</div>
+        <div class="lab"><span class="d" style="background:var(--sage)"></span><span id="lblEarned">EARNED</span></div>
         <div class="val serif" id="earnedVal">£0</div>
         <div class="sub" id="earnedSub">No income in this space</div>
       </div>
@@ -654,13 +694,13 @@
     </div>
 
     <div class="chartcard">
-      <div class="cardhead"><h2>Where it went</h2><button class="cardlink" id="wiwLink">Insights</button></div>
+      <div class="cardhead"><h2 id="wiwTitle">Where it went</h2><button class="cardlink" id="wiwLink">Insights</button></div>
       <div class="donutrow" id="donutRow"></div>
       <div class="empty" id="wiwEmpty" style="display:none;">No spending this month yet.</div>
     </div>
 
     <div class="chartcard">
-      <div class="cardhead"><h2>History</h2>
+      <div class="cardhead"><h2 id="histTitle">History</h2>
         <span class="toneseg" id="histSeg">
           <button data-m="month" class="sel">Month</button>
           <button data-m="year">Year</button>
@@ -706,8 +746,18 @@
   <!-- ===== INSIGHTS ===== -->
   <section class="tab" id="tab-insights">
     <div class="pagetitle">Insights</div>
-    <button class="darkcard" id="patternCard" style="display:none; margin-top:0; cursor:default;">
-      <div class="klab"><span class="d" style="background:var(--sage)"></span>PATTERN SPOTTED</div>
+    <div class="chartcard" style="margin-top:0;" id="askCard">
+      <h2 id="askTitle">Ask Kaupa</h2>
+      <div class="sub" id="askSub">Any question about this space&rsquo;s money &mdash; English or Lithuanian</div>
+      <div class="askline">
+        <input type="text" id="askInput" placeholder="How much at Lidl this month?" enterkeyhint="send" autocomplete="off">
+        <button id="askGo">Ask</button>
+      </div>
+      <div class="askhints" id="askHints"></div>
+      <div class="askanswer" id="askAnswer"></div>
+    </div>
+    <button class="darkcard" id="patternCard" style="display:none; cursor:default;">
+      <div class="klab"><span class="d" style="background:var(--sage)"></span><span id="patternLab">PATTERN SPOTTED</span></div>
       <div class="ktitle serif" id="patternTitle"></div>
       <div class="kbody" id="patternBody"></div>
     </button>
@@ -721,7 +771,7 @@
     </div>
     <div id="sugBox"></div>
     <div class="chartcard">
-      <h2>Where it went</h2>
+      <h2 id="wiw2Title">Where it went</h2>
       <div class="sub" id="catSub">This month &mdash; tap a category to see its entries</div>
       <div class="catbars" id="catBars"></div>
       <div class="empty" id="catEmpty" style="display:none;">No spending this month yet.</div>
@@ -731,8 +781,8 @@
       </details>
     </div>
     <div class="chartcard">
-      <h2>Six months</h2>
-      <div class="sub">Total spend per month &mdash; tap a bar for the value</div>
+      <h2 id="sixTitle">Six months</h2>
+      <div class="sub" id="sixSub">Total spend per month &mdash; tap a bar for the value</div>
       <div class="trend">
         <div class="plot" id="trendPlot"></div>
         <div class="xlabels" id="trendLabels"></div>
@@ -740,8 +790,8 @@
       <div class="statrow" id="trendStats"></div>
     </div>
     <div class="chartcard">
-      <h2>Top merchants</h2>
-      <div class="sub">This month</div>
+      <h2 id="tmTitle">Top merchants</h2>
+      <div class="sub" id="tmSub">This month</div>
       <div id="topMerch"></div>
       <div class="empty" id="topMerchEmpty" style="display:none;">No spending this month yet.</div>
     </div>
@@ -783,8 +833,8 @@
       </div>
     </div>
     <div class="chartcard">
-      <h2>Spending assumptions</h2>
-      <div class="sub">Per category, per month. Groceries up 3%? Nudge it.</div>
+      <h2 id="spendAssumpTitle">Spending assumptions</h2>
+      <div class="sub" id="spendAssumpSub">Per category, per month. Groceries up 3%? Nudge it.</div>
       <div id="assumpRows"></div>
     </div>
   </section>
@@ -812,6 +862,10 @@
         <span><span class="st">Voice language</span><br><span class="ss">Speech recognition for the mic</span></span>
         <span class="sa" id="setLangVal">EN</span>
       </button>
+      <button class="setrow" id="setAppLang">
+        <span><span class="st">App language</span><br><span class="ss">All screens and labels</span></span>
+        <span class="sa" id="setAppLangVal">English</span>
+      </button>
     </div>
     <div class="setcard">
       <button class="setrow" id="setBank">
@@ -833,7 +887,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer">Kaupa v3.0 &mdash; made by Domantas &amp; Claude.</div>
+    <div class="footer">Kaupa v3.3 &mdash; made by Domantas &amp; Claude.</div>
   </section>
 
 </div>
@@ -841,16 +895,16 @@
 <!-- tab bar -->
 <nav class="tabbar"><div class="inner">
   <button class="tabbtn sel" data-tab="home">
-    <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" class="fillme"/></svg>Home
+    <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" class="fillme"/></svg><span id="tabLblHome">Home</span>
   </button>
   <button class="tabbtn" data-tab="activity">
-    <svg class="ic" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="4"/></svg>Activity
+    <svg class="ic" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="4"/></svg><span id="tabLblActivity">Activity</span>
   </button>
   <button class="tabbtn" data-tab="insights">
-    <svg class="ic" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="4" class="fillme"/></svg>Insights
+    <svg class="ic" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="4" class="fillme"/></svg><span id="tabLblInsights">Insights</span>
   </button>
   <button class="tabbtn" data-tab="settings">
-    <svg class="ic" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="7"/></svg>Settings
+    <svg class="ic" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="7"/></svg><span id="tabLblSettings">Settings</span>
   </button>
 </div></nav>
 </div>
@@ -912,7 +966,7 @@ function addCustomCat(name) {
   const clean = String(name || '').trim().slice(0, 30);
   const id = catSlug(clean);
   if (!id || id === 'income') return null;
-  const existing = allCats().find(c => c.id === id || c.name.toLowerCase() === clean.toLowerCase());
+  const existing = allCats().find(c => c.id === id || c.name.toLowerCase() === clean.toLowerCase() || catLabel(c).toLowerCase() === clean.toLowerCase());
   if (existing) return existing;
   const meta = catMeta(id, clean);
   customCats.push(meta);
@@ -936,18 +990,18 @@ function syncCustomCats() {
   saveLocalCats();
 }
 function promptNewCategory() {
-  const name = window.prompt('New category name (e.g. Holidays, Pets, Kids)');
+  const name = window.prompt(t('newCatPrompt'));
   if (!name || !name.trim()) return null;
   return addCustomCat(name);
 }
 function fillCatSelect(sel, selectedId, onPick) {
   sel.textContent = '';
   allCats().forEach(c => {
-    const o = el('option', null, c.name); o.value = c.id;
+    const o = el('option', null, catLabel(c)); o.value = c.id;
     if (c.id === selectedId) o.selected = true;
     sel.appendChild(o);
   });
-  const nw = el('option', null, '+ New category…'); nw.value = '__new';
+  const nw = el('option', null, t('newCatOpt')); nw.value = '__new';
   sel.appendChild(nw);
   sel.onchange = () => {
     if (sel.value === '__new') {
@@ -997,7 +1051,631 @@ let loading = false;
 
 const fmtGBP = n => '£' + n.toLocaleString('en-GB', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
 const fmt0 = n => '£' + Math.round(n).toLocaleString('en-GB');
-const monthName = d => d.toLocaleDateString('en-GB', { month: 'long' });
+const monthName = d => d.toLocaleDateString(loc(), { month: 'long' });
+/* ================= i18n ================= */
+let uiLang = lsGet('kaupa.uilang', 'en');
+const LOCALES = { en: 'en-GB', lt: 'lt-LT', de: 'de-DE', es: 'es-ES' };
+const UI_LANGS = ['en', 'lt', 'de', 'es'];
+const UI_LANG_NAMES = { en: 'English', lt: 'Lietuvių', de: 'Deutsch', es: 'Español' };
+function loc() { return LOCALES[uiLang] || 'en-GB'; }
+const I18N = {
+en: {
+  cat_groceries: 'Groceries', cat_diy: 'Home & DIY', cat_transport: 'Transport & Fuel', cat_eatingout: 'Eating Out', cat_shopping: 'Shopping', cat_bills: 'Bills & Subs', cat_health: 'Health & Beauty', cat_other: 'Other',
+  tagline: 'Money, spoken plainly. Track spending by voice, share spaces with your household, and see where it all goes.',
+  loginSend: 'Send me a sign-in link', or: 'or', continueGoogle: 'Continue with Google',
+  enterValidEmail: 'Enter a valid email address.', sending: 'Sending…', couldNotSend: 'Could not send: {msg}',
+  linkSent: 'Link sent — check your email (and spam) on this device, then tap it.',
+  googleUnavailable: 'Google sign-in isn’t available right now — use the email link instead.',
+  justYou: 'Just you', sharedPeople: 'Shared · {n} people',
+  tapToAdd: 'Tap to add', tapToFinish: 'Tap to finish', listening: 'Listening…',
+  micBlocked: 'Microphone blocked — allow mic access in your browser settings.',
+  voiceNote: 'Voice isn’t supported in this browser — use typing (the keyboard mic works too).',
+  typeInstead: 'Type it instead', typePh: '12.50 at Greggs', add: 'Add',
+  expense: 'Expense', income: 'Income', cancel: 'Cancel',
+  saveExpense: 'Save expense', saveIncome: 'Save income', saveAll: 'Save all {n}',
+  entriesCheck: '{n} entries — check each, then save',
+  spent: 'SPENT', earned: 'EARNED',
+  spentMore: '{amt} more than {month} · {space}', spentLess: '{amt} less than {month} · {space}',
+  firstMonth: 'First tracked month in this space', nothingYetTap: 'Nothing yet — tap above to add',
+  thisMonthInSpace: 'This month in this space', noIncomeSpace: 'No income in this space',
+  whereItWent: 'Where it went', insightsLink: 'Insights', noSpendMonth: 'No spending this month yet.',
+  history: 'History', month: 'Month', year: 'Year', allYears: 'All years', inProgress: 'in progress', allTime: 'All time',
+  out: 'OUT', inLbl: 'In', net: 'Net',
+  latest: 'Latest', allActivity: 'All activity', nothingYetMic: 'Nothing yet — tap the mic above.',
+  importTitle: 'Import a bank statement', importSub: 'Barclays, Monzo, Revolut, HSBC · PDF or CSV',
+  homeFooter: 'Synced to your private Kaupa cloud — only space members can see this data.',
+  youLbl: 'You', memberLbl: 'Member', statementTag: 'statement', unknown: 'Unknown',
+  nothingToDelete: 'Nothing to delete.', deleted: 'Deleted {amt} {merchant}.', thinking: 'Thinking…',
+  couldntUnderstand: 'Couldn’t understand that — try “240 at Lidl” or “Lidl 240”.',
+  couldNotSave: 'Could not save — check connection and try again.',
+  updateFailed: 'Update failed — check your connection.', deleteFailed: 'Delete failed — check your connection.',
+  couldNotCreateSpace: 'Could not create space: {msg}',
+  invitedYou: '{who} invited you to “{space}”', someone: 'Someone', accept: 'Accept', decline: 'Decline',
+  activity: 'Activity', searchPh: 'Search merchant or category', everything: 'Everything',
+  nothingHere: 'Nothing here yet — add something from Home.',
+  thisWeek: 'THIS WEEK', earlierIn: 'EARLIER IN {month}',
+  saveChanges: 'Save changes', delete: 'Delete',
+  newCatOpt: '+ New category…', newCatPrompt: 'New category name (e.g. Holidays, Pets, Kids)', plusNew: '+ New', newCategoryBtn: '+ New category',
+  askTitle: 'Ask Kaupa', askSub: 'Any question about this space’s money', askPh: 'How much at Lidl this month?', ask: 'Ask',
+  askFail: 'Couldn’t get an answer ({msg}) — try again in a moment.',
+  patternSpotted: 'PATTERN SPOTTED',
+  patternTitle1: '{cat} leads this month — {amt} across 1 entry.', patternTitleN: '{cat} leads this month — {amt} across {n} entries.',
+  patternBody: 'That is {pct}% of everything leaving {space} this month', ledBy: ', led by {mer} at {amt}.',
+  suggestions: 'Suggestions', gentle: 'Gentle', neutral: 'Neutral', blunt: 'Blunt',
+  catSub: 'This month — tap a category to see its entries', viewTable: 'View as table',
+  category: 'Category', amount: 'Amount', share: 'Share',
+  sixMonths: 'Six months', sixSub: 'Total spend per month — tap a bar for the value', totalTip: '{m} total',
+  average: 'Average', highest: 'Highest', surplus: 'Surplus', shortfall: 'Shortfall',
+  topMerchants: 'Top merchants', thisMonth: 'This month',
+  budgets: 'Budgets', projectForward: 'Project forward',
+  dismiss: 'Dismiss', raiseLimitTo: 'Raise limit to {amt}', notNow: 'Not now', addIncome: 'Add income', setBudgetsAct: 'Set budgets',
+  back: '‹ Back',
+  bUnavailable: 'Temporarily unavailable — try again shortly',
+  bSub1: '{o} of 1 category over plan · {space}', bSubN: '{o} of {n} categories over plan · {space}',
+  noLimitsYet: 'No limits yet — tap Adjust on a category to set one · {space}',
+  spentLbl: '{amt} spent', noLimit: 'No limit', overBy: '{amt} over', leftAmt: '{amt} left',
+  ofLimit: '{a} of {b}', noMonthlyLimit: 'No monthly limit set', adjust: 'Adjust',
+  monthlyLimitPh: 'Monthly limit £', save: 'Save', remove: 'Remove',
+  projection: 'Projection', reset: 'Reset', keptPerMonth: 'KEPT PER MONTH',
+  pctKept: '{pct}% of income kept', pctOver: '{pct}% of income overspent', noIncomeRec: 'no income recorded',
+  keepThisUp: 'Keep this up and you will have {amt} put aside by {when}.',
+  shortOver: 'At this pace you will be {amt} short over the next 12 months.',
+  runningTotal: 'RUNNING TOTAL · NEXT 12 MONTHS',
+  incomeStat: 'Income', spendStat: 'Spend', twelveMonths: '12 months',
+  incomeNextYear: 'Income next year', expectRise: 'Expecting a rise? Adjust the percentage.',
+  spendAssumptions: 'Spending assumptions', perCatMonth: 'Per category, per month. Groceries up 3%? Nudge it.',
+  settings: 'Settings', spacesMembers: 'Spaces & members',
+  nSpace1: '1 space · invite people', nSpaces: '{n} spaces · invite people',
+  setLimitsSub: 'Set monthly limits per category', nSet: '{n} set', nOverPlan: ' · {n} over plan', tempUnavailable: 'Temporarily unavailable',
+  voiceLanguage: 'Voice language', speechSub: 'Speech recognition for the mic',
+  appLanguage: 'App language', appLangSub: 'All screens and labels',
+  open: 'Open', importLbl: 'Import', exportLbl: 'Export',
+  importBank: 'Import bank statement', pdfCsvBank: 'PDF or CSV from any UK bank',
+  importKaupaCsv: 'Import Kaupa CSV', exportedFile: 'A file exported from this app',
+  exportCsvLbl: 'Export CSV', forPowerBi: 'This space — for Power BI or backup', signOut: 'Sign out',
+  tabHome: 'Home', tabActivity: 'Activity', tabInsights: 'Insights', tabSettings: 'Settings',
+  spacesTitle: 'Spaces', spacesSub: 'Separate pots of money — personal, household, business. Tap to switch.',
+  sharedSpace: 'Shared space', businessLbl: 'Business', personalLbl: 'Personal', newSpaceItem: '+ New space',
+  newSpaceTitle: 'New space', newSpaceSub: 'A separate pot of money to track — e.g. Household or a business.',
+  namePh: 'Name, e.g. Household', householdShared: 'Household (shared)', createSpace: 'Create space',
+  budgetsSheetSub: 'Monthly limits for “{space}”. Leave empty for no limit.',
+  budgetsBeingSetUp: 'Budgets are being set up — try again shortly.',
+  saveBudgets: 'Save budgets', saving: 'Saving…',
+  members: 'Members', owner: 'owner', invitedWaiting: 'invited, waiting for accept',
+  inviteByEmail: 'Invite by email to {space}', inviteBtn: 'Invite', couldNotInvite: 'Could not invite: {msg}',
+  inviteSent: 'Invitation sent — when they open Kaupa signed in with {email}, they’ll get an Accept/Decline banner.',
+  switchSpaceItem: 'Switch space…', deleteSpaceItem: 'Delete this space…',
+  tapAgainDelete: 'Tap again to delete “{space}” and ALL its entries',
+  bankImportTitle: 'Bank statement import', readingPdf: 'Reading PDF…',
+  pdfPwdWrong: 'That password didn’t unlock it — try again.',
+  pdfPwdInfo: 'This PDF is password-protected (banks often do this — the password is usually in the email, or your date of birth/postcode).',
+  pdfPassword: 'PDF password', unlockRead: 'Unlock and read',
+  pdfReaderFail: 'Couldn’t load the PDF reader — check your internet connection and try again.',
+  pdfOpenFail: 'Couldn’t open this PDF ({msg}) — try your bank’s CSV export instead.',
+  pdfScanned: 'This PDF has no readable text — it looks scanned or image-based. Use your bank’s CSV export instead.',
+  askingAi: 'Asking AI to read {n} lines…',
+  aiReaderFailedDetail: 'The AI reader failed — {msg} — show this message to Claude.',
+  aiReaderFailedRetry: 'The AI reader failed ({msg}) — try again in a minute.',
+  pdfExtractFail: 'Couldn’t extract transactions from this PDF — try your bank’s CSV export instead.',
+  foundTx: 'Found {n} transactions', dupesPar: ' ({d} skipped as likely duplicates)', dupesComma: ', {d} skipped as likely duplicates',
+  categorising: '. Categorising…', checkCats: '. Check categories, remove any you don’t want, then import into “{space}”.',
+  importN: 'Import {n} entries', importing: 'Importing…', importStopped: 'Import stopped: {msg}',
+  fileEmpty: 'File looks empty.',
+  colsFail: 'Couldn’t recognise the columns — export the statement as CSV with date, description and amount.',
+  noTxFound: 'No transactions found in this file.',
+  unrecognisedFile: 'Unrecognised file — expected a Kaupa/Spendlog export.', noValidRows: 'No valid rows found.',
+},
+lt: {
+  cat_groceries: 'Maisto prekės', cat_diy: 'Namai ir remontas', cat_transport: 'Transportas ir kuras', cat_eatingout: 'Kavinės ir restoranai', cat_shopping: 'Apsipirkimas', cat_bills: 'Sąskaitos ir prenumeratos', cat_health: 'Sveikata ir grožis', cat_other: 'Kita',
+  tagline: 'Pinigai — paprastai ir aiškiai. Fiksuok išlaidas balsu, dalinkis erdvėmis su šeima ir matyk, kur viskas iškeliauja.',
+  loginSend: 'Atsiųsti prisijungimo nuorodą', or: 'arba', continueGoogle: 'Tęsti su Google',
+  enterValidEmail: 'Įvesk galiojantį el. pašto adresą.', sending: 'Siunčiama…', couldNotSend: 'Nepavyko išsiųsti: {msg}',
+  linkSent: 'Nuoroda išsiųsta — patikrink el. paštą (ir šlamštą) šiame įrenginyje ir paspausk ją.',
+  googleUnavailable: 'Google prisijungimas šiuo metu neveikia — pasinaudok el. pašto nuoroda.',
+  justYou: 'Tik tu', sharedPeople: 'Bendra · {n} žm.',
+  tapToAdd: 'Spausk ir kalbėk', tapToFinish: 'Spausk, kai baigsi', listening: 'Klausausi…',
+  micBlocked: 'Mikrofonas užblokuotas — leisk mikrofoną naršyklės nustatymuose.',
+  voiceNote: 'Balsas šioje naršyklėje nepalaikomas — rašyk ranka (veikia ir klaviatūros mikrofonas).',
+  typeInstead: 'Verčiau įrašyti ranka', typePh: '12.50 Lidl', add: 'Pridėti',
+  expense: 'Išlaida', income: 'Pajamos', cancel: 'Atšaukti',
+  saveExpense: 'Išsaugoti išlaidą', saveIncome: 'Išsaugoti pajamas', saveAll: 'Išsaugoti visus ({n})',
+  entriesCheck: '{n} įrašai — peržiūrėk ir išsaugok',
+  spent: 'IŠLEISTA', earned: 'UŽDIRBTA',
+  spentMore: '{amt} daugiau nei {month} · {space}', spentLess: '{amt} mažiau nei {month} · {space}',
+  firstMonth: 'Pirmas fiksuojamas mėnuo šioje erdvėje', nothingYetTap: 'Dar nieko — spausk viršuje',
+  thisMonthInSpace: 'Šį mėnesį šioje erdvėje', noIncomeSpace: 'Šioje erdvėje pajamų nėra',
+  whereItWent: 'Kur iškeliavo', insightsLink: 'Įžvalgos', noSpendMonth: 'Šį mėnesį išlaidų dar nėra.',
+  history: 'Istorija', month: 'Mėnuo', year: 'Metai', allYears: 'Visi metai', inProgress: 'tebevyksta', allTime: 'Visas laikas',
+  out: 'IŠLAIDOS', inLbl: 'Gauta', net: 'Balansas',
+  latest: 'Naujausi', allActivity: 'Visa veikla', nothingYetMic: 'Dar nieko — spausk mikrofoną viršuje.',
+  importTitle: 'Įkelti banko išrašą', importSub: 'Barclays, Monzo, Revolut, HSBC · PDF arba CSV',
+  homeFooter: 'Sinchronizuota su tavo privačiu Kaupa debesiu — duomenis mato tik erdvės nariai.',
+  youLbl: 'Tu', memberLbl: 'Narys', statementTag: 'išrašas', unknown: 'Nežinoma',
+  nothingToDelete: 'Nėra ką ištrinti.', deleted: 'Ištrinta: {amt} {merchant}.', thinking: 'Galvoju…',
+  couldntUnderstand: 'Nesupratau — pabandyk „240 Lidl“ arba „Lidl 240“.',
+  couldNotSave: 'Nepavyko išsaugoti — patikrink ryšį ir bandyk dar kartą.',
+  updateFailed: 'Atnaujinti nepavyko — patikrink ryšį.', deleteFailed: 'Ištrinti nepavyko — patikrink ryšį.',
+  couldNotCreateSpace: 'Nepavyko sukurti erdvės: {msg}',
+  invitedYou: '{who} pakvietė tave į „{space}“', someone: 'Kažkas', accept: 'Priimti', decline: 'Atmesti',
+  activity: 'Veikla', searchPh: 'Ieškok parduotuvės ar kategorijos', everything: 'Viskas',
+  nothingHere: 'Čia dar tuščia — pridėk ką nors Pradžioje.',
+  thisWeek: 'ŠIĄ SAVAITĘ', earlierIn: 'ANKSČIAU – {month}',
+  saveChanges: 'Išsaugoti pakeitimus', delete: 'Ištrinti',
+  newCatOpt: '+ Nauja kategorija…', newCatPrompt: 'Naujos kategorijos pavadinimas (pvz., Atostogos, Gyvūnai, Vaikai)', plusNew: '+ Nauja', newCategoryBtn: '+ Nauja kategorija',
+  askTitle: 'Klausk Kaupos', askSub: 'Bet koks klausimas apie šios erdvės pinigus', askPh: 'Kiek Lidl šį mėnesį?', ask: 'Klausti',
+  askFail: 'Nepavyko gauti atsakymo ({msg}) — bandyk dar kartą po akimirkos.',
+  patternSpotted: 'PASTEBĖTA TENDENCIJA',
+  patternTitle1: '{cat} pirmauja šį mėnesį — {amt} per 1 įrašą.', patternTitleN: '{cat} pirmauja šį mėnesį — {amt} per {n} įrašų.',
+  patternBody: 'Tai {pct}% visų šio mėnesio „{space}“ išlaidų', ledBy: ', daugiausia {mer} — {amt}.',
+  suggestions: 'Pasiūlymai', gentle: 'Švelniai', neutral: 'Neutraliai', blunt: 'Tiesiai',
+  catSub: 'Šis mėnuo — spausk kategoriją ir pamatysi įrašus', viewTable: 'Rodyti lentele',
+  category: 'Kategorija', amount: 'Suma', share: 'Dalis',
+  sixMonths: 'Šeši mėnesiai', sixSub: 'Bendros mėnesio išlaidos — spausk stulpelį', totalTip: '{m} iš viso',
+  average: 'Vidurkis', highest: 'Didžiausia', surplus: 'Perteklius', shortfall: 'Trūkumas',
+  topMerchants: 'Populiariausios vietos', thisMonth: 'Šis mėnuo',
+  budgets: 'Biudžetai', projectForward: 'Prognozuoti',
+  dismiss: 'Praleisti', raiseLimitTo: 'Padidinti limitą iki {amt}', notNow: 'Ne dabar', addIncome: 'Pridėti pajamas', setBudgetsAct: 'Nustatyti biudžetus',
+  back: '‹ Atgal',
+  bUnavailable: 'Laikinai neveikia — bandyk netrukus',
+  bSub1: '{o} iš 1 kategorijos viršija planą · {space}', bSubN: '{o} iš {n} kategorijų viršija planą · {space}',
+  noLimitsYet: 'Limitų dar nėra — spausk „Koreguoti“ prie kategorijos · {space}',
+  spentLbl: 'išleista {amt}', noLimit: 'Be limito', overBy: 'viršyta {amt}', leftAmt: 'liko {amt}',
+  ofLimit: '{a} iš {b}', noMonthlyLimit: 'Mėnesio limitas nenustatytas', adjust: 'Koreguoti',
+  monthlyLimitPh: 'Mėnesio limitas £', save: 'Išsaugoti', remove: 'Pašalinti',
+  projection: 'Prognozė', reset: 'Iš naujo', keptPerMonth: 'SUTAUPOMA PER MĖNESĮ',
+  pctKept: '{pct}% pajamų sutaupoma', pctOver: '{pct}% daugiau nei pajamos', noIncomeRec: 'pajamų neužfiksuota',
+  keepThisUp: 'Taip tęsdamas iki {when} būsi atsidėjęs {amt}.',
+  shortOver: 'Tokiu tempu per 12 mėnesių pritrūks {amt}.',
+  runningTotal: 'AUGANTI SUMA · KITI 12 MĖN.',
+  incomeStat: 'Pajamos', spendStat: 'Išlaidos', twelveMonths: '12 mėnesių',
+  incomeNextYear: 'Pajamos kitąmet', expectRise: 'Lauki pakėlimo? Koreguok procentą.',
+  spendAssumptions: 'Išlaidų prielaidos', perCatMonth: 'Kiekvienai kategorijai per mėnesį. Maistas brangsta 3%? Pakoreguok.',
+  settings: 'Nustatymai', spacesMembers: 'Erdvės ir nariai',
+  nSpace1: '1 erdvė · pakviesk žmonių', nSpaces: '{n} erdv. · pakviesk žmonių',
+  setLimitsSub: 'Nustatyk mėnesio limitus kategorijoms', nSet: 'nustatyta: {n}', nOverPlan: ' · {n} viršija planą', tempUnavailable: 'Laikinai neveikia',
+  voiceLanguage: 'Balso kalba', speechSub: 'Kalbos atpažinimas mikrofonui',
+  appLanguage: 'Programėlės kalba', appLangSub: 'Visi ekranai ir užrašai',
+  open: 'Atverti', importLbl: 'Įkelti', exportLbl: 'Eksportuoti',
+  importBank: 'Įkelti banko išrašą', pdfCsvBank: 'PDF arba CSV iš tavo banko',
+  importKaupaCsv: 'Įkelti Kaupa CSV', exportedFile: 'Failas, eksportuotas iš šios programėlės',
+  exportCsvLbl: 'Eksportuoti CSV', forPowerBi: 'Ši erdvė — Power BI ar atsarginei kopijai', signOut: 'Atsijungti',
+  tabHome: 'Pradžia', tabActivity: 'Veikla', tabInsights: 'Įžvalgos', tabSettings: 'Nustatymai',
+  spacesTitle: 'Erdvės', spacesSub: 'Atskiri pinigų katilai — asmeninis, šeimos, verslo. Spausk ir perjunk.',
+  sharedSpace: 'Bendra erdvė', businessLbl: 'Verslas', personalLbl: 'Asmeninė', newSpaceItem: '+ Nauja erdvė',
+  newSpaceTitle: 'Nauja erdvė', newSpaceSub: 'Atskiras stebimas pinigų katilas — pvz., Namai ar verslas.',
+  namePh: 'Pavadinimas, pvz., Namai', householdShared: 'Namų ūkis (bendra)', createSpace: 'Sukurti erdvę',
+  budgetsSheetSub: 'Mėnesio limitai erdvei „{space}“. Palik tuščią — be limito.',
+  budgetsBeingSetUp: 'Biudžetai dar ruošiami — bandyk netrukus.',
+  saveBudgets: 'Išsaugoti biudžetus', saving: 'Saugoma…',
+  members: 'Nariai', owner: 'savininkas', invitedWaiting: 'pakviesta, laukiama patvirtinimo',
+  inviteByEmail: 'Pakviesk el. paštu į „{space}“', inviteBtn: 'Pakviesti', couldNotInvite: 'Nepavyko pakviesti: {msg}',
+  inviteSent: 'Kvietimas išsiųstas — kai jie atsidarys Kaupą prisijungę su {email}, gaus pranešimą Priimti/Atmesti.',
+  switchSpaceItem: 'Perjungti erdvę…', deleteSpaceItem: 'Ištrinti šią erdvę…',
+  tapAgainDelete: 'Spausk dar kartą, kad ištrintum „{space}“ ir VISUS jos įrašus',
+  bankImportTitle: 'Banko išrašo įkėlimas', readingPdf: 'Skaitomas PDF…',
+  pdfPwdWrong: 'Šis slaptažodis netiko — bandyk dar kartą.',
+  pdfPwdInfo: 'Šis PDF apsaugotas slaptažodžiu (bankai taip daro — slaptažodis dažniausiai laiške arba tavo gimimo data / pašto kodas).',
+  pdfPassword: 'PDF slaptažodis', unlockRead: 'Atrakinti ir skaityti',
+  pdfReaderFail: 'Nepavyko įkelti PDF skaitytuvo — patikrink interneto ryšį ir bandyk dar kartą.',
+  pdfOpenFail: 'Nepavyko atidaryti šio PDF ({msg}) — pabandyk banko CSV eksportą.',
+  pdfScanned: 'Šiame PDF nėra skaitomo teksto — jis atrodo skenuotas. Naudok banko CSV eksportą.',
+  askingAi: 'AI skaito {n} eilučių…',
+  aiReaderFailedDetail: 'AI skaitytuvui nepavyko — {msg} — parodyk šią žinutę Claude.',
+  aiReaderFailedRetry: 'AI skaitytuvui nepavyko ({msg}) — bandyk po minutės.',
+  pdfExtractFail: 'Nepavyko ištraukti operacijų iš šio PDF — pabandyk banko CSV eksportą.',
+  foundTx: 'Rasta {n} operacijų', dupesPar: ' ({d} praleista kaip dublikatai)', dupesComma: ', {d} praleista kaip dublikatai',
+  categorising: '. Skirstoma į kategorijas…', checkCats: '. Patikrink kategorijas, pašalink nereikalingas ir įkelk į „{space}“.',
+  importN: 'Įkelti {n} įrašų', importing: 'Įkeliama…', importStopped: 'Įkėlimas sustojo: {msg}',
+  fileEmpty: 'Failas atrodo tuščias.',
+  colsFail: 'Nepavyko atpažinti stulpelių — eksportuok išrašą kaip CSV su data, aprašymu ir suma.',
+  noTxFound: 'Šiame faile operacijų nerasta.',
+  unrecognisedFile: 'Neatpažintas failas — tikėtasi Kaupa/Spendlog eksporto.', noValidRows: 'Tinkamų eilučių nerasta.',
+},
+de: {
+  cat_groceries: 'Lebensmittel', cat_diy: 'Haus & Heimwerken', cat_transport: 'Transport & Kraftstoff', cat_eatingout: 'Essen gehen', cat_shopping: 'Shopping', cat_bills: 'Rechnungen & Abos', cat_health: 'Gesundheit & Pflege', cat_other: 'Sonstiges',
+  tagline: 'Geld, klar ausgesprochen. Erfasse Ausgaben per Sprache, teile Bereiche mit deinem Haushalt und sieh, wohin alles geht.',
+  loginSend: 'Anmeldelink senden', or: 'oder', continueGoogle: 'Mit Google fortfahren',
+  enterValidEmail: 'Gib eine gültige E-Mail-Adresse ein.', sending: 'Wird gesendet…', couldNotSend: 'Senden fehlgeschlagen: {msg}',
+  linkSent: 'Link gesendet — prüfe deine E-Mails (auch Spam) auf diesem Gerät und tippe darauf.',
+  googleUnavailable: 'Google-Anmeldung ist gerade nicht verfügbar — nutze stattdessen den E-Mail-Link.',
+  justYou: 'Nur du', sharedPeople: 'Geteilt · {n} Personen',
+  tapToAdd: 'Tippen zum Hinzufügen', tapToFinish: 'Tippen zum Beenden', listening: 'Ich höre zu…',
+  micBlocked: 'Mikrofon blockiert — erlaube den Zugriff in den Browser-Einstellungen.',
+  voiceNote: 'Sprache wird in diesem Browser nicht unterstützt — tippe stattdessen (das Tastatur-Mikrofon geht auch).',
+  typeInstead: 'Lieber eintippen', typePh: '12,50 bei Lidl', add: 'Hinzufügen',
+  expense: 'Ausgabe', income: 'Einnahmen', cancel: 'Abbrechen',
+  saveExpense: 'Ausgabe speichern', saveIncome: 'Einnahme speichern', saveAll: 'Alle {n} speichern',
+  entriesCheck: '{n} Einträge — alle prüfen, dann speichern',
+  spent: 'AUSGEGEBEN', earned: 'VERDIENT',
+  spentMore: '{amt} mehr als im {month} · {space}', spentLess: '{amt} weniger als im {month} · {space}',
+  firstMonth: 'Erster erfasster Monat in diesem Bereich', nothingYetTap: 'Noch nichts — oben tippen',
+  thisMonthInSpace: 'Diesen Monat in diesem Bereich', noIncomeSpace: 'Keine Einnahmen in diesem Bereich',
+  whereItWent: 'Wohin es ging', insightsLink: 'Einblicke', noSpendMonth: 'Diesen Monat noch keine Ausgaben.',
+  history: 'Verlauf', month: 'Monat', year: 'Jahr', allYears: 'Alle Jahre', inProgress: 'läuft noch', allTime: 'Gesamt',
+  out: 'AUSGABEN', inLbl: 'Rein', net: 'Netto',
+  latest: 'Zuletzt', allActivity: 'Alle Aktivitäten', nothingYetMic: 'Noch nichts — tippe oben aufs Mikro.',
+  importTitle: 'Kontoauszug importieren', importSub: 'Barclays, Monzo, Revolut, HSBC · PDF oder CSV',
+  homeFooter: 'Mit deiner privaten Kaupa-Cloud synchronisiert — nur Mitglieder des Bereichs sehen diese Daten.',
+  youLbl: 'Du', memberLbl: 'Mitglied', statementTag: 'Auszug', unknown: 'Unbekannt',
+  nothingToDelete: 'Nichts zu löschen.', deleted: 'Gelöscht: {amt} {merchant}.', thinking: 'Denke nach…',
+  couldntUnderstand: 'Nicht verstanden — versuch „240 bei Lidl“ oder „Lidl 240“.',
+  couldNotSave: 'Speichern fehlgeschlagen — prüfe die Verbindung und versuch es erneut.',
+  updateFailed: 'Aktualisierung fehlgeschlagen — prüfe die Verbindung.', deleteFailed: 'Löschen fehlgeschlagen — prüfe die Verbindung.',
+  couldNotCreateSpace: 'Bereich konnte nicht erstellt werden: {msg}',
+  invitedYou: '{who} hat dich zu „{space}“ eingeladen', someone: 'Jemand', accept: 'Annehmen', decline: 'Ablehnen',
+  activity: 'Aktivität', searchPh: 'Händler oder Kategorie suchen', everything: 'Alles',
+  nothingHere: 'Noch nichts hier — füge etwas über Start hinzu.',
+  thisWeek: 'DIESE WOCHE', earlierIn: 'FRÜHER IM {month}',
+  saveChanges: 'Änderungen speichern', delete: 'Löschen',
+  newCatOpt: '+ Neue Kategorie…', newCatPrompt: 'Name der neuen Kategorie (z. B. Urlaub, Haustiere, Kinder)', plusNew: '+ Neu', newCategoryBtn: '+ Neue Kategorie',
+  askTitle: 'Frag Kaupa', askSub: 'Jede Frage zum Geld in diesem Bereich', askPh: 'Wie viel bei Lidl diesen Monat?', ask: 'Fragen',
+  askFail: 'Keine Antwort erhalten ({msg}) — versuch es gleich noch einmal.',
+  patternSpotted: 'MUSTER ERKANNT',
+  patternTitle1: '{cat} führt diesen Monat — {amt} in 1 Eintrag.', patternTitleN: '{cat} führt diesen Monat — {amt} in {n} Einträgen.',
+  patternBody: 'Das sind {pct}% aller Ausgaben in „{space}“ diesen Monat', ledBy: ', angeführt von {mer} mit {amt}.',
+  suggestions: 'Vorschläge', gentle: 'Sanft', neutral: 'Neutral', blunt: 'Direkt',
+  catSub: 'Dieser Monat — tippe auf eine Kategorie für die Einträge', viewTable: 'Als Tabelle anzeigen',
+  category: 'Kategorie', amount: 'Betrag', share: 'Anteil',
+  sixMonths: 'Sechs Monate', sixSub: 'Gesamtausgaben pro Monat — tippe auf einen Balken', totalTip: '{m} gesamt',
+  average: 'Durchschnitt', highest: 'Höchstwert', surplus: 'Überschuss', shortfall: 'Fehlbetrag',
+  topMerchants: 'Top-Händler', thisMonth: 'Dieser Monat',
+  budgets: 'Budgets', projectForward: 'Vorausschau',
+  dismiss: 'Ausblenden', raiseLimitTo: 'Limit auf {amt} erhöhen', notNow: 'Nicht jetzt', addIncome: 'Einnahme hinzufügen', setBudgetsAct: 'Budgets festlegen',
+  back: '‹ Zurück',
+  bUnavailable: 'Vorübergehend nicht verfügbar — versuch es gleich wieder',
+  bSub1: '{o} von 1 Kategorie über Plan · {space}', bSubN: '{o} von {n} Kategorien über Plan · {space}',
+  noLimitsYet: 'Noch keine Limits — tippe bei einer Kategorie auf „Anpassen“ · {space}',
+  spentLbl: '{amt} ausgegeben', noLimit: 'Kein Limit', overBy: '{amt} drüber', leftAmt: '{amt} übrig',
+  ofLimit: '{a} von {b}', noMonthlyLimit: 'Kein Monatslimit festgelegt', adjust: 'Anpassen',
+  monthlyLimitPh: 'Monatslimit £', save: 'Speichern', remove: 'Entfernen',
+  projection: 'Prognose', reset: 'Zurücksetzen', keptPerMonth: 'GESPART PRO MONAT',
+  pctKept: '{pct}% des Einkommens gespart', pctOver: '{pct}% über dem Einkommen', noIncomeRec: 'keine Einnahmen erfasst',
+  keepThisUp: 'Wenn das so bleibt, hast du bis {when} {amt} zurückgelegt.',
+  shortOver: 'In diesem Tempo fehlen dir in den nächsten 12 Monaten {amt}.',
+  runningTotal: 'SUMME · NÄCHSTE 12 MONATE',
+  incomeStat: 'Einkommen', spendStat: 'Ausgaben', twelveMonths: '12 Monate',
+  incomeNextYear: 'Einkommen nächstes Jahr', expectRise: 'Gehaltserhöhung in Sicht? Passe den Prozentsatz an.',
+  spendAssumptions: 'Ausgaben-Annahmen', perCatMonth: 'Pro Kategorie und Monat. Lebensmittel 3% teurer? Stell es ein.',
+  settings: 'Einstellungen', spacesMembers: 'Bereiche & Mitglieder',
+  nSpace1: '1 Bereich · Leute einladen', nSpaces: '{n} Bereiche · Leute einladen',
+  setLimitsSub: 'Monatliche Limits pro Kategorie festlegen', nSet: '{n} festgelegt', nOverPlan: ' · {n} über Plan', tempUnavailable: 'Vorübergehend nicht verfügbar',
+  voiceLanguage: 'Spracheingabe', speechSub: 'Spracherkennung fürs Mikrofon',
+  appLanguage: 'App-Sprache', appLangSub: 'Alle Ansichten und Texte',
+  open: 'Öffnen', importLbl: 'Import', exportLbl: 'Export',
+  importBank: 'Kontoauszug importieren', pdfCsvBank: 'PDF oder CSV von deiner Bank',
+  importKaupaCsv: 'Kaupa-CSV importieren', exportedFile: 'Eine aus dieser App exportierte Datei',
+  exportCsvLbl: 'CSV exportieren', forPowerBi: 'Dieser Bereich — für Power BI oder Backup', signOut: 'Abmelden',
+  tabHome: 'Start', tabActivity: 'Aktivität', tabInsights: 'Einblicke', tabSettings: 'Einstellungen',
+  spacesTitle: 'Bereiche', spacesSub: 'Getrennte Geldtöpfe — privat, Haushalt, Geschäft. Zum Wechseln tippen.',
+  sharedSpace: 'Geteilter Bereich', businessLbl: 'Geschäftlich', personalLbl: 'Privat', newSpaceItem: '+ Neuer Bereich',
+  newSpaceTitle: 'Neuer Bereich', newSpaceSub: 'Ein separater Geldtopf — z. B. Haushalt oder ein Geschäft.',
+  namePh: 'Name, z. B. Haushalt', householdShared: 'Haushalt (geteilt)', createSpace: 'Bereich erstellen',
+  budgetsSheetSub: 'Monatslimits für „{space}“. Leer lassen für kein Limit.',
+  budgetsBeingSetUp: 'Budgets werden eingerichtet — versuch es gleich wieder.',
+  saveBudgets: 'Budgets speichern', saving: 'Wird gespeichert…',
+  members: 'Mitglieder', owner: 'Inhaber', invitedWaiting: 'eingeladen, wartet auf Annahme',
+  inviteByEmail: 'Per E-Mail zu „{space}“ einladen', inviteBtn: 'Einladen', couldNotInvite: 'Einladung fehlgeschlagen: {msg}',
+  inviteSent: 'Einladung gesendet — beim Öffnen von Kaupa mit {email} erscheint ein Annehmen/Ablehnen-Banner.',
+  switchSpaceItem: 'Bereich wechseln…', deleteSpaceItem: 'Diesen Bereich löschen…',
+  tapAgainDelete: 'Noch einmal tippen, um „{space}“ und ALLE Einträge zu löschen',
+  bankImportTitle: 'Kontoauszug-Import', readingPdf: 'PDF wird gelesen…',
+  pdfPwdWrong: 'Dieses Passwort war falsch — versuch es erneut.',
+  pdfPwdInfo: 'Diese PDF ist passwortgeschützt (bei Banken üblich — das Passwort steht meist in der E-Mail oder ist dein Geburtsdatum / deine PLZ).',
+  pdfPassword: 'PDF-Passwort', unlockRead: 'Entsperren und lesen',
+  pdfReaderFail: 'PDF-Reader konnte nicht geladen werden — prüfe deine Internetverbindung und versuch es erneut.',
+  pdfOpenFail: 'Diese PDF ließ sich nicht öffnen ({msg}) — versuch stattdessen den CSV-Export deiner Bank.',
+  pdfScanned: 'Diese PDF enthält keinen lesbaren Text — sie wirkt gescannt. Nutze den CSV-Export deiner Bank.',
+  askingAi: 'KI liest {n} Zeilen…',
+  aiReaderFailedDetail: 'Der KI-Reader ist fehlgeschlagen — {msg} — zeig diese Meldung Claude.',
+  aiReaderFailedRetry: 'Der KI-Reader ist fehlgeschlagen ({msg}) — versuch es in einer Minute.',
+  pdfExtractFail: 'Aus dieser PDF ließen sich keine Transaktionen lesen — versuch den CSV-Export deiner Bank.',
+  foundTx: '{n} Transaktionen gefunden', dupesPar: ' ({d} als Duplikate übersprungen)', dupesComma: ', {d} als Duplikate übersprungen',
+  categorising: '. Wird kategorisiert…', checkCats: '. Prüfe die Kategorien, entferne Unerwünschtes und importiere dann in „{space}“.',
+  importN: '{n} Einträge importieren', importing: 'Importiere…', importStopped: 'Import gestoppt: {msg}',
+  fileEmpty: 'Die Datei scheint leer zu sein.',
+  colsFail: 'Spalten nicht erkannt — exportiere den Auszug als CSV mit Datum, Beschreibung und Betrag.',
+  noTxFound: 'Keine Transaktionen in dieser Datei gefunden.',
+  unrecognisedFile: 'Datei nicht erkannt — erwartet wurde ein Kaupa/Spendlog-Export.', noValidRows: 'Keine gültigen Zeilen gefunden.',
+},
+es: {
+  cat_groceries: 'Alimentación', cat_diy: 'Hogar y bricolaje', cat_transport: 'Transporte y combustible', cat_eatingout: 'Comer fuera', cat_shopping: 'Compras', cat_bills: 'Facturas y suscripciones', cat_health: 'Salud y belleza', cat_other: 'Otros',
+  tagline: 'Tu dinero, claro y sencillo. Registra gastos con la voz, comparte espacios con tu familia y ve adónde va todo.',
+  loginSend: 'Enviarme un enlace de acceso', or: 'o', continueGoogle: 'Continuar con Google',
+  enterValidEmail: 'Introduce un correo electrónico válido.', sending: 'Enviando…', couldNotSend: 'No se pudo enviar: {msg}',
+  linkSent: 'Enlace enviado: revisa tu correo (y el spam) en este dispositivo y púlsalo.',
+  googleUnavailable: 'El acceso con Google no está disponible ahora — usa el enlace por correo.',
+  justYou: 'Solo tú', sharedPeople: 'Compartido · {n} personas',
+  tapToAdd: 'Toca para añadir', tapToFinish: 'Toca para terminar', listening: 'Escuchando…',
+  micBlocked: 'Micrófono bloqueado: permite el acceso en los ajustes del navegador.',
+  voiceNote: 'La voz no funciona en este navegador: escribe (el micrófono del teclado también sirve).',
+  typeInstead: 'Escribirlo', typePh: '12,50 en Lidl', add: 'Añadir',
+  expense: 'Gasto', income: 'Ingresos', cancel: 'Cancelar',
+  saveExpense: 'Guardar gasto', saveIncome: 'Guardar ingreso', saveAll: 'Guardar los {n}',
+  entriesCheck: '{n} entradas: revísalas y guarda',
+  spent: 'GASTADO', earned: 'INGRESADO',
+  spentMore: '{amt} más que en {month} · {space}', spentLess: '{amt} menos que en {month} · {space}',
+  firstMonth: 'Primer mes registrado en este espacio', nothingYetTap: 'Nada aún: toca arriba',
+  thisMonthInSpace: 'Este mes en este espacio', noIncomeSpace: 'Sin ingresos en este espacio',
+  whereItWent: 'Adónde fue', insightsLink: 'Análisis', noSpendMonth: 'Aún no hay gastos este mes.',
+  history: 'Historial', month: 'Mes', year: 'Año', allYears: 'Todos', inProgress: 'en curso', allTime: 'Todo el tiempo',
+  out: 'GASTOS', inLbl: 'Entradas', net: 'Neto',
+  latest: 'Recientes', allActivity: 'Toda la actividad', nothingYetMic: 'Nada aún: toca el micro de arriba.',
+  importTitle: 'Importar un extracto bancario', importSub: 'Barclays, Monzo, Revolut, HSBC · PDF o CSV',
+  homeFooter: 'Sincronizado con tu nube privada de Kaupa: solo los miembros del espacio ven estos datos.',
+  youLbl: 'Tú', memberLbl: 'Miembro', statementTag: 'extracto', unknown: 'Desconocido',
+  nothingToDelete: 'Nada que borrar.', deleted: 'Borrado: {amt} {merchant}.', thinking: 'Pensando…',
+  couldntUnderstand: 'No lo entendí: prueba «240 en Lidl» o «Lidl 240».',
+  couldNotSave: 'No se pudo guardar: comprueba la conexión e inténtalo de nuevo.',
+  updateFailed: 'No se pudo actualizar: revisa la conexión.', deleteFailed: 'No se pudo borrar: revisa la conexión.',
+  couldNotCreateSpace: 'No se pudo crear el espacio: {msg}',
+  invitedYou: '{who} te invitó a «{space}»', someone: 'Alguien', accept: 'Aceptar', decline: 'Rechazar',
+  activity: 'Actividad', searchPh: 'Buscar comercio o categoría', everything: 'Todo',
+  nothingHere: 'Aún no hay nada: añade algo desde Inicio.',
+  thisWeek: 'ESTA SEMANA', earlierIn: 'ANTES EN {month}',
+  saveChanges: 'Guardar cambios', delete: 'Borrar',
+  newCatOpt: '+ Nueva categoría…', newCatPrompt: 'Nombre de la nueva categoría (p. ej., Vacaciones, Mascotas, Niños)', plusNew: '+ Nueva', newCategoryBtn: '+ Nueva categoría',
+  askTitle: 'Pregunta a Kaupa', askSub: 'Cualquier pregunta sobre el dinero de este espacio', askPh: '¿Cuánto en Lidl este mes?', ask: 'Preguntar',
+  askFail: 'No se pudo obtener respuesta ({msg}): inténtalo de nuevo en un momento.',
+  patternSpotted: 'PATRÓN DETECTADO',
+  patternTitle1: '{cat} lidera este mes: {amt} en 1 entrada.', patternTitleN: '{cat} lidera este mes: {amt} en {n} entradas.',
+  patternBody: 'Es el {pct}% de todo lo que sale de «{space}» este mes', ledBy: ', encabezado por {mer} con {amt}.',
+  suggestions: 'Sugerencias', gentle: 'Suave', neutral: 'Neutral', blunt: 'Directo',
+  catSub: 'Este mes: toca una categoría para ver sus entradas', viewTable: 'Ver como tabla',
+  category: 'Categoría', amount: 'Importe', share: 'Cuota',
+  sixMonths: 'Seis meses', sixSub: 'Gasto total por mes: toca una barra para ver el valor', totalTip: '{m} total',
+  average: 'Media', highest: 'Máximo', surplus: 'Superávit', shortfall: 'Déficit',
+  topMerchants: 'Principales comercios', thisMonth: 'Este mes',
+  budgets: 'Presupuestos', projectForward: 'Proyectar',
+  dismiss: 'Descartar', raiseLimitTo: 'Subir el límite a {amt}', notNow: 'Ahora no', addIncome: 'Añadir ingresos', setBudgetsAct: 'Fijar presupuestos',
+  back: '‹ Atrás',
+  bUnavailable: 'No disponible temporalmente: inténtalo en breve',
+  bSub1: '{o} de 1 categoría por encima del plan · {space}', bSubN: '{o} de {n} categorías por encima del plan · {space}',
+  noLimitsYet: 'Sin límites aún: pulsa «Ajustar» en una categoría · {space}',
+  spentLbl: '{amt} gastado', noLimit: 'Sin límite', overBy: '{amt} de más', leftAmt: 'quedan {amt}',
+  ofLimit: '{a} de {b}', noMonthlyLimit: 'Sin límite mensual', adjust: 'Ajustar',
+  monthlyLimitPh: 'Límite mensual £', save: 'Guardar', remove: 'Quitar',
+  projection: 'Proyección', reset: 'Restablecer', keptPerMonth: 'AHORRO AL MES',
+  pctKept: '{pct}% de los ingresos ahorrado', pctOver: '{pct}% por encima de los ingresos', noIncomeRec: 'sin ingresos registrados',
+  keepThisUp: 'Si sigues así, habrás apartado {amt} para {when}.',
+  shortOver: 'A este ritmo te faltarán {amt} en los próximos 12 meses.',
+  runningTotal: 'ACUMULADO · PRÓXIMOS 12 MESES',
+  incomeStat: 'Ingresos', spendStat: 'Gastos', twelveMonths: '12 meses',
+  incomeNextYear: 'Ingresos el próximo año', expectRise: '¿Esperas una subida? Ajusta el porcentaje.',
+  spendAssumptions: 'Supuestos de gasto', perCatMonth: 'Por categoría y mes. ¿La compra sube un 3%? Ajústalo.',
+  settings: 'Ajustes', spacesMembers: 'Espacios y miembros',
+  nSpace1: '1 espacio · invita a gente', nSpaces: '{n} espacios · invita a gente',
+  setLimitsSub: 'Fija límites mensuales por categoría', nSet: '{n} fijados', nOverPlan: ' · {n} sobre el plan', tempUnavailable: 'No disponible temporalmente',
+  voiceLanguage: 'Idioma de voz', speechSub: 'Reconocimiento de voz del micrófono',
+  appLanguage: 'Idioma de la app', appLangSub: 'Todas las pantallas y textos',
+  open: 'Abrir', importLbl: 'Importar', exportLbl: 'Exportar',
+  importBank: 'Importar extracto bancario', pdfCsvBank: 'PDF o CSV de tu banco',
+  importKaupaCsv: 'Importar CSV de Kaupa', exportedFile: 'Un archivo exportado desde esta app',
+  exportCsvLbl: 'Exportar CSV', forPowerBi: 'Este espacio: para Power BI o copia de seguridad', signOut: 'Cerrar sesión',
+  tabHome: 'Inicio', tabActivity: 'Actividad', tabInsights: 'Análisis', tabSettings: 'Ajustes',
+  spacesTitle: 'Espacios', spacesSub: 'Fondos separados: personal, hogar, negocio. Toca para cambiar.',
+  sharedSpace: 'Espacio compartido', businessLbl: 'Negocio', personalLbl: 'Personal', newSpaceItem: '+ Nuevo espacio',
+  newSpaceTitle: 'Nuevo espacio', newSpaceSub: 'Un fondo aparte para llevar: p. ej., Hogar o un negocio.',
+  namePh: 'Nombre, p. ej., Hogar', householdShared: 'Hogar (compartido)', createSpace: 'Crear espacio',
+  budgetsSheetSub: 'Límites mensuales de «{space}». Deja vacío para sin límite.',
+  budgetsBeingSetUp: 'Los presupuestos se están preparando: inténtalo en breve.',
+  saveBudgets: 'Guardar presupuestos', saving: 'Guardando…',
+  members: 'Miembros', owner: 'propietario', invitedWaiting: 'invitado, esperando aceptación',
+  inviteByEmail: 'Invitar por correo a «{space}»', inviteBtn: 'Invitar', couldNotInvite: 'No se pudo invitar: {msg}',
+  inviteSent: 'Invitación enviada: cuando abran Kaupa con {email}, verán un aviso para Aceptar/Rechazar.',
+  switchSpaceItem: 'Cambiar de espacio…', deleteSpaceItem: 'Borrar este espacio…',
+  tapAgainDelete: 'Toca otra vez para borrar «{space}» y TODAS sus entradas',
+  bankImportTitle: 'Importación de extracto', readingPdf: 'Leyendo el PDF…',
+  pdfPwdWrong: 'Esa contraseña no funcionó: inténtalo de nuevo.',
+  pdfPwdInfo: 'Este PDF tiene contraseña (los bancos suelen hacerlo: normalmente está en el correo o es tu fecha de nacimiento / código postal).',
+  pdfPassword: 'Contraseña del PDF', unlockRead: 'Desbloquear y leer',
+  pdfReaderFail: 'No se pudo cargar el lector de PDF: comprueba tu conexión e inténtalo de nuevo.',
+  pdfOpenFail: 'No se pudo abrir este PDF ({msg}): prueba el CSV de tu banco.',
+  pdfScanned: 'Este PDF no tiene texto legible: parece escaneado. Usa el CSV de tu banco.',
+  askingAi: 'La IA está leyendo {n} líneas…',
+  aiReaderFailedDetail: 'El lector de IA falló — {msg} — muestra este mensaje a Claude.',
+  aiReaderFailedRetry: 'El lector de IA falló ({msg}): inténtalo en un minuto.',
+  pdfExtractFail: 'No se pudieron extraer transacciones de este PDF: prueba el CSV de tu banco.',
+  foundTx: 'Se encontraron {n} transacciones', dupesPar: ' ({d} omitidas por duplicadas)', dupesComma: ', {d} omitidas por duplicadas',
+  categorising: '. Categorizando…', checkCats: '. Revisa las categorías, quita las que no quieras e importa a «{space}».',
+  importN: 'Importar {n} entradas', importing: 'Importando…', importStopped: 'Importación detenida: {msg}',
+  fileEmpty: 'El archivo parece vacío.',
+  colsFail: 'No se reconocieron las columnas: exporta el extracto como CSV con fecha, descripción e importe.',
+  noTxFound: 'No se encontraron transacciones en este archivo.',
+  unrecognisedFile: 'Archivo no reconocido: se esperaba un export de Kaupa/Spendlog.', noValidRows: 'No se encontraron filas válidas.',
+},
+};
+function t(key, vars) {
+  let s = (I18N[uiLang] && I18N[uiLang][key]);
+  if (s == null) s = I18N.en[key];
+  if (s == null) return key;
+  if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+  return s;
+}
+function catLabel(c) { if (!c) return ''; return c.custom ? c.name : t('cat_' + c.id); }
+function catNameEn(c) { if (!c) return ''; return c.custom ? c.name : (I18N.en['cat_' + c.id] || c.name); }
+function catLetter(c) { const n = c.custom ? c.name : catLabel(c); return (n[0] || '?').toUpperCase(); }
+
+/* tone suggestion templates, per language: [label, title, body] with {cat},{catlc},{s},{l},{pct},{diff},{month} */
+const I18N_TONES = {
+en: {
+  gentle: {
+    over: ['{cat} over its limit', '{cat}: {s} spent of the {l} you planned.', 'Maybe worth a gentler few days — or perhaps the limit was just optimistic.'],
+    near: ['{cat} getting close', '{cat} is at {pct}% of its {l} limit.', 'Still within plan — just something to keep half an eye on.'],
+    income: ['Income missing', 'This space only shows money going out.', 'If you add salary or transfers in, Kaupa can show the full picture.'],
+    nobudget: ['Budgets could help', 'No category limits set for this space yet.', 'Even one or two rough limits make the insights much more useful.'],
+    calm: ['All calm', 'Everything looks steady this month.', 'Nothing needs your attention right now.'],
+  },
+  neutral: {
+    over: ['{cat} over limit', '{cat}: {s} spent against a {l} limit.', 'Adjust the limit or reduce spend for the remaining days of {month}.'],
+    near: ['{cat} near limit', '{cat} is at {pct}% of its {l} limit.', 'On current pace it may go over before month end.'],
+    income: ['Income missing', 'This space has outflow only — no income side to measure against.', 'Add salary or a recurring transfer to enable ratio tracking.'],
+    nobudget: ['No budgets set', 'This space has no category limits.', 'Set a few monthly limits to unlock over/under tracking here.'],
+    calm: ['Nothing needs attention', 'No limits breached and no anomalies this month.', ''],
+  },
+  blunt: {
+    over: ['{cat} is over budget', '{cat} is {diff} over. That was the whole point of the limit.', 'Stop spending on {catlc} or raise the limit — pick one.'],
+    near: ['{cat} almost blown', '{pct}% of the {cat} budget gone already.', 'Slow down or accept going over.'],
+    income: ['Where’s the income?', 'All spend, no earnings recorded in this space.', 'Add your income or this is just a list of regrets.'],
+    nobudget: ['No budgets, no discipline', 'You haven’t set a single limit here.', 'Set limits or stop pretending to track.'],
+    calm: ['No problems', 'Nothing over, nothing weird.', 'Go make some money.'],
+  },
+},
+lt: {
+  gentle: {
+    over: ['{cat} viršijo limitą', '{cat}: išleista {s} iš planuotų {l}.', 'Gal vertėtų kelias dienas ramiau — o gal limitas tiesiog buvo optimistinis.'],
+    near: ['{cat} artėja prie ribos', '{cat} pasiekė {pct}% iš {l} limito.', 'Dar pagal planą — tiesiog verta stebėti.'],
+    income: ['Trūksta pajamų', 'Šioje erdvėje matomos tik išlaidos.', 'Pridėjus algą ar pervedimus, Kaupa parodys pilną vaizdą.'],
+    nobudget: ['Biudžetai padėtų', 'Šioje erdvėje dar nėra kategorijų limitų.', 'Net vienas kitas apytikslis limitas įžvalgas padaro daug naudingesnes.'],
+    calm: ['Viskas ramu', 'Šį mėnesį viskas atrodo stabilu.', 'Šiuo metu niekas nereikalauja dėmesio.'],
+  },
+  neutral: {
+    over: ['{cat} viršija limitą', '{cat}: išleista {s}, limitas {l}.', 'Pakoreguok limitą arba mažink išlaidas iki mėnesio pabaigos.'],
+    near: ['{cat} arti limito', '{cat} pasiekė {pct}% iš {l} limito.', 'Tokiu tempu limitas gali būti viršytas iki mėnesio pabaigos.'],
+    income: ['Trūksta pajamų', 'Šioje erdvėje tik išlaidos — nėra pajamų palyginimui.', 'Pridėk algą ar periodinį pervedimą, kad matytum santykį.'],
+    nobudget: ['Biudžetai nenustatyti', 'Šioje erdvėje nėra kategorijų limitų.', 'Nustatyk kelis mėnesio limitus ir matysi viršijimus.'],
+    calm: ['Dėmesio niekas nereikalauja', 'Šį mėnesį limitai neviršyti, anomalijų nėra.', ''],
+  },
+  blunt: {
+    over: ['{cat} viršija biudžetą', '{cat} viršyta {diff}. Limitas juk tam ir buvo.', 'Nustok leisti pinigus ({catlc}) arba pasikelk limitą — rinkis.'],
+    near: ['{cat} beveik išnaudota', 'Jau išnaudota {pct}% „{cat}“ biudžeto.', 'Pristabdyk arba susitaikyk, kad viršysi.'],
+    income: ['Kur pajamos?', 'Vien išlaidos, jokių pajamų šioje erdvėje.', 'Pridėk pajamas, kitaip čia tik apgailestavimų sąrašas.'],
+    nobudget: ['Be biudžetų nėra disciplinos', 'Nenustatei nė vieno limito.', 'Nustatyk limitus arba nustok apsimetinėti, kad seki.'],
+    calm: ['Problemų nėra', 'Niekas neviršyta, nieko keisto.', 'Eik užsidirbti pinigų.'],
+  },
+},
+de: {
+  gentle: {
+    over: ['{cat} über dem Limit', '{cat}: {s} ausgegeben von geplanten {l}.', 'Vielleicht ein paar ruhigere Tage — oder das Limit war einfach optimistisch.'],
+    near: ['{cat} nähert sich dem Limit', '{cat} liegt bei {pct}% des Limits von {l}.', 'Noch im Plan — nur etwas im Auge behalten.'],
+    income: ['Einnahmen fehlen', 'Dieser Bereich zeigt nur ausgehendes Geld.', 'Mit Gehalt oder Überweisungen zeigt Kaupa das ganze Bild.'],
+    nobudget: ['Budgets könnten helfen', 'Noch keine Kategorien-Limits in diesem Bereich.', 'Schon ein, zwei grobe Limits machen die Einblicke viel nützlicher.'],
+    calm: ['Alles ruhig', 'Diesen Monat sieht alles stabil aus.', 'Gerade braucht nichts deine Aufmerksamkeit.'],
+  },
+  neutral: {
+    over: ['{cat} über Limit', '{cat}: {s} ausgegeben bei einem Limit von {l}.', 'Limit anpassen oder die Ausgaben für den Rest von {month} senken.'],
+    near: ['{cat} nahe am Limit', '{cat} liegt bei {pct}% des Limits von {l}.', 'Bei diesem Tempo ist das Limit vor Monatsende erreicht.'],
+    income: ['Einnahmen fehlen', 'Nur Abflüsse in diesem Bereich — keine Einnahmen zum Vergleichen.', 'Füge Gehalt oder eine wiederkehrende Überweisung hinzu.'],
+    nobudget: ['Keine Budgets festgelegt', 'Dieser Bereich hat keine Kategorien-Limits.', 'Lege ein paar Monatslimits fest, um Über/Unter zu verfolgen.'],
+    calm: ['Nichts zu beachten', 'Keine Limits gerissen, keine Auffälligkeiten diesen Monat.', ''],
+  },
+  blunt: {
+    over: ['{cat} ist über Budget', '{cat} ist {diff} drüber. Genau dafür war das Limit da.', 'Hör auf, Geld für {cat} auszugeben, oder erhöh das Limit — such’s dir aus.'],
+    near: ['{cat} fast aufgebraucht', '{pct}% des Budgets für {cat} sind schon weg.', 'Bremsen oder das Überziehen akzeptieren.'],
+    income: ['Wo sind die Einnahmen?', 'Nur Ausgaben, keine Einnahmen in diesem Bereich.', 'Trag dein Einkommen ein, sonst ist das nur eine Liste voller Reue.'],
+    nobudget: ['Keine Budgets, keine Disziplin', 'Du hast kein einziges Limit gesetzt.', 'Setz Limits oder hör auf, so zu tun, als würdest du tracken.'],
+    calm: ['Keine Probleme', 'Nichts drüber, nichts komisch.', 'Geh Geld verdienen.'],
+  },
+},
+es: {
+  gentle: {
+    over: ['{cat} por encima del límite', '{cat}: {s} gastado de los {l} previstos.', 'Quizá unos días más tranquilos, o puede que el límite fuera optimista.'],
+    near: ['{cat} se acerca al límite', '{cat} está al {pct}% de su límite de {l}.', 'Aún dentro del plan; solo tenlo medio vigilado.'],
+    income: ['Faltan ingresos', 'Este espacio solo muestra dinero saliendo.', 'Si añades nómina o transferencias, Kaupa mostrará el cuadro completo.'],
+    nobudget: ['Los presupuestos ayudarían', 'Aún no hay límites por categoría en este espacio.', 'Con uno o dos límites aproximados, el análisis es mucho más útil.'],
+    calm: ['Todo en calma', 'Este mes todo parece estable.', 'Nada necesita tu atención ahora mismo.'],
+  },
+  neutral: {
+    over: ['{cat} sobre el límite', '{cat}: {s} gastado frente a un límite de {l}.', 'Ajusta el límite o reduce el gasto en lo que queda de {month}.'],
+    near: ['{cat} cerca del límite', '{cat} está al {pct}% de su límite de {l}.', 'Al ritmo actual puede superarse antes de fin de mes.'],
+    income: ['Faltan ingresos', 'Este espacio solo tiene salidas; no hay ingresos contra los que medir.', 'Añade nómina o una transferencia recurrente para ver la proporción.'],
+    nobudget: ['Sin presupuestos', 'Este espacio no tiene límites por categoría.', 'Fija algunos límites mensuales para controlar excesos.'],
+    calm: ['Nada requiere atención', 'Ningún límite superado ni anomalías este mes.', ''],
+  },
+  blunt: {
+    over: ['{cat} pasado de presupuesto', '{cat} va {diff} de más. Para eso estaba el límite.', 'Deja de gastar en {catlc} o sube el límite: elige.'],
+    near: ['{cat} casi agotado', 'Ya se ha ido el {pct}% del presupuesto de {cat}.', 'Frena o asume que te pasarás.'],
+    income: ['¿Y los ingresos?', 'Todo gasto y ningún ingreso registrado en este espacio.', 'Añade tus ingresos o esto es solo una lista de remordimientos.'],
+    nobudget: ['Sin presupuestos no hay disciplina', 'No has puesto ni un solo límite.', 'Pon límites o deja de fingir que controlas.'],
+    calm: ['Sin problemas', 'Nada excedido, nada raro.', 'Ve a ganar dinero.'],
+  },
+},
+};
+function tonesNow() {
+  const T = I18N_TONES[uiLang] || I18N_TONES.en;
+  const fill = (arr, vars) => arr.map(str => str.replace(/\{(\w+)\}/g, (_, k) => vars[k] != null ? String(vars[k]) : ''));
+  const out = {};
+  for (const tn of ['gentle', 'neutral', 'blunt']) {
+    out[tn] = {};
+    for (const kind of ['over', 'near', 'income', 'nobudget', 'calm']) {
+      out[tn][kind] = (c, s, l) => fill(T[tn][kind], {
+        cat: c ? catLabel(c) : '', catlc: c ? catLabel(c).toLowerCase() : '',
+        s: s != null ? fmt0(s) : '', l: l ? fmt0(l) : '',
+        pct: l ? Math.round(s / l * 100) : 0,
+        diff: (s != null && l != null) ? fmt0(s - l) : '',
+        month: monthName(new Date()),
+      });
+    }
+  }
+  return out;
+}
+
+const ASK_HINTS_ALL = {
+  en: ['Top 5 spends this month', 'How much at Lidl?', 'Where am I spending the most?', 'Eating out vs last month'],
+  lt: ['Top 5 išlaidos šį mėnesį', 'Kiek išleidau Lidl?', 'Kur išleidžiu daugiausiai?', 'Kavinės: šis mėnuo ir praėjęs'],
+  de: ['Top 5 Ausgaben diesen Monat', 'Wie viel bei Lidl?', 'Wofür gebe ich am meisten aus?', 'Essen gehen vs. letzter Monat'],
+  es: ['Top 5 gastos este mes', '¿Cuánto en Lidl?', '¿En qué gasto más?', 'Comer fuera vs. mes pasado'],
+};
+
+const STATIC_I18N = [
+  ['#loginCard p', 'tagline'], ['#loginSend', 'loginSend'], ['.ordiv span', 'or'], ['#loginGoogleTxt', 'continueGoogle'],
+  ['#voiceNote', 'voiceNote'], ['#typePill', 'typeInstead'], ['#typeAdd', 'add'],
+  ['#typeToggle .tt[data-type="expense"]', 'expense'], ['#typeToggle .tt[data-type="income"]', 'income'], ['#cCancel', 'cancel'],
+  ['#lblSpent', 'spent'], ['#lblEarned', 'earned'],
+  ['#wiwTitle', 'whereItWent'], ['#wiwLink', 'insightsLink'], ['#wiwEmpty', 'noSpendMonth'],
+  ['#histTitle', 'history'], ['#histSeg [data-m="month"]', 'month'], ['#histSeg [data-m="year"]', 'year'], ['#histSeg [data-m="all"]', 'allYears'],
+  ['#tab-home .lt1', 'latest'], ['#latestLink', 'allActivity'], ['#latestEmpty', 'nothingYetMic'],
+  ['#importCard .it1', 'importTitle'], ['#importCard .it2', 'importSub'],
+  ['#tab-home .footer', 'homeFooter'],
+  ['#tab-activity .pagetitle', 'activity'], ['#actEmpty', 'nothingHere'],
+  ['#tab-insights .pagetitle', 'tabInsights'],
+  ['#askTitle', 'askTitle'], ['#askSub', 'askSub'], ['#askGo', 'ask'],
+  ['#patternLab', 'patternSpotted'], ['.tonebar .tl', 'suggestions'],
+  ['#toneSeg [data-t="gentle"]', 'gentle'], ['#toneSeg [data-t="neutral"]', 'neutral'], ['#toneSeg [data-t="blunt"]', 'blunt'],
+  ['#wiw2Title', 'whereItWent'], ['#catSub', 'catSub'], ['#catEmpty', 'noSpendMonth'], ['#tab-insights summary', 'viewTable'],
+  ['#sixTitle', 'sixMonths'], ['#sixSub', 'sixSub'],
+  ['#tmTitle', 'topMerchants'], ['#tmSub', 'thisMonth'], ['#topMerchEmpty', 'noSpendMonth'],
+  ['#budgetsBtn', 'budgets'], ['#projectBtn', 'projectForward'],
+  ['#budgetsBack', 'back'], ['#tab-budgetspage .pagetitle', 'budgets'],
+  ['#projBack', 'back'], ['#projReset', 'reset'], ['#tab-projectionpage .pagetitle', 'projection'],
+  ['.assumphead .at', 'incomeNextYear'], ['.assumphead .as', 'expectRise'],
+  ['#spendAssumpTitle', 'spendAssumptions'], ['#spendAssumpSub', 'perCatMonth'],
+  ['#tab-settings .pagetitle', 'settings'],
+  ['#setSpaces .st', 'spacesMembers'], ['#setSpaces .sa', 'open'],
+  ['#setBudgets .st', 'budgets'], ['#setBudgets .sa', 'open'],
+  ['#setLang .st', 'voiceLanguage'], ['#setLang .ss', 'speechSub'],
+  ['#setAppLang .st', 'appLanguage'], ['#setAppLang .ss', 'appLangSub'],
+  ['#setBank .st', 'importBank'], ['#setBank .ss', 'pdfCsvBank'], ['#setBank .sa', 'importLbl'],
+  ['#setCsvIn .st', 'importKaupaCsv'], ['#setCsvIn .ss', 'exportedFile'], ['#setCsvIn .sa', 'importLbl'],
+  ['#setCsvOut .st', 'exportCsvLbl'], ['#setCsvOut .ss', 'forPowerBi'], ['#setCsvOut .sa', 'exportLbl'],
+  ['#setSignOut .st', 'signOut'],
+  ['#tabLblHome', 'tabHome'], ['#tabLblActivity', 'tabActivity'], ['#tabLblInsights', 'tabInsights'], ['#tabLblSettings', 'tabSettings'],
+];
+const STATIC_I18N_PH = [['#typeInput', 'typePh'], ['#actSearch', 'searchPh'], ['#askInput', 'askPh']];
+function applyStaticI18n() {
+  STATIC_I18N.forEach(([sel, key]) => {
+    const n = document.querySelector(sel);
+    if (n) n.textContent = t(key);
+  });
+  STATIC_I18N_PH.forEach(([sel, key]) => {
+    const n = document.querySelector(sel);
+    if (n) n.placeholder = t(key);
+  });
+  const av = document.getElementById('setAppLangVal');
+  if (av) av.textContent = UI_LANG_NAMES[uiLang];
+  const ml = document.getElementById('micLabel');
+  if (ml && !listeningState()) ml.textContent = t('tapToAdd');
+  if (typeof renderAskHints === 'function') renderAskHints();
+}
+function listeningState() { try { return !!listening; } catch (e) { return false; } }
+function setUiLang(lang) {
+  uiLang = UI_LANGS.includes(lang) ? lang : 'en';
+  lsSet('kaupa.uilang', uiLang);
+  recLang = { en: 'en-GB', lt: 'lt-LT', de: 'de-DE', es: 'es-ES' }[uiLang];
+  lsSet('spendlog.lang', recLang);
+  applyStaticI18n();
+  if (typeof render === 'function' && session) render(); else if (typeof renderLang === 'function') renderLang();
+}
+
 
 /* ================= sync dot ================= */
 function setDot(state) {
@@ -1035,7 +1713,7 @@ async function loadSpaces() {
 }
 async function createSpace(name, kind) {
   const { data, error } = await sb.from('spaces').insert({ name, kind }).select().single();
-  if (error) { alertMsg('Could not create space: ' + error.message); return null; }
+  if (error) { alertMsg(t('couldNotCreateSpace', { msg: error.message })); return null; }
   spaces.push(data);
   return data;
 }
@@ -1075,7 +1753,7 @@ async function insertTx(p) {
   if (error) {
     entries = entries.filter(e => e.id !== temp.id);
     if (!navigator.onLine) pushOutbox(payload);
-    else { alertMsg('Could not save — check connection and try again.'); setDot('warn'); }
+    else { alertMsg(t('couldNotSave')); setDot('warn'); }
     render();
   } else {
     const i = entries.findIndex(e => e.id === temp.id);
@@ -1085,13 +1763,13 @@ async function insertTx(p) {
 }
 async function updateTx(entry) {
   const { error } = await sb.from('transactions').update({ amount: entry.amount, merchant: entry.merchant, category: entry.cat }).eq('id', entry.id);
-  if (error) alertMsg('Update failed — check your connection.');
+  if (error) alertMsg(t('updateFailed'));
   await loadTx(); render();
 }
 async function deleteTx(id) {
   entries = entries.filter(e => e.id !== id); render();
   const { error } = await sb.from('transactions').delete().eq('id', id);
-  if (error) { alertMsg('Delete failed — check your connection.'); await loadTx(); render(); }
+  if (error) { alertMsg(t('deleteFailed')); await loadTx(); render(); }
 }
 
 /* ================= auth ================= */
@@ -1101,17 +1779,17 @@ const appView = document.getElementById('appView');
 async function sendLink() {
   const email = document.getElementById('loginEmail').value.trim();
   const st = document.getElementById('loginStatus');
-  if (!email.includes('@')) { st.textContent = 'Enter a valid email address.'; return; }
-  st.textContent = 'Sending…';
+  if (!email.includes('@')) { st.textContent = t('enterValidEmail'); return; }
+  st.textContent = t('sending');
   const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
-  st.textContent = error ? ('Could not send: ' + error.message) : 'Link sent — check your email (and spam) on this device, then tap it.';
+  st.textContent = error ? t('couldNotSend', { msg: error.message }) : t('linkSent');
 }
 document.getElementById('loginSend').onclick = sendLink;
 document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') sendLink(); });
 document.getElementById('loginGoogle').onclick = async () => {
   const st = document.getElementById('loginStatus');
   const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
-  if (error) st.textContent = 'Google sign-in isn’t available right now — use the email link instead.';
+  if (error) st.textContent = t('googleUnavailable');
 };
 
 async function bootstrap() {
@@ -1179,11 +1857,11 @@ function renderInvites(list) {
     const card = el('div', 'invitecard');
     const top = el('div', 'irowtop');
     const av = el('span', 'iav', (inv.inviter || '?')[0].toUpperCase());
-    const txt = el('div', 'itxt', (inv.inviter || 'Someone') + ' invited you to “' + inv.space_name + '”');
+    const txt = el('div', 'itxt', t('invitedYou', { who: inv.inviter || t('someone'), space: inv.space_name }));
     top.appendChild(av); top.appendChild(txt);
     const row = el('div', 'irow');
-    const acc = el('button', 'iaccept', 'Accept');
-    const dec = el('button', 'idecline', 'Decline');
+    const acc = el('button', 'iaccept', t('accept'));
+    const dec = el('button', 'idecline', t('decline'));
     acc.onclick = async () => {
       acc.disabled = true;
       const { error } = await sb.rpc('respond_invite', { p_invite: inv.id, p_accept: true });
@@ -1226,7 +1904,7 @@ function parseUtterance(raw) {
   }
   merchant = merchant.replace(/\s+/g, ' ').trim();
   merchant = merchant.split(/\s+/).filter(w => !FILLER.has(w)).join(' ').trim();
-  if (!merchant) merchant = type === 'income' ? 'Income' : 'Unknown';
+  if (!merchant) merchant = type === 'income' ? t('income') : t('unknown');
   const ALIAS = { 'level': 'Lidl', 'lido': 'Lidl', 'liddle': 'Lidl', 'b and q': 'B&Q', 'bandq': 'B&Q', 'screw fix': 'Screwfix', 'aldis': 'Aldi' };
   let pretty;
   if (ALIAS[merchant]) { pretty = ALIAS[merchant]; merchant = pretty.toLowerCase(); }
@@ -1277,9 +1955,9 @@ function handleInput(raw) {
   if (!t) return;
   const cmd = t.toLowerCase().replace(/[.!?]/g, '').trim();
   if (CMD_DELETE.test(cmd)) {
-    if (!entries.length) { transcriptEl.textContent = 'Nothing to delete.'; return; }
+    if (!entries.length) { transcriptEl.textContent = t('nothingToDelete'); return; }
     const last = entries[0];
-    transcriptEl.textContent = 'Deleted ' + (last.type === 'income' ? '+' : '') + fmtGBP(last.amount) + ' ' + last.merchant + '.';
+    transcriptEl.textContent = t('deleted', { amt: (last.type === 'income' ? '+' : '') + fmtGBP(last.amount), merchant: last.merchant });
     deleteTx(last.id);
     return;
   }
@@ -1289,7 +1967,7 @@ function handleInput(raw) {
   else showConfirmMulti(list);
 }
 async function aiParse(text) {
-  transcriptEl.textContent = 'Thinking…';
+  transcriptEl.textContent = t('thinking');
   try {
     const { data, error } = await sb.functions.invoke('parse-expense', { body: { text, categories: aiCatIds() } });
     if (error || !data || !Array.isArray(data.entries) || !data.entries.length) throw new Error('no parse');
@@ -1300,7 +1978,7 @@ async function aiParse(text) {
       const d = new Date(today);
       d.setDate(d.getDate() - (parseInt(e.days_ago) || 0));
       const type = e.type === 'income' ? 'income' : 'expense';
-      const merchant = String(e.merchant || (type === 'income' ? 'Income' : 'Unknown')).slice(0, 60);
+      const merchant = String(e.merchant || (type === 'income' ? t('income') : t('unknown'))).slice(0, 60);
       let cat = allCats().some(c => c.id === e.category) ? e.category : guessCategory(merchant);
       if (type !== 'income') { const l = learnedCategory(merchant); if (l) cat = l; }
       return { amount, merchant, cat: type === 'income' ? 'income' : cat, type, dateISO: d.toISOString().slice(0, 10) };
@@ -1309,7 +1987,7 @@ async function aiParse(text) {
     transcriptEl.textContent = '';
     if (list.length === 1) showConfirm(list[0]); else showConfirmMulti(list);
   } catch (e) {
-    transcriptEl.textContent = 'Couldn’t understand that — try “240 at Lidl” or “Lidl 240”.';
+    transcriptEl.textContent = t('couldntUnderstand');
   }
 }
 function alertMsg(msg) { transcriptEl.textContent = msg; }
@@ -1322,7 +2000,7 @@ function showConfirmMulti(list) {
   const total = list.reduce((s, p) => s + (p.type === 'income' ? -p.amount : p.amount), 0);
   document.getElementById('cAmount').textContent = fmtGBP(Math.abs(total));
   document.getElementById('cAmount').style.color = '';
-  document.getElementById('cMerchant').textContent = list.length + ' entries — check each, then save';
+  document.getElementById('cMerchant').textContent = t('entriesCheck', { n: list.length });
   document.getElementById('typeToggle').style.display = 'none';
   const chips = document.getElementById('cChips');
   chips.textContent = '';
@@ -1336,7 +2014,7 @@ function showConfirmMulti(list) {
     const mer = el('span', 'mmer', p.merchant);
     const sel = el('select', 'msel');
     if (p.type === 'income') {
-      const o = el('option', null, 'Income'); o.value = 'income'; sel.appendChild(o);
+      const o = el('option', null, t('income')); o.value = 'income'; sel.appendChild(o);
     } else {
       fillCatSelect(sel, p.cat, v => { p.cat = v; });
     }
@@ -1350,20 +2028,20 @@ function showConfirmMulti(list) {
     row.appendChild(amt); row.appendChild(mer); row.appendChild(sel); row.appendChild(rm);
     chips.appendChild(row);
   });
-  document.getElementById('cSave').textContent = 'Save all ' + list.length;
+  document.getElementById('cSave').textContent = t('saveAll', { n: list.length });
   confirmEl.classList.add('open');
   confirmEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 function showConfirm(parsed) {
   pending = parsed;
   document.getElementById('typeToggle').style.display = '';
-  document.getElementById('cSave').textContent = parsed.type === 'income' ? 'Save income' : 'Save expense';
+  document.getElementById('cSave').textContent = parsed.type === 'income' ? t('saveIncome') : t('saveExpense');
   const chipsReset = document.getElementById('cChips');
   chipsReset.style.flexDirection = '';
   chipsReset.style.alignItems = '';
   document.getElementById('cAmount').textContent = (parsed.type === 'income' ? '+' : '') + fmtGBP(parsed.amount);
   document.getElementById('cAmount').style.color = parsed.type === 'income' ? 'var(--good)' : '';
-  document.getElementById('cMerchant').textContent = parsed.merchant + ' · ' + new Date(parsed.dateISO).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  document.getElementById('cMerchant').textContent = parsed.merchant + ' · ' + new Date(parsed.dateISO).toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
   document.querySelectorAll('#typeToggle .tt').forEach(b => {
     b.classList.toggle('sel', b.dataset.type === parsed.type);
     b.onclick = () => { pending.type = b.dataset.type; showConfirm(pending); };
@@ -1375,12 +2053,12 @@ function showConfirm(parsed) {
     allCats().forEach(c => {
       const b = el('button', 'chip' + (c.id === parsed.cat ? ' sel' : ''));
       const d = el('span', 'dot'); d.style.background = 'var(--s' + c.slot + ')';
-      b.appendChild(d); b.appendChild(document.createTextNode(c.name));
+      b.appendChild(d); b.appendChild(document.createTextNode(catLabel(c)));
       b.onclick = () => { pending.cat = c.id; showConfirm(pending); };
       chips.appendChild(b);
     });
     const nb = el('button', 'chip');
-    nb.appendChild(document.createTextNode('+ New'));
+    nb.appendChild(document.createTextNode(t('plusNew')));
     nb.onclick = () => { const m = promptNewCategory(); if (m) { pending.cat = m.id; } showConfirm(pending); };
     chips.appendChild(nb);
   }
@@ -1405,7 +2083,7 @@ function renderLang() {
     b.onclick = () => { recLang = b.dataset.l; lsSet('spendlog.lang', recLang); renderLang(); };
   });
   const v = document.getElementById('setLangVal');
-  if (v) v.textContent = recLang === 'lt-LT' ? 'LT' : 'EN';
+  if (v) v.textContent = ({ 'en-GB': 'EN', 'lt-LT': 'LT', 'de-DE': 'DE', 'es-ES': 'ES' })[recLang] || 'EN';
 }
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('micBtn');
@@ -1424,7 +2102,7 @@ if (!SR) {
   function finishVoice() {
     listening = false;
     micBtn.classList.remove('listening');
-    micLabel.textContent = 'Tap to add';
+    micLabel.textContent = t('tapToAdd');
     const text = sessionParts.join(', ').trim();
     sessionParts = [];
     if (text) handleInput(text);
@@ -1448,7 +2126,7 @@ if (!SR) {
     };
     rec.onerror = ev => {
       if (ev.error === 'not-allowed') {
-        transcriptEl.textContent = 'Microphone blocked — allow mic access in your browser settings.';
+        transcriptEl.textContent = t('micBlocked');
         finishVoice();
       }
       // 'no-speech' and friends fall through to onend, which decides
@@ -1467,8 +2145,8 @@ if (!SR) {
     sessionParts = []; emptyRounds = 0;
     listening = true;
     micBtn.classList.add('listening');
-    micLabel.textContent = 'Tap to finish';
-    transcriptEl.textContent = 'Listening…';
+    micLabel.textContent = t('tapToFinish');
+    transcriptEl.textContent = t('listening');
     startRound();
   };
 }
@@ -1531,29 +2209,6 @@ function monthEntries(offset) {
 }
 
 /* ================= tone / suggestions ================= */
-const TONES = {
-  gentle: {
-    over: (c, s, l) => [c.name + ' over its limit', c.name + ': ' + fmt0(s) + ' spent of the ' + fmt0(l) + ' you planned.', 'Maybe worth a gentler few days — or perhaps the limit was just optimistic.'],
-    near: (c, s, l) => [c.name + ' getting close', c.name + ' is at ' + Math.round(s / l * 100) + '% of its ' + fmt0(l) + ' limit.', 'Still within plan — just something to keep half an eye on.'],
-    income: () => ['Income missing', 'This space only shows money going out.', 'If you add salary or transfers in, Kaupa can show the full picture.'],
-    nobudget: () => ['Budgets could help', 'No category limits set for this space yet.', 'Even one or two rough limits make the insights much more useful.'],
-    calm: () => ['All calm', 'Everything looks steady this month.', 'Nothing needs your attention right now.'],
-  },
-  neutral: {
-    over: (c, s, l) => [c.name + ' over limit', c.name + ': ' + fmt0(s) + ' spent against a ' + fmt0(l) + ' limit.', 'Adjust the limit or reduce spend for the remaining days of ' + monthName(new Date()) + '.'],
-    near: (c, s, l) => [c.name + ' near limit', c.name + ' is at ' + Math.round(s / l * 100) + '% of its ' + fmt0(l) + ' limit.', 'On current pace it may go over before month end.'],
-    income: () => ['Income missing', 'This space has outflow only — no income side to measure against.', 'Add salary or a recurring transfer to enable ratio tracking.'],
-    nobudget: () => ['No budgets set', 'This space has no category limits.', 'Set a few monthly limits to unlock over/under tracking here.'],
-    calm: () => ['Nothing needs attention', 'No limits breached and no anomalies this month.', ''],
-  },
-  blunt: {
-    over: (c, s, l) => [c.name + ' is over budget', c.name + ' is ' + fmt0(s - l) + ' over. That was the whole point of the limit.', 'Stop spending on ' + c.name.toLowerCase() + ' or raise the limit — pick one.'],
-    near: (c, s, l) => [c.name + ' almost blown', Math.round(s / l * 100) + '% of the ' + c.name + ' budget gone already.', 'Slow down or accept going over.'],
-    income: () => ['Where’s the income?', 'All spend, no earnings recorded in this space.', 'Add your income or this is just a list of regrets.'],
-    nobudget: () => ['No budgets, no discipline', 'You haven’t set a single limit here.', 'Set limits or stop pretending to track.'],
-    calm: () => ['No problems', 'Nothing over, nothing weird.', 'Go make some money.'],
-  },
-};
 function dismissKey(kind, cat) { return currentSpaceId + '|' + kind + '|' + (cat || '') + '|' + monthStartISO(0).slice(0, 7); }
 function isDismissed(kind, cat) { return !!lsGet('kaupa.dismiss', {})[dismissKey(kind, cat)]; }
 function dismiss(kind, cat) { const d = lsGet('kaupa.dismiss', {}); d[dismissKey(kind, cat)] = 1; lsSet('kaupa.dismiss', d); render(); }
@@ -1601,8 +2256,8 @@ function renderHome() {
   const space = spaces.find(s => s.id === currentSpaceId);
   document.getElementById('spaceName').textContent = space ? space.name : '—';
   document.getElementById('spaceInitial').textContent = space ? space.name[0].toUpperCase() : '·';
-  document.getElementById('spaceSub').textContent = memberCount > 1 ? 'Shared · ' + memberCount + ' people' : 'Just you';
-  document.getElementById('monthLabel').textContent = new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase();
+  document.getElementById('spaceSub').textContent = memberCount > 1 ? t('sharedPeople', { n: memberCount }) : t('justYou');
+  document.getElementById('monthLabel').textContent = new Date().toLocaleDateString(loc(), { month: 'long', year: 'numeric' }).toUpperCase();
 
   const cur = monthEntries(0), prev = monthEntries(-1);
   const spent = cur.filter(e => e.type !== 'income').reduce((s, e) => s + e.amount, 0);
@@ -1612,23 +2267,23 @@ function renderHome() {
   const prevName = monthName(new Date(new Date().setDate(0)));
   const diff = spent - prevSpent;
   document.getElementById('spentSub').textContent = prevSpent > 0
-    ? fmt0(Math.abs(diff)) + (diff >= 0 ? ' more' : ' less') + ' than ' + prevName + ' · ' + (spaces.find(s => s.id === currentSpaceId) || { name: '' }).name.toLowerCase()
-    : (spent > 0 ? 'First tracked month in this space' : 'Nothing yet — tap above to add');
+    ? t(diff >= 0 ? 'spentMore' : 'spentLess', { amt: fmt0(Math.abs(diff)), month: prevName, space: (spaces.find(s => s.id === currentSpaceId) || { name: '' }).name.toLowerCase() })
+    : (spent > 0 ? t('firstMonth') : t('nothingYetTap'));
   document.getElementById('earnedVal').textContent = fmt0(earned);
-  document.getElementById('earnedSub').textContent = earned > 0 ? 'This month in this space' : 'No income in this space';
+  document.getElementById('earnedSub').textContent = earned > 0 ? t('thisMonthInSpace') : t('noIncomeSpace');
 
   const sug = computeSuggestions().filter(s => s.kind === 'over')[0];
   const ac = document.getElementById('alertCard');
   if (sug) {
-    const [lab, title, body] = TONES[tone].over(sug.cat, sug.spent, sug.limit);
+    const [lab, title, body] = tonesNow()[tone].over(sug.cat, sug.spent, sug.limit);
     document.getElementById('alertLab').textContent = lab.toUpperCase();
     document.getElementById('alertTitle').textContent = title;
     document.getElementById('alertBody').textContent = body;
     const acts = document.getElementById('alertActions');
     acts.textContent = '';
-    const raise = el('button', 'alertact', 'Raise limit to ' + fmt0(Math.ceil(sug.spent)));
+    const raise = el('button', 'alertact', t('raiseLimitTo', { amt: fmt0(Math.ceil(sug.spent)) }));
     raise.onclick = async () => { await saveBudget(sug.cat.id, Math.ceil(sug.spent)); };
-    const notNow = el('button', 'alertdis', 'Not now');
+    const notNow = el('button', 'alertdis', t('notNow'));
     notNow.onclick = () => dismiss('over', sug.cat.id);
     acts.appendChild(raise); acts.appendChild(notNow);
     ac.style.display = 'block';
@@ -1666,7 +2321,7 @@ function renderHome() {
     wrap.appendChild(svg);
     const center = el('div', 'dcenter');
     center.appendChild(el('div', 'dpct serif', Math.round(sortedH[0][1] / totalH * 100) + '%'));
-    center.appendChild(el('div', 'dcat', catById(sortedH[0][0]).name.toUpperCase().slice(0, 12)));
+    center.appendChild(el('div', 'dcat', catLabel(catById(sortedH[0][0])).toUpperCase().slice(0, 12)));
     wrap.appendChild(center);
     dRow.appendChild(wrap);
     const leg = el('div', 'leg');
@@ -1675,7 +2330,7 @@ function renderHome() {
       const lr = el('div', 'legrow');
       const dot = el('span', 'dot'); dot.style.background = 'var(--s' + c.slot + ')';
       lr.appendChild(dot);
-      lr.appendChild(el('span', 'ln', c.name));
+      lr.appendChild(el('span', 'ln', catLabel(c)));
       lr.appendChild(el('span', 'lv', fmt0(amt)));
       leg.appendChild(lr);
     });
@@ -1705,12 +2360,12 @@ function renderHistory() {
   let label = '', sub = '';
   if (histMode === 'month') {
     const d = new Date(now.getFullYear(), now.getMonth() + histOffset, 1);
-    label = d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-    sub = histOffset === 0 ? 'in progress' : '';
+    label = d.toLocaleDateString(loc(), { month: 'long', year: 'numeric' });
+    sub = histOffset === 0 ? t('inProgress') : '';
   } else if (histMode === 'year') {
     label = String(now.getFullYear() + histOffset);
-    sub = histOffset === 0 ? 'in progress' : '';
-  } else { label = 'All time'; sub = ''; }
+    sub = histOffset === 0 ? t('inProgress') : '';
+  } else { label = t('allTime'); sub = ''; }
   document.getElementById('histLabel').textContent = label;
   document.getElementById('histSub').textContent = sub;
   document.getElementById('histPrev').disabled = histMode === 'all';
@@ -1723,14 +2378,14 @@ function renderHistory() {
   const stats = document.getElementById('histStats');
   stats.textContent = '';
   const left = el('div', 'ho');
-  left.appendChild(el('div', 'hol', 'OUT'));
+  left.appendChild(el('div', 'hol', t('out')));
   left.appendChild(el('div', 'hov serif', fmt0(out)));
   const right = el('div', 'hi');
   const r1 = el('div', 'hir');
-  r1.appendChild(el('span', 'hlab', 'In'));
+  r1.appendChild(el('span', 'hlab', t('inLbl')));
   r1.appendChild(el('span', 'hval', fmt0(inn)));
   const r2 = el('div', 'hir');
-  r2.appendChild(el('span', 'hlab', 'Net'));
+  r2.appendChild(el('span', 'hlab', t('net')));
   const nv = el('span', 'hval', (net >= 0 ? '+' : '−') + fmt0(Math.abs(net)));
   nv.style.color = net >= 0 ? 'var(--good)' : 'var(--terra)';
   r2.appendChild(nv);
@@ -1747,7 +2402,7 @@ function renderHistory() {
     const c = catById(cid);
     const row = el('div', 'histbarrow');
     const top = el('div', 'hbt');
-    top.appendChild(el('span', null, c.name));
+    top.appendChild(el('span', null, catLabel(c)));
     top.appendChild(el('span', null, fmt0(amt)));
     const bb = el('div', 'hbb');
     const bf = el('div', 'hbf');
@@ -1767,13 +2422,13 @@ function renderLatest() {
   latest.forEach(e => {
     const row = el('div', 'entry');
     const c = e.type === 'income' ? INCOME_CHIP : catById(e.cat);
-    const chip = el('span', 'catchip', c.letter);
+    const chip = el('span', 'catchip', e.type === 'income' ? c.letter : catLetter(c));
     chip.style.background = c.tint; chip.style.color = c.tx;
     const mid = el('div', 'mid');
     mid.appendChild(el('div', 'mname', e.merchant));
-    const who = session && e.user_id === session.user.id ? 'You' : (memberNames[e.user_id] || 'Member');
-    const dLab = new Date(e.dateISO + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    mid.appendChild(el('div', 'msub', (e.type === 'income' ? 'Income' : catById(e.cat).name) + ' · ' + dLab + ' · ' + who));
+    const who = session && e.user_id === session.user.id ? t('youLbl') : (memberNames[e.user_id] || t('memberLbl'));
+    const dLab = new Date(e.dateISO + 'T00:00:00').toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
+    mid.appendChild(el('div', 'msub', (e.type === 'income' ? t('income') : catLabel(catById(e.cat))) + ' · ' + dLab + ' · ' + who));
     const amt = el('div', 'amt', (e.type === 'income' ? '+' : '−') + fmtGBP(e.amount));
     if (e.type === 'income') amt.style.color = 'var(--good)';
     row.appendChild(chip); row.appendChild(mid); row.appendChild(amt);
@@ -1801,14 +2456,14 @@ function openEditor(entry, afterRow) {
   const sel = el('select');
   fillCatSelect(sel, entry.cat, () => {});
   const row = el('div', 'erow');
-  const save = el('button', 'save', 'Save changes');
+  const save = el('button', 'save', t('saveChanges'));
   save.onclick = () => {
     entry.cat = entry.type === 'income' ? 'income' : sel.value;
     entry.amount = parseFloat(amtIn.value) || entry.amount;
     entry.merchant = merIn.value.trim() || entry.merchant;
     closeEditor(); updateTx(entry);
   };
-  const del = el('button', 'del', 'Delete');
+  const del = el('button', 'del', t('delete'));
   del.onclick = () => { closeEditor(); deleteTx(entry.id); };
   row.appendChild(save); row.appendChild(del);
   editorEl.appendChild(merIn); editorEl.appendChild(amtIn);
@@ -1819,12 +2474,12 @@ function openEditor(entry, afterRow) {
 function entryRow(e) {
   const row = el('div', 'entry');
   const c = e.type === 'income' ? INCOME_CHIP : catById(e.cat);
-  const chip = el('span', 'catchip', c.letter);
+  const chip = el('span', 'catchip', e.type === 'income' ? c.letter : catLetter(c));
   chip.style.background = c.tint; chip.style.color = c.tx;
   const mid = el('div', 'mid');
   const n = el('div', 'mname', e.merchant);
-  let sub = (e.type === 'income' ? 'Income' : catById(e.cat).name);
-  if (e.source === 'statement') sub += ' · statement';
+  let sub = (e.type === 'income' ? t('income') : catLabel(catById(e.cat)));
+  if (e.source === 'statement') sub += ' · ' + t('statementTag');
   if (memberCount > 1 && memberNames[e.user_id]) sub += ' · ' + memberNames[e.user_id];
   const s = el('div', 'msub', sub);
   mid.appendChild(n); mid.appendChild(s);
@@ -1842,13 +2497,13 @@ function renderActivity() {
     b.onclick = () => { catFilter = id; closeEditor(); render(); };
     pills.appendChild(b);
   };
-  mk('Everything', null);
-  allCats().forEach(c => mk(c.name, c.id));
+  mk(t('everything'), null);
+  allCats().forEach(c => mk(catLabel(c), c.id));
 
   const q = searchQ.toLowerCase().trim();
   const filtered = entries.filter(e => {
     if (catFilter && !(e.cat === catFilter && e.type !== 'income')) return false;
-    if (q && !(e.merchant.toLowerCase().includes(q) || (e.type === 'income' ? 'income' : catById(e.cat).name.toLowerCase()).includes(q))) return false;
+    if (q && !(e.merchant.toLowerCase().includes(q) || (e.type === 'income' ? t('income').toLowerCase() : catLabel(catById(e.cat)).toLowerCase()).includes(q))) return false;
     return true;
   }).slice(0, 300);
 
@@ -1865,11 +2520,11 @@ function renderActivity() {
     gmap[key].items.push(e);
   };
   filtered.forEach(e => {
-    if (e.dateISO >= wk && e.dateISO >= mo) push('week', 'THIS WEEK', e);
-    else if (e.dateISO >= mo) push('month', 'EARLIER IN ' + monthName(new Date()).toUpperCase(), e);
+    if (e.dateISO >= wk && e.dateISO >= mo) push('week', t('thisWeek'), e);
+    else if (e.dateISO >= mo) push('month', t('earlierIn', { month: monthName(new Date()).toUpperCase() }), e);
     else {
       const d = new Date(e.dateISO + 'T00:00:00');
-      push(e.dateISO.slice(0, 7), d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase(), e);
+      push(e.dateISO.slice(0, 7), d.toLocaleDateString(loc(), { month: 'long', year: 'numeric' }).toUpperCase(), e);
     }
   });
   groups.forEach(g => {
@@ -1902,9 +2557,9 @@ function renderInsights() {
     const byMer = {};
     catEntries.forEach(e => { byMer[e.merchant] = (byMer[e.merchant] || 0) + e.amount; });
     const topMer = Object.entries(byMer).sort((a, b) => b[1] - a[1])[0];
-    document.getElementById('patternTitle').textContent = c.name + ' leads this month — ' + fmt0(amt) + ' across ' + catEntries.length + (catEntries.length === 1 ? ' entry.' : ' entries.');
+    document.getElementById('patternTitle').textContent = t(catEntries.length === 1 ? 'patternTitle1' : 'patternTitleN', { cat: catLabel(c), amt: fmt0(amt), n: catEntries.length });
     const space = spaces.find(s => s.id === currentSpaceId);
-    document.getElementById('patternBody').textContent = 'That is ' + Math.round(amt / total * 100) + '% of everything leaving ' + (space ? space.name : 'this space') + ' this month' + (topMer ? ', led by ' + topMer[0] + ' at ' + fmt0(topMer[1]) + '.' : '.');
+    document.getElementById('patternBody').textContent = t('patternBody', { pct: Math.round(amt / total * 100), space: space ? space.name : '' }) + (topMer ? t('ledBy', { mer: topMer[0], amt: fmt0(topMer[1]) }) : '.');
     pc.style.display = 'block';
   } else pc.style.display = 'none';
 
@@ -1938,30 +2593,30 @@ function renderInsights() {
     box.appendChild(card);
   };
   if (!sugs.length) {
-    const [lab, title, body] = TONES[tone].calm();
+    const [lab, title, body] = tonesNow()[tone].calm();
     addCard('var(--sage)', lab, title, body, []);
   }
   sugs.forEach(s => {
     if (s.kind === 'over') {
-      const [lab, title, body] = TONES[tone].over(s.cat, s.spent, s.limit);
+      const [lab, title, body] = tonesNow()[tone].over(s.cat, s.spent, s.limit);
       addCard('var(--terra)', lab, title, body, [
-        ['Raise limit to ' + fmt0(Math.ceil(s.spent)), async () => { await saveBudget(s.cat.id, Math.ceil(s.spent)); }, true],
-        ['Dismiss', () => dismiss('over', s.cat.id), false],
+        [t('raiseLimitTo', { amt: fmt0(Math.ceil(s.spent)) }), async () => { await saveBudget(s.cat.id, Math.ceil(s.spent)); }, true],
+        [t('dismiss'), () => dismiss('over', s.cat.id), false],
       ]);
     } else if (s.kind === 'near') {
-      const [lab, title, body] = TONES[tone].near(s.cat, s.spent, s.limit);
-      addCard('var(--terra)', lab, title, body, [['Dismiss', () => dismiss('near', s.cat.id), false]]);
+      const [lab, title, body] = tonesNow()[tone].near(s.cat, s.spent, s.limit);
+      addCard('var(--terra)', lab, title, body, [[t('dismiss'), () => dismiss('near', s.cat.id), false]]);
     } else if (s.kind === 'income') {
-      const [lab, title, body] = TONES[tone].income();
+      const [lab, title, body] = tonesNow()[tone].income();
       addCard('var(--sage)', lab, title, body, [
-        ['Add income', () => { switchTab('home'); document.getElementById('typeLine').classList.add('open'); document.getElementById('typeInput').focus(); }, true],
-        ['Dismiss', () => dismiss('income'), false],
+        [t('addIncome'), () => { switchTab('home'); document.getElementById('typeLine').classList.add('open'); document.getElementById('typeInput').focus(); }, true],
+        [t('dismiss'), () => dismiss('income'), false],
       ]);
     } else if (s.kind === 'nobudget') {
-      const [lab, title, body] = TONES[tone].nobudget();
+      const [lab, title, body] = tonesNow()[tone].nobudget();
       addCard('var(--sage)', lab, title, body, [
-        ['Set budgets', () => switchTab('budgetspage'), true],
-        ['Dismiss', () => dismiss('nobudget'), false],
+        [t('setBudgetsAct'), () => switchTab('budgetspage'), true],
+        [t('dismiss'), () => dismiss('nobudget'), false],
       ]);
     }
   });
@@ -1977,7 +2632,7 @@ function renderInsights() {
     row.style.cursor = 'pointer';
     const name = el('div', 'name');
     const dot = el('span', 'dot'); dot.style.background = 'var(--s' + c.slot + ')';
-    name.appendChild(dot); name.appendChild(document.createTextNode(c.name));
+    name.appendChild(dot); name.appendChild(document.createTextNode(catLabel(c)));
     const wrapEl = el('div', 'barwrap');
     const bar = el('div', 'bar');
     bar.style.background = 'var(--s' + c.slot + ')';
@@ -1985,7 +2640,7 @@ function renderInsights() {
     const val = el('span', 'val', fmtGBP(amt));
     wrapEl.appendChild(bar); wrapEl.appendChild(val);
     row.appendChild(name); row.appendChild(wrapEl);
-    row.addEventListener('pointerdown', ev => showTip(ev.clientX, ev.clientY, fmtGBP(amt), c.name + (total ? ' · ' + Math.round(amt / total * 100) + '%' : '')));
+    row.addEventListener('pointerdown', ev => showTip(ev.clientX, ev.clientY, fmtGBP(amt), catLabel(c) + (total ? ' · ' + Math.round(amt / total * 100) + '%' : '')));
     row.addEventListener('click', () => { catFilter = cid; switchTab('activity'); });
     barsEl.appendChild(row);
   });
@@ -1994,14 +2649,14 @@ function renderInsights() {
   const tbl = document.getElementById('catTable');
   tbl.textContent = '';
   const thr = el('tr');
-  ['Category', 'Amount', 'Share'].forEach((h, i) => {
+  [t('category'), t('amount'), t('share')].forEach((h, i) => {
     const th = el('th', i > 0 ? 'num' : null, h);
     thr.appendChild(th);
   });
   tbl.appendChild(thr);
   sorted.forEach(([cid, amt]) => {
     const tr = el('tr');
-    tr.appendChild(el('td', null, catById(cid).name));
+    tr.appendChild(el('td', null, catLabel(catById(cid))));
     tr.appendChild(el('td', 'num', fmtGBP(amt)));
     tr.appendChild(el('td', 'num', total ? Math.round(amt / total * 100) + '%' : ''));
     tbl.appendChild(tr);
@@ -2015,7 +2670,7 @@ function renderInsights() {
   const months = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(Date.UTC(now.getFullYear(), now.getMonth() - i, 1));
-    months.push({ key: d.toISOString().slice(0, 7), label: d.toLocaleDateString('en-GB', { month: 'short' }), total: 0 });
+    months.push({ key: d.toISOString().slice(0, 7), label: d.toLocaleDateString(loc(), { month: 'short' }), total: 0 });
   }
   entries.filter(e => e.type !== 'income').forEach(e => {
     const mm = months.find(x => x.key === e.dateISO.slice(0, 7));
@@ -2028,7 +2683,7 @@ function renderInsights() {
     const bar = el('div', 'bar');
     bar.style.height = Math.max(2, Math.round(m.total / tmax * 92)) + '%';
     col.appendChild(bar);
-    col.addEventListener('pointerdown', ev => showTip(ev.clientX, ev.clientY, fmtGBP(m.total), m.label + ' total'));
+    col.addEventListener('pointerdown', ev => showTip(ev.clientX, ev.clientY, fmtGBP(m.total), t('totalTip', { m: m.label })));
     plot.appendChild(col);
     xlab.appendChild(el('span', null, m.label));
   });
@@ -2049,9 +2704,9 @@ function renderInsights() {
     d.appendChild(v);
     stats.appendChild(d);
   };
-  mkStat('Average', fmt0(avg));
-  mkStat('Highest', fmt0(highest));
-  mkStat(net >= 0 ? 'Surplus' : 'Shortfall', (net >= 0 ? '+' : '−') + fmt0(Math.abs(net)), net >= 0 ? 'var(--good)' : 'var(--terra)');
+  mkStat(t('average'), fmt0(avg));
+  mkStat(t('highest'), fmt0(highest));
+  mkStat(net >= 0 ? t('surplus') : t('shortfall'), (net >= 0 ? '+' : '−') + fmt0(Math.abs(net)), net >= 0 ? 'var(--good)' : 'var(--terra)');
 
   /* top merchants this month */
   const tm = document.getElementById('topMerch');
@@ -2088,10 +2743,10 @@ function renderBudgetsPage() {
   const withLimits = allCats().filter(c => budgets[c.id]);
   const overs = withLimits.filter(c => (byCat[c.id] || 0) > budgets[c.id]).length;
   document.getElementById('budgetsSubT').textContent = budgetsUnavailable
-    ? 'Temporarily unavailable — try again shortly'
+    ? t('bUnavailable')
     : (withLimits.length
-      ? overs + ' of ' + withLimits.length + (withLimits.length === 1 ? ' category' : ' categories') + ' over plan · ' + (space ? space.name : '')
-      : 'No limits yet — tap Adjust on a category to set one · ' + (space ? space.name : ''));
+      ? t(withLimits.length === 1 ? 'bSub1' : 'bSubN', { o: overs, n: withLimits.length, space: space ? space.name : '' })
+      : t('noLimitsYet', { space: space ? space.name : '' }));
   const box = document.getElementById('budgetsCards');
   box.textContent = '';
   allCats().forEach(c => {
@@ -2099,14 +2754,14 @@ function renderBudgetsPage() {
     const limit = budgets[c.id] || 0;
     const card = el('div', 'bcard');
     const top = el('div', 'btop');
-    const chip = el('span', 'catchip', c.letter);
+    const chip = el('span', 'catchip', catLetter(c));
     chip.style.background = c.tint; chip.style.color = c.tx;
     top.appendChild(chip);
-    top.appendChild(el('span', 'bname', c.name));
+    top.appendChild(el('span', 'bname', catLabel(c)));
     let stat;
-    if (!limit) stat = el('span', 'bstat', spent ? fmtGBP(spent) + ' spent' : 'No limit');
-    else if (spent > limit) { stat = el('span', 'bstat over', fmtGBP(spent - limit) + ' over'); }
-    else stat = el('span', 'bstat', fmtGBP(limit - spent) + ' left');
+    if (!limit) stat = el('span', 'bstat', spent ? t('spentLbl', { amt: fmtGBP(spent) }) : t('noLimit'));
+    else if (spent > limit) { stat = el('span', 'bstat over', t('overBy', { amt: fmtGBP(spent - limit) })); }
+    else stat = el('span', 'bstat', t('leftAmt', { amt: fmtGBP(limit - spent) }));
     top.appendChild(stat);
     card.appendChild(top);
     const bar = el('div', 'bbar');
@@ -2118,16 +2773,43 @@ function renderBudgetsPage() {
     bar.appendChild(fill);
     card.appendChild(bar);
     const foot = el('div', 'bfoot');
-    foot.appendChild(el('span', null, limit ? fmtGBP(spent) + ' of ' + fmtGBP(limit) : 'No monthly limit set'));
-    const adj = el('button', 'badjust', 'Adjust');
+    const footLbl = el('span', null, limit ? t('ofLimit', { a: fmtGBP(spent), b: fmtGBP(limit) }) : t('noMonthlyLimit'));
+    foot.appendChild(footLbl);
+    const adj = el('button', 'badjust', t('adjust'));
     foot.appendChild(adj);
     card.appendChild(foot);
+    /* drag-to-set budget: far left = no limit, £25 steps */
+    const slider = el('input', 'bslider');
+    slider.type = 'range'; slider.min = '0'; slider.step = '25';
+    slider.max = String(Math.max(1000, Math.ceil(Math.max(spent, limit) * 1.5 / 25) * 25));
+    slider.value = String(Math.round(limit / 25) * 25);
+    slider.oninput = () => {
+      const v = parseFloat(slider.value);
+      footLbl.textContent = v > 0 ? t('ofLimit', { a: fmtGBP(spent), b: fmtGBP(v) }) : t('noMonthlyLimit');
+      if (v > 0) {
+        fill.style.width = Math.min(100, Math.round(spent / v * 100)) + '%';
+        fill.style.background = spent > v ? 'var(--terra)' : 'var(--s' + c.slot + ')';
+        stat.textContent = spent > v ? t('overBy', { amt: fmtGBP(spent - v) }) : t('leftAmt', { amt: fmtGBP(v - spent) });
+        stat.className = spent > v ? 'bstat over' : 'bstat';
+      } else {
+        fill.style.width = '0%';
+        stat.textContent = spent ? t('spentLbl', { amt: fmtGBP(spent) }) : t('noLimit');
+        stat.className = 'bstat';
+      }
+    };
+    slider.onchange = async () => {
+      const v = parseFloat(slider.value);
+      if (v > 0) await saveBudget(c.id, v);
+      else if (limit) await clearBudget(c.id);
+      renderBudgetsPage();
+    };
+    card.appendChild(slider);
     adj.onclick = () => {
       if (card.querySelector('.bedit')) { card.querySelector('.bedit').remove(); return; }
       const ed = el('div', 'bedit');
-      const inp = el('input'); inp.type = 'number'; inp.min = '0'; inp.placeholder = 'Monthly limit £';
+      const inp = el('input'); inp.type = 'number'; inp.min = '0'; inp.placeholder = t('monthlyLimitPh');
       if (limit) inp.value = limit;
-      const save = el('button', 'bsave', 'Save');
+      const save = el('button', 'bsave', t('save'));
       save.onclick = async () => {
         const v = parseFloat(inp.value);
         if (v > 0) await saveBudget(c.id, v);
@@ -2136,7 +2818,7 @@ function renderBudgetsPage() {
       };
       ed.appendChild(inp); ed.appendChild(save);
       if (limit) {
-        const clr = el('button', 'bclear', 'Remove');
+        const clr = el('button', 'bclear', t('remove'));
         clr.onclick = async () => { await clearBudget(c.id); renderBudgetsPage(); };
         ed.appendChild(clr);
       }
@@ -2145,7 +2827,7 @@ function renderBudgetsPage() {
     };
     box.appendChild(card);
   });
-  const addCatBtn = el('button', 'badjust', '+ New category');
+  const addCatBtn = el('button', 'badjust', t('newCategoryBtn'));
   addCatBtn.style.display = 'block';
   addCatBtn.style.margin = '14px auto 4px';
   addCatBtn.onclick = () => { if (promptNewCategory()) { render(); renderBudgetsPage(); } };
@@ -2178,20 +2860,20 @@ function renderProjectionPage() {
   const pctKept = adjIncome > 0 ? Math.round(kept / adjIncome * 100) : 0;
   const now = new Date();
   const horizon = new Date(now.getFullYear(), now.getMonth() + 12, 1);
-  const horizonLabel = horizon.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  const horizonLabel = horizon.toLocaleDateString(loc(), { month: 'long', year: 'numeric' });
 
   const dark = document.getElementById('projDark');
   dark.textContent = '';
   const klab = el('div', 'klab');
-  klab.appendChild(document.createTextNode('KEPT PER MONTH'));
+  klab.appendChild(document.createTextNode(t('keptPerMonth')));
   dark.appendChild(klab);
   const keptEl = el('span', 'kept' + (kept < 0 ? ' neg' : ''), (kept < 0 ? '−' : '') + fmt0(Math.abs(kept)));
   dark.appendChild(keptEl);
-  dark.appendChild(el('span', 'keptsub', adjIncome > 0 ? Math.abs(pctKept) + '% of income ' + (kept >= 0 ? 'kept' : 'overspent') : 'no income recorded'));
+  dark.appendChild(el('span', 'keptsub', adjIncome > 0 ? t(kept >= 0 ? 'pctKept' : 'pctOver', { pct: Math.abs(pctKept) }) : t('noIncomeRec')));
   dark.appendChild(el('div', 'knarr', kept >= 0
-    ? 'Keep this up and you will have ' + fmt0(kept * 12) + ' put aside by ' + horizonLabel + '.'
-    : 'At this pace you will be ' + fmt0(Math.abs(kept) * 12) + ' short over the next 12 months.'));
-  dark.appendChild(el('div', 'kchartlab', 'RUNNING TOTAL · NEXT 12 MONTHS'));
+    ? t('keepThisUp', { amt: fmt0(kept * 12), when: horizonLabel })
+    : t('shortOver', { amt: fmt0(Math.abs(kept) * 12) })));
+  dark.appendChild(el('div', 'kchartlab', t('runningTotal')));
   const plot = el('div', 'kplot');
   const maxCum = Math.abs(kept) * 12 || 1;
   for (let i = 1; i <= 12; i++) {
@@ -2200,14 +2882,14 @@ function renderProjectionPage() {
     bar.style.height = Math.max(3, Math.round(Math.abs(kept) * i / maxCum * 100)) + '%';
     col.appendChild(bar);
     const m = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    col.appendChild(el('div', 'klet', m.toLocaleDateString('en-GB', { month: 'short' })[0]));
+    col.appendChild(el('div', 'klet', m.toLocaleDateString(loc(), { month: 'short' })[0]));
     plot.appendChild(col);
   }
   dark.appendChild(plot);
   const range = el('div', 'krange');
   const m1 = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  range.appendChild(el('span', null, m1.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })));
-  range.appendChild(el('span', null, horizon.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })));
+  range.appendChild(el('span', null, m1.toLocaleDateString(loc(), { month: 'short', year: 'numeric' })));
+  range.appendChild(el('span', null, horizon.toLocaleDateString(loc(), { month: 'short', year: 'numeric' })));
   dark.appendChild(range);
   const stats = el('div', 'kstats');
   const mkS = (l, v) => {
@@ -2216,9 +2898,9 @@ function renderProjectionPage() {
     d.appendChild(el('div', 'ksv', v));
     stats.appendChild(d);
   };
-  mkS('Income', fmt0(adjIncome));
-  mkS('Spend', fmt0(adjSpend));
-  mkS('12 months', (kept < 0 ? '−' : '') + fmt0(Math.abs(kept) * 12));
+  mkS(t('incomeStat'), fmt0(adjIncome));
+  mkS(t('spendStat'), fmt0(adjSpend));
+  mkS(t('twelveMonths'), (kept < 0 ? '−' : '') + fmt0(Math.abs(kept) * 12));
   dark.appendChild(stats);
 
   document.getElementById('incPct').textContent = (projIncomePct >= 0 ? '+' : '') + projIncomePct + '%';
@@ -2232,11 +2914,11 @@ function renderProjectionPage() {
     const adj = avg * (1 + pct / 100);
     const row = el('div', 'assumprow');
     const top = el('div', 'artop');
-    const chip = el('span', 'catchip', c.letter);
+    const chip = el('span', 'catchip', catLetter(c));
     chip.style.background = c.tint; chip.style.color = c.tx;
     top.appendChild(chip);
     const nm = el('div', 'arname');
-    nm.appendChild(el('div', 'arn', c.name));
+    nm.appendChild(el('div', 'arn', catLabel(c)));
     const arv = el('div', 'arv');
     arv.appendChild(document.createTextNode(fmt0(avg) + ' → '));
     const bEl = document.createElement('b');
@@ -2330,14 +3012,16 @@ document.getElementById('projectBtn').onclick = () => switchTab('projectionpage'
 
 /* ---------- settings ---------- */
 function renderSettings() {
-  document.getElementById('setSpacesSub').textContent = spaces.length + (spaces.length === 1 ? ' space' : ' spaces') + ' · invite people';
+  document.getElementById('setSpacesSub').textContent = spaces.length === 1 ? t('nSpace1') : t('nSpaces', { n: spaces.length });
   const set = Object.keys(budgets).length;
   const overs = computeSuggestions().filter(s => s.kind === 'over').length;
-  document.getElementById('setBudgetsSub').textContent = budgetsUnavailable ? 'Temporarily unavailable' : (set ? set + ' set' + (overs ? ' · ' + overs + ' over plan' : '') : 'Set monthly limits per category');
+  document.getElementById('setBudgetsSub').textContent = budgetsUnavailable ? t('tempUnavailable') : (set ? t('nSet', { n: set }) + (overs ? t('nOverPlan', { n: overs }) : '') : t('setLimitsSub'));
 }
 document.getElementById('setSpaces').onclick = () => openSheet('menu');
 document.getElementById('setBudgets').onclick = () => switchTab('budgetspage');
-document.getElementById('setLang').onclick = () => { recLang = recLang === 'lt-LT' ? 'en-GB' : 'lt-LT'; lsSet('spendlog.lang', recLang); renderLang(); };
+const REC_LANGS = ['en-GB', 'lt-LT', 'de-DE', 'es-ES'];
+document.getElementById('setLang').onclick = () => { recLang = REC_LANGS[(REC_LANGS.indexOf(recLang) + 1) % REC_LANGS.length]; lsSet('spendlog.lang', recLang); renderLang(); };
+document.getElementById('setAppLang').onclick = () => { setUiLang(UI_LANGS[(UI_LANGS.indexOf(uiLang) + 1) % UI_LANGS.length]); };
 document.getElementById('setSignOut').onclick = async () => { await sb.auth.signOut(); };
 document.getElementById('setCsvOut').onclick = () => exportCsv();
 
@@ -2359,7 +3043,7 @@ function exportCsv() {
   const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
   const rows = [['Date', 'Type', 'Merchant', 'Category', 'Amount', 'AddedBy', 'Space'].join(',')];
   entries.slice().sort((a, b) => a.dateISO.localeCompare(b.dateISO)).forEach(e => {
-    rows.push([e.dateISO, e.type, esc(e.merchant), esc(e.type === 'income' ? 'Income' : catById(e.cat).name), e.amount.toFixed(2), esc(memberNames[e.user_id] || ''), esc(space ? space.name : '')].join(','));
+    rows.push([e.dateISO, e.type, esc(e.merchant), esc(e.type === 'income' ? 'Income' : catNameEn(catById(e.cat))), e.amount.toFixed(2), esc(memberNames[e.user_id] || ''), esc(space ? space.name : '')].join(','));
   });
   const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
@@ -2372,7 +3056,7 @@ async function importOwnCsv(f) {
   const lines = text.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim());
   const header = (lines[0] || '').toLowerCase();
   showImportSheet();
-  if (!header.includes('date') || !header.includes('amount')) { sheet.appendChild(el('p', 'sheet-sub', 'Unrecognised file — expected a Kaupa/Spendlog export.')); return; }
+  if (!header.includes('date') || !header.includes('amount')) { sheet.appendChild(el('p', 'sheet-sub', t('unrecognisedFile'))); return; }
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     const parts = parseCsvLine(lines[i]);
@@ -2382,11 +3066,11 @@ async function importOwnCsv(f) {
     else { [d, mer, catName, amt] = parts; }
     const amount = parseFloat(amt);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !(amount > 0)) continue;
-    let cat = allCats().find(c => c.name.toLowerCase() === (catName || '').toLowerCase());
+    let cat = allCats().find(c => catNameEn(c).toLowerCase() === (catName || '').toLowerCase() || catLabel(c).toLowerCase() === (catName || '').toLowerCase());
     if (!cat && catName && catName.trim() && catName.toLowerCase() !== 'income' && type !== 'income') cat = addCustomCat(catName);
-    rows.push({ dateISO: d, merchant: mer || 'Unknown', rawDesc: mer || 'Unknown', amount, type: type === 'income' ? 'income' : 'expense', cat: type === 'income' ? 'income' : (cat ? cat.id : guessCategory(mer || '')) });
+    rows.push({ dateISO: d, merchant: mer || t('unknown'), rawDesc: mer || t('unknown'), amount, type: type === 'income' ? 'income' : 'expense', cat: type === 'income' ? 'income' : (cat ? cat.id : guessCategory(mer || '')) });
   }
-  if (!rows.length) { sheet.appendChild(el('p', 'sheet-sub', 'No valid rows found.')); return; }
+  if (!rows.length) { sheet.appendChild(el('p', 'sheet-sub', t('noValidRows'))); return; }
   await showImportReview(rows, false);
 }
 
@@ -2400,6 +3084,62 @@ async function clearBudget(cat) {
   delete budgets[cat]; render();
 }
 
+/* ================= ask (AI chat about this space) ================= */
+const askInput = document.getElementById('askInput');
+const askGo = document.getElementById('askGo');
+const askAnswerEl = document.getElementById('askAnswer');
+function renderAskHints() {
+  const box = document.getElementById('askHints');
+  box.textContent = '';
+  (ASK_HINTS_ALL[uiLang] || ASK_HINTS_ALL.en).forEach(h => {
+    const b = el('button', null, h);
+    b.onclick = () => { askInput.value = h; runAsk(); };
+    box.appendChild(b);
+  });
+}
+renderAskHints();
+function askRows() {
+  return entries.slice(0, 2000).map(e => [
+    e.dateISO,
+    String(e.merchant).replace(/\|/g, '/'),
+    e.type === 'income' ? 'income' : catLabel(catById(e.cat)),
+    e.amount,
+    e.type === 'income' ? 'i' : 'e',
+    memberCount > 1 ? (memberNames[e.user_id] || '') : '',
+  ].join('|'));
+}
+async function runAsk() {
+  const q = askInput.value.trim();
+  if (!q || askGo.disabled) return;
+  askGo.disabled = true;
+  askAnswerEl.classList.add('show');
+  askAnswerEl.textContent = t('thinking');
+  try {
+    const space = spaces.find(s => s.id === currentSpaceId);
+    const { data, error } = await sb.functions.invoke('parse-expense', {
+      body: {
+        question: q,
+        expense_rows: askRows(),
+        space_name: space ? space.name : '',
+        lang: uiLang,
+        today: new Date().toISOString().slice(0, 10),
+      },
+    });
+    if (error) {
+      let detail = '';
+      try { if (error.context && error.context.clone) detail = await error.context.clone().text(); } catch (e2) {}
+      throw new Error(detail ? detail.slice(0, 120) : (error.message || 'network error'));
+    }
+    if (!data || data.error || !data.answer) throw new Error((data && String(data.error).slice(0, 120)) || 'no answer');
+    askAnswerEl.textContent = String(data.answer);
+  } catch (e) {
+    askAnswerEl.textContent = t('askFail', { msg: e.message || 'error' });
+  }
+  askGo.disabled = false;
+}
+askGo.onclick = runAsk;
+askInput.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); runAsk(); } });
+
 /* ================= sheets ================= */
 const sheetBack = document.getElementById('sheetBack');
 const sheet = document.getElementById('sheet');
@@ -2412,33 +3152,33 @@ async function openSheet(mode) {
   const space = spaces.find(s => s.id === currentSpaceId);
 
   if (mode === 'spaces') {
-    sheet.appendChild(el('h3', null, 'Spaces'));
-    sheet.appendChild(el('p', 'sheet-sub', 'Separate pots of money — personal, household, business. Tap to switch.'));
+    sheet.appendChild(el('h3', null, t('spacesTitle')));
+    sheet.appendChild(el('p', 'sheet-sub', t('spacesSub')));
     spaces.forEach(s => {
       const row = el('button', 'spacerow' + (s.id === currentSpaceId ? ' cur' : ''));
       const av = el('span', 'sav', s.name[0].toUpperCase());
       const txt = el('span');
       txt.appendChild(el('span', 'nm', s.name));
-      txt.appendChild(el('div', 'sb', s.kind === 'household' ? 'Shared space' : s.kind === 'business' ? 'Business' : 'Personal'));
+      txt.appendChild(el('div', 'sb', s.kind === 'household' ? t('sharedSpace') : s.kind === 'business' ? t('businessLbl') : t('personalLbl')));
       row.appendChild(av); row.appendChild(txt);
       row.onclick = () => switchSpace(s.id);
       sheet.appendChild(row);
     });
-    const plus = el('button', 'sheet-item', '+ New space');
+    const plus = el('button', 'sheet-item', t('newSpaceItem'));
     plus.onclick = () => openSheet('newspace');
     sheet.appendChild(plus);
     return;
   }
 
   if (mode === 'newspace') {
-    sheet.appendChild(el('h3', null, 'New space'));
-    sheet.appendChild(el('p', 'sheet-sub', 'A separate pot of money to track — e.g. Household or a business.'));
-    const nameIn = el('input'); nameIn.placeholder = 'Name, e.g. Household';
+    sheet.appendChild(el('h3', null, t('newSpaceTitle')));
+    sheet.appendChild(el('p', 'sheet-sub', t('newSpaceSub')));
+    const nameIn = el('input'); nameIn.placeholder = t('namePh');
     const kindSel = el('select');
-    [['personal', 'Personal'], ['household', 'Household (shared)'], ['business', 'Business']].forEach(([v, t]) => {
-      const o = el('option', null, t); o.value = v; kindSel.appendChild(o);
+    [['personal', t('personalLbl')], ['household', t('householdShared')], ['business', t('businessLbl')]].forEach(([v, lbl]) => {
+      const o = el('option', null, lbl); o.value = v; kindSel.appendChild(o);
     });
-    const go = el('button', 'sheet-primary', 'Create space');
+    const go = el('button', 'sheet-primary', t('createSpace'));
     go.onclick = async () => {
       const name = nameIn.value.trim();
       if (!name) return;
@@ -2450,24 +3190,24 @@ async function openSheet(mode) {
   }
 
   if (mode === 'budgets') {
-    sheet.appendChild(el('h3', null, 'Budgets'));
-    if (budgetsUnavailable) { sheet.appendChild(el('p', 'sheet-sub', 'Budgets are being set up — try again shortly.')); return; }
-    sheet.appendChild(el('p', 'sheet-sub', 'Monthly limits for “' + (space ? space.name : '') + '”. Leave empty for no limit.'));
+    sheet.appendChild(el('h3', null, t('budgets')));
+    if (budgetsUnavailable) { sheet.appendChild(el('p', 'sheet-sub', t('budgetsBeingSetUp'))); return; }
+    sheet.appendChild(el('p', 'sheet-sub', t('budgetsSheetSub', { space: space ? space.name : '' })));
     const inputs = {};
     allCats().forEach(c => {
       const row = el('div', 'budgetrow');
       const bn = el('span', 'bn');
       const d = el('span', 'dot'); d.style.background = 'var(--s' + c.slot + ')';
-      bn.appendChild(d); bn.appendChild(document.createTextNode(c.name));
+      bn.appendChild(d); bn.appendChild(document.createTextNode(catLabel(c)));
       const inp = el('input'); inp.type = 'number'; inp.min = '0'; inp.placeholder = '—';
       if (budgets[c.id]) inp.value = budgets[c.id];
       inputs[c.id] = inp;
       row.appendChild(bn); row.appendChild(inp);
       sheet.appendChild(row);
     });
-    const save = el('button', 'sheet-primary', 'Save budgets');
+    const save = el('button', 'sheet-primary', t('saveBudgets'));
     save.onclick = async () => {
-      save.disabled = true; save.textContent = 'Saving…';
+      save.disabled = true; save.textContent = t('saving');
       for (const c of allCats()) {
         const v = parseFloat(inputs[c.id].value);
         if (v > 0) await saveBudget(c.id, v);
@@ -2480,47 +3220,47 @@ async function openSheet(mode) {
   }
 
   /* members / space management */
-  sheet.appendChild(el('h3', null, space ? space.name : 'Space'));
-  sheet.appendChild(el('h4', null, 'Members'));
+  sheet.appendChild(el('h3', null, space ? space.name : ''));
+  sheet.appendChild(el('h4', null, t('members')));
   const memList = el('div');
   const { data: mems } = await sb.from('space_members').select('user_id, role').eq('space_id', currentSpaceId);
   (mems || []).forEach(m => {
-    memList.appendChild(el('div', 'member-row', (memberNames[m.user_id] || 'Member') + (m.role === 'owner' ? ' · owner' : '')));
+    memList.appendChild(el('div', 'member-row', (memberNames[m.user_id] || t('memberLbl')) + (m.role === 'owner' ? ' · ' + t('owner') : '')));
   });
   const { data: pendingInv } = await sb.from('invites').select('email').eq('space_id', currentSpaceId).eq('status', 'pending');
   (pendingInv || []).forEach(pi => {
-    memList.appendChild(el('div', 'member-row', pi.email + ' · invited, waiting for accept'));
+    memList.appendChild(el('div', 'member-row', pi.email + ' · ' + t('invitedWaiting')));
   });
   sheet.appendChild(memList);
   const isOwner = space && space.created_by === session.user.id;
   if (isOwner) {
     const inviteRow = el('div', 'erow');
-    const emIn = el('input'); emIn.placeholder = 'Invite by email to ' + (space ? space.name : 'this space'); emIn.type = 'email';
-    const emBtn = el('button', 'sheet-primary small', 'Invite');
+    const emIn = el('input'); emIn.placeholder = t('inviteByEmail', { space: space ? space.name : '' }); emIn.type = 'email';
+    const emBtn = el('button', 'sheet-primary small', t('inviteBtn'));
     const emSt = el('p', 'sheet-sub', '');
     emBtn.onclick = async () => {
       const email = emIn.value.trim().toLowerCase();
       if (!email.includes('@')) return;
       const { error } = await sb.from('invites').insert({ space_id: currentSpaceId, email });
-      emSt.textContent = error ? ('Could not invite: ' + error.message)
-        : 'Invitation sent — when they open Kaupa signed in with ' + email + ', they’ll get an Accept/Decline banner.';
+      emSt.textContent = error ? t('couldNotInvite', { msg: error.message })
+        : t('inviteSent', { email: email });
       emIn.value = '';
     };
     inviteRow.appendChild(emIn); inviteRow.appendChild(emBtn);
     sheet.appendChild(inviteRow); sheet.appendChild(emSt);
   }
-  sheet.appendChild(el('h4', null, 'Spaces'));
-  const sw = el('button', 'sheet-item', 'Switch space…');
+  sheet.appendChild(el('h4', null, t('spacesTitle')));
+  const sw = el('button', 'sheet-item', t('switchSpaceItem'));
   sw.onclick = () => openSheet('spaces');
   sheet.appendChild(sw);
-  const plus = el('button', 'sheet-item', '+ New space');
+  const plus = el('button', 'sheet-item', t('newSpaceItem'));
   plus.onclick = () => openSheet('newspace');
   sheet.appendChild(plus);
   if (isOwner && spaces.length > 1) {
-    const delSpace = el('button', 'sheet-item danger', 'Delete this space…');
+    const delSpace = el('button', 'sheet-item danger', t('deleteSpaceItem'));
     let armed = false;
     delSpace.onclick = async () => {
-      if (!armed) { armed = true; delSpace.textContent = 'Tap again to delete “' + (space ? space.name : '') + '” and ALL its entries'; return; }
+      if (!armed) { armed = true; delSpace.textContent = t('tapAgainDelete', { space: space ? space.name : '' }); return; }
       await sb.from('spaces').delete().eq('id', currentSpaceId);
       await loadSpaces();
       await switchSpace(spaces.length ? spaces[0].id : null);
@@ -2566,7 +3306,7 @@ function cleanBankDesc(desc) {
 }
 function parseBankCsv(text) {
   const lines = text.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim());
-  if (lines.length < 2) return { rows: [], error: 'File looks empty.' };
+  if (lines.length < 2) return { rows: [], error: t('fileEmpty') };
   const grid = lines.map(parseCsvLine);
   const header = grid[0].map(h => h.toLowerCase());
   const find = re => header.findIndex(h => re.test(h));
@@ -2594,7 +3334,7 @@ function parseBankCsv(text) {
     }
     iDate = bestD; iDesc = bestT; iAmt = bestA;
   }
-  if (iDate < 0 || iDesc < 0 || (iAmt < 0 && iDebit < 0)) return { rows: [], error: 'Couldn’t recognise the columns — export the statement as CSV with date, description and amount.' };
+  if (iDate < 0 || iDesc < 0 || (iAmt < 0 && iDebit < 0)) return { rows: [], error: t('colsFail') };
   const rows = [];
   for (const r of dataRows) {
     const dateISO = parseBankDate(r[iDate]);
@@ -2612,7 +3352,7 @@ function parseBankCsv(text) {
       else if (!isNaN(cv) && cv !== 0) { type = 'income'; amount = Math.abs(cv); }
       else continue;
     }
-    const rawDesc = r[iDesc] || 'Unknown';
+    const rawDesc = r[iDesc] || t('unknown');
     const merchant = cleanBankDesc(rawDesc);
     let cat = 'other';
     if (type !== 'income') {
@@ -2621,7 +3361,7 @@ function parseBankCsv(text) {
     }
     rows.push({ dateISO, merchant, rawDesc, amount, type, cat: type === 'income' ? 'income' : cat });
   }
-  return { rows, error: rows.length ? null : 'No transactions found in this file.' };
+  return { rows, error: rows.length ? null : t('noTxFound') };
 }
 function isDuplicate(row) {
   return entries.some(e => e.dateISO === row.dateISO && Math.abs(e.amount - row.amount) < 0.005 && e.type === row.type);
@@ -2646,7 +3386,7 @@ async function aiCategorizeBatch(rows) {
 function showImportSheet() {
   sheet.textContent = '';
   sheetBack.style.display = 'flex';
-  sheet.appendChild(el('h3', null, 'Bank statement import'));
+  sheet.appendChild(el('h3', null, t('bankImportTitle')));
 }
 const PDFJS_SOURCES = [
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174',
@@ -2704,45 +3444,43 @@ async function openBankImport(file) {
 }
 async function openPdfImport(file, password) {
   showImportSheet();
-  const status = el('p', 'sheet-sub', 'Reading PDF…');
+  const status = el('p', 'sheet-sub', t('readingPdf'));
   sheet.appendChild(status);
   let lines;
   try { lines = await extractPdfLines(file, password); }
   catch (e) {
     const msg = (e && (e.name + ' ' + (e.message || ''))) || '';
     if (/password/i.test(msg)) {
-      status.textContent = password
-        ? 'That password didn’t unlock it — try again.'
-        : 'This PDF is password-protected (banks often do this — the password is usually in the email, or your date of birth/postcode).';
-      const pwIn = el('input'); pwIn.type = 'password'; pwIn.placeholder = 'PDF password';
-      const pwGo = el('button', 'sheet-primary', 'Unlock and read');
+      status.textContent = password ? t('pdfPwdWrong') : t('pdfPwdInfo');
+      const pwIn = el('input'); pwIn.type = 'password'; pwIn.placeholder = t('pdfPassword');
+      const pwGo = el('button', 'sheet-primary', t('unlockRead'));
       pwGo.onclick = () => openPdfImport(file, pwIn.value);
       pwIn.addEventListener('keydown', ev => { if (ev.key === 'Enter') pwGo.click(); });
       sheet.appendChild(pwIn); sheet.appendChild(pwGo);
       return;
     }
-    if (e && e.stage === 'load') { status.textContent = 'Couldn’t load the PDF reader — check your internet connection and try again.'; return; }
-    status.textContent = 'Couldn’t open this PDF (' + (e && (e.message || e.name) || 'unknown error') + ') — try your bank’s CSV export instead.';
+    if (e && e.stage === 'load') { status.textContent = t('pdfReaderFail'); return; }
+    status.textContent = t('pdfOpenFail', { msg: e && (e.message || e.name) || 'error' });
     return;
   }
-  if (!lines || lines.join('').length < 100) { status.textContent = 'This PDF has no readable text — it looks scanned or image-based. Use your bank’s CSV export instead.'; return; }
-  status.textContent = 'Asking AI to read ' + lines.length + ' lines…';
+  if (!lines || lines.join('').length < 100) { status.textContent = t('pdfScanned'); return; }
+  status.textContent = t('askingAi', { n: lines.length });
   try {
     const { data, error } = await sb.functions.invoke('parse-expense', { body: { statement_lines: lines.slice(0, 400), categories: aiCatIds() } });
     if (error) {
       let detail = '';
       try { if (error.context && error.context.clone) detail = await error.context.clone().text(); } catch (e2) {}
-      status.textContent = 'The AI reader failed — ' + (detail ? detail.slice(0, 160) : (error.message || 'network error')) + ' — show this message to Claude.';
+      status.textContent = t('aiReaderFailedDetail', { msg: detail ? detail.slice(0, 160) : (error.message || 'network error') });
       return;
     }
-    if (data && data.error) { status.textContent = 'The AI reader failed (' + String(data.error).slice(0, 80) + ') — try again in a minute.'; return; }
+    if (data && data.error) { status.textContent = t('aiReaderFailedRetry', { msg: String(data.error).slice(0, 80) }); return; }
     if (!data || !Array.isArray(data.items) || !data.items.length) throw new Error('no items');
     const rows = data.items.map(it => {
       const amount = parseFloat(it.amount);
       const dateISO = /^\d{4}-\d{2}-\d{2}$/.test(it.date) ? it.date : null;
       if (!(amount > 0) || !dateISO) return null;
       const type = it.type === 'income' ? 'income' : 'expense';
-      let merchant = String(it.merchant || 'Unknown').slice(0, 60);
+      let merchant = String(it.merchant || t('unknown')).slice(0, 60);
       let cat = type === 'income' ? 'income' : (allCats().some(c => c.id === it.category) ? it.category : guessCategory(merchant));
       if (type !== 'income') { const l = learnedCategory(merchant); if (l) cat = l; }
       return { dateISO, merchant, rawDesc: merchant, amount, type, cat };
@@ -2750,7 +3488,7 @@ async function openPdfImport(file, password) {
     if (!rows.length) throw new Error('no valid rows');
     await showImportReview(rows, false);
   } catch (e) {
-    status.textContent = 'Couldn’t extract transactions from this PDF — try your bank’s CSV export instead.';
+    status.textContent = t('pdfExtractFail');
   }
 }
 async function showImportReview(rows, runAiBatch) {
@@ -2758,12 +3496,12 @@ async function showImportReview(rows, runAiBatch) {
   const dupes = rows.filter(isDuplicate).length;
   const keep = rows.filter(r => !isDuplicate(r));
   const space = spaces.find(s => s.id === currentSpaceId);
-  const status = el('p', 'sheet-sub', 'Found ' + rows.length + ' transactions' + (dupes ? ' (' + dupes + ' skipped as likely duplicates)' : '') + '. Categorising…');
+  const status = el('p', 'sheet-sub', t('foundTx', { n: rows.length }) + (dupes ? t('dupesPar', { d: dupes }) : '') + t('categorising'));
   sheet.appendChild(status);
   if (runAiBatch) await aiCategorizeBatch(keep);
-  status.textContent = 'Found ' + rows.length + ' transactions' + (dupes ? ', ' + dupes + ' skipped as likely duplicates' : '') + '. Check categories, remove any you don’t want, then import into “' + (space ? space.name : '') + '”.';
+  status.textContent = t('foundTx', { n: rows.length }) + (dupes ? t('dupesComma', { d: dupes }) : '') + t('checkCats', { space: space ? space.name : '' });
   const listBox = el('div');
-  const go = el('button', 'sheet-primary', 'Import ' + keep.length + ' entries');
+  const go = el('button', 'sheet-primary', t('importN', { n: keep.length }));
   const renderRows = () => {
     listBox.textContent = '';
     keep.forEach((r, idx) => {
@@ -2772,20 +3510,20 @@ async function showImportReview(rows, runAiBatch) {
       if (r.type === 'income') amt.style.color = 'var(--good)';
       const mer = el('span', 'mmer', r.merchant + ' · ' + r.dateISO.slice(5));
       const sel = el('select', 'msel');
-      if (r.type === 'income') { sel.appendChild(el('option', null, 'Income')); }
+      if (r.type === 'income') { sel.appendChild(el('option', null, t('income'))); }
       else fillCatSelect(sel, r.cat, v => { r.cat = v; });
       const rm = el('button', 'mrm', '✕');
-      rm.onclick = () => { keep.splice(idx, 1); renderRows(); go.textContent = 'Import ' + keep.length + ' entries'; };
+      rm.onclick = () => { keep.splice(idx, 1); renderRows(); go.textContent = t('importN', { n: keep.length }); };
       row.appendChild(amt); row.appendChild(mer); row.appendChild(sel); row.appendChild(rm);
       listBox.appendChild(row);
     });
   };
   go.onclick = async () => {
-    go.disabled = true; go.textContent = 'Importing…';
+    go.disabled = true; go.textContent = t('importing');
     const payloads = keep.map(r => ({ space_id: currentSpaceId, user_id: session.user.id, type: r.type, amount: r.amount, merchant: r.merchant, category: r.cat, tx_date: r.dateISO, source: 'statement' }));
     for (let i = 0; i < payloads.length; i += 200) {
       const { error: e2 } = await sb.from('transactions').insert(payloads.slice(i, i + 200));
-      if (e2) { go.textContent = 'Import stopped: ' + e2.message; return; }
+      if (e2) { go.textContent = t('importStopped', { msg: e2.message }); return; }
     }
     closeSheet();
     await loadTx(); render();
@@ -2796,6 +3534,7 @@ async function showImportReview(rows, runAiBatch) {
 }
 
 /* ================= PWA + boot ================= */
+applyStaticI18n();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
