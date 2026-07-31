@@ -656,12 +656,6 @@
         </span>
         <span class="miclabel" id="micLabel">Tap to add</span>
       </button>
-      <div class="langtoggle" id="langToggle">
-        <button class="lt" data-l="en-GB">EN</button>
-        <button class="lt" data-l="lt-LT">LT</button>
-        <button class="lt" data-l="de-DE">DE</button>
-        <button class="lt" data-l="es-ES">ES</button>
-      </div>
       <div class="transcript" id="transcript"></div>
       <div class="voice-note" id="voiceNote">Voice isn&rsquo;t supported in this browser &mdash; use typing (the keyboard mic works too).</div>
       <button class="typepill" id="typePill">Type it instead</button>
@@ -860,10 +854,6 @@
         <span><span class="st">Budgets</span><br><span class="ss" id="setBudgetsSub">Set monthly limits per category</span></span>
         <span class="sa">Open</span>
       </button>
-      <button class="setrow" id="setLang">
-        <span><span class="st">Voice language</span><br><span class="ss">Speech recognition for the mic</span></span>
-        <span class="sa" id="setLangVal">EN</span>
-      </button>
       <button class="setrow" id="setAppLang">
         <span><span class="st">App language</span><br><span class="ss">All screens and labels</span></span>
         <span class="sa" id="setAppLangVal">English</span>
@@ -871,6 +861,10 @@
       <button class="setrow" id="setAiVoice">
         <span><span class="st" id="aiVoiceTitle">High-accuracy voice</span><br><span class="ss" id="aiVoiceSub">AI transcription &mdash; better in Lithuanian, uses data</span></span>
         <span class="sa" id="setAiVoiceVal">Off</span>
+      </button>
+      <button class="setrow" id="setPush">
+        <span><span class="st" id="pushTitle">Notifications</span><br><span class="ss" id="pushSub">Weekly recap and cheeky reminders</span></span>
+        <span class="sa" id="setPushVal">Off</span>
       </button>
     </div>
     <div class="setcard">
@@ -893,7 +887,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer">Kaupa v3.6 &mdash; made by Domantas &amp; Claude.</div>
+    <div class="footer">Kaupa v4.1 &mdash; made by Domantas &amp; Claude.</div>
   </section>
 
 </div>
@@ -1041,6 +1035,36 @@ function guessCategory(merchant) {
   for (const [cat, words] of MERCHANT_MAP) for (const w of words) if (m.includes(w)) return cat;
   return 'other';
 }
+const KNOWN_MERCHANTS = ['Lidl','Aldi','Tesco','Asda','Morrisons','Sainsburys','Iceland','Waitrose','Co-op','M&S','Maxima','Norfa','Rimi','Iki','Senukai','Eurovaistine','Camelia','Akropolis','Depo','Ermitazas','Circle K','Viada','Wolt','Bolt','B&Q','Screwfix','Wickes','Ikea','Dunelm','Halfords','Greggs','McDonalds','KFC','Nandos','Costa','Starbucks','Subway','Pret','Dominos','Pizza Hut','Wetherspoon','Deliveroo','Just Eat','Uber Eats','Uber','Trainline','Amazon','Argos','Primark','Next','TK Maxx','Sports Direct','JD Sports','Boots','Superdrug','PureGym','Shell','BP','Esso','Vinted','Temu','Currys','Poundland','Home Bargains','B&M'];
+function levDist(a, b) {
+  if (Math.abs(a.length - b.length) > 3) return 99;
+  const m = a.length, n = b.length;
+  let prev = new Array(n + 1);
+  for (let j = 0; j <= n; j++) prev[j] = j;
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function fuzzyMerchant(name) {
+  const n = String(name || '').toLowerCase().trim();
+  if (!n || n.length < 3) return name;
+  const ns = n.replace(/\s+/g, '');
+  const cands = [...new Set(entries.map(e => e.merchant).concat(KNOWN_MERCHANTS))];
+  let best = null, bestD = 9;
+  const limit = ns.length <= 4 ? 1 : ns.length <= 7 ? 2 : 3;
+  for (const c of cands) {
+    const cl = String(c).toLowerCase().trim();
+    if (cl === n) return c;
+    const d = Math.min(levDist(n, cl), levDist(ns, cl.replace(/\s+/g, '')));
+    if (d <= limit && d < bestD) { bestD = d; best = c; }
+  }
+  return best || name;
+}
 
 /* ================= prefs / state ================= */
 function lsGet(k, fallback) { try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch (e) { return fallback; } }
@@ -1083,6 +1107,10 @@ en: {
   transcribing: 'Transcribing…', aiVoiceFail: 'Voice transcription failed ({msg}) — try again, or switch off high-accuracy voice in Settings.',
   on: 'On', off: 'Off', voiceNoteShort: 'Recording isn’t supported on this device — use typing.',
   aiVoiceTitle: 'High-accuracy voice', aiVoiceSub: 'AI transcription — better in Lithuanian, uses data',
+  pushTitle: 'Notifications', pushSub: 'Weekly recap and cheeky reminders',
+  pushDenied: 'Notifications are blocked — allow them in your browser/app settings.',
+  pushFail: 'Couldn’t turn notifications on ({msg}) — check the send-nudges function is set up.',
+  pushUnsupported: 'Notifications aren’t supported on this device/browser.',
   voiceNote: 'Voice isn’t supported in this browser — use typing (the keyboard mic works too).',
   typeInstead: 'Type it instead', typePh: '12.50 at Greggs', add: 'Add',
   expense: 'Expense', income: 'Income', cancel: 'Cancel',
@@ -1192,6 +1220,10 @@ lt: {
   transcribing: 'Atpažįstama…', aiVoiceFail: 'Nepavyko atpažinti balso ({msg}) — bandyk dar kartą arba išjunk tikslų balsą Nustatymuose.',
   on: 'Įjungta', off: 'Išjungta', voiceNoteShort: 'Įrašymas šiame įrenginyje nepalaikomas — rašyk ranka.',
   aiVoiceTitle: 'Tikslus balso atpažinimas', aiVoiceSub: 'DI transkripcija — geriau lietuviškai, naudoja duomenis',
+  pushTitle: 'Pranešimai', pushSub: 'Savaitės apžvalga ir šmaikštūs priminimai',
+  pushDenied: 'Pranešimai užblokuoti — leisk juos naršyklės/programėlės nustatymuose.',
+  pushFail: 'Nepavyko įjungti pranešimų ({msg}).',
+  pushUnsupported: 'Pranešimai šiame įrenginyje nepalaikomi.',
   voiceNote: 'Balsas šioje naršyklėje nepalaikomas — rašyk ranka (veikia ir klaviatūros mikrofonas).',
   typeInstead: 'Verčiau įrašyti ranka', typePh: '12.50 Lidl', add: 'Pridėti',
   expense: 'Išlaida', income: 'Pajamos', cancel: 'Atšaukti',
@@ -1301,6 +1333,10 @@ de: {
   transcribing: 'Wird transkribiert…', aiVoiceFail: 'Sprachtranskription fehlgeschlagen ({msg}) — versuch es erneut oder schalte die hochpräzise Sprache in den Einstellungen aus.',
   on: 'Ein', off: 'Aus', voiceNoteShort: 'Aufnahme wird auf diesem Gerät nicht unterstützt — tippe stattdessen.',
   aiVoiceTitle: 'Hochpräzise Sprache', aiVoiceSub: 'KI-Transkription — besser auf Litauisch, verbraucht Daten',
+  pushTitle: 'Benachrichtigungen', pushSub: 'Wochenrückblick und freche Erinnerungen',
+  pushDenied: 'Benachrichtigungen sind blockiert — erlaube sie in den Einstellungen.',
+  pushFail: 'Benachrichtigungen konnten nicht aktiviert werden ({msg}).',
+  pushUnsupported: 'Benachrichtigungen werden auf diesem Gerät nicht unterstützt.',
   voiceNote: 'Sprache wird in diesem Browser nicht unterstützt — tippe stattdessen (das Tastatur-Mikrofon geht auch).',
   typeInstead: 'Lieber eintippen', typePh: '12,50 bei Lidl', add: 'Hinzufügen',
   expense: 'Ausgabe', income: 'Einnahmen', cancel: 'Abbrechen',
@@ -1410,6 +1446,10 @@ es: {
   transcribing: 'Transcribiendo…', aiVoiceFail: 'Falló la transcripción de voz ({msg}): inténtalo de nuevo o desactiva la voz de alta precisión en Ajustes.',
   on: 'Activado', off: 'Desactivado', voiceNoteShort: 'La grabación no es compatible en este dispositivo: escribe.',
   aiVoiceTitle: 'Voz de alta precisión', aiVoiceSub: 'Transcripción con IA: mejor en lituano, usa datos',
+  pushTitle: 'Notificaciones', pushSub: 'Resumen semanal y recordatorios con chispa',
+  pushDenied: 'Las notificaciones están bloqueadas: permítelas en los ajustes.',
+  pushFail: 'No se pudieron activar las notificaciones ({msg}).',
+  pushUnsupported: 'Las notificaciones no son compatibles con este dispositivo.',
   voiceNote: 'La voz no funciona en este navegador: escribe (el micrófono del teclado también sirve).',
   typeInstead: 'Escribirlo', typePh: '12,50 en Lidl', add: 'Añadir',
   expense: 'Gasto', income: 'Ingresos', cancel: 'Cancelar',
@@ -1664,9 +1704,9 @@ const STATIC_I18N = [
   ['#tab-settings .pagetitle', 'settings'],
   ['#setSpaces .st', 'spacesMembers'], ['#setSpaces .sa', 'open'],
   ['#setBudgets .st', 'budgets'], ['#setBudgets .sa', 'open'],
-  ['#setLang .st', 'voiceLanguage'], ['#setLang .ss', 'speechSub'],
   ['#setAppLang .st', 'appLanguage'], ['#setAppLang .ss', 'appLangSub'],
   ['#aiVoiceTitle', 'aiVoiceTitle'], ['#aiVoiceSub', 'aiVoiceSub'],
+  ['#pushTitle', 'pushTitle'], ['#pushSub', 'pushSub'],
   ['#setBank .st', 'importBank'], ['#setBank .ss', 'pdfCsvBank'], ['#setBank .sa', 'importLbl'],
   ['#setCsvIn .st', 'importKaupaCsv'], ['#setCsvIn .ss', 'exportedFile'], ['#setCsvIn .sa', 'importLbl'],
   ['#setCsvOut .st', 'exportCsvLbl'], ['#setCsvOut .ss', 'forPowerBi'], ['#setCsvOut .sa', 'exportLbl'],
@@ -1834,6 +1874,7 @@ async function bootstrap() {
   await Promise.all([loadTx(), loadMembers(), loadBudgets(), refreshInvites()]);
   syncCustomCats();
   render(); flushOutbox();
+  refreshPushPrefs();
 }
 function fillProfile() {
   const u = session.user;
@@ -1931,6 +1972,8 @@ function parseUtterance(raw) {
   let pretty;
   if (ALIAS[merchant]) { pretty = ALIAS[merchant]; merchant = pretty.toLowerCase(); }
   else pretty = merchant.split(' ').map(w => w.length > 2 ? w[0].toUpperCase() + w.slice(1) : w.toUpperCase()).join(' ');
+  pretty = fuzzyMerchant(pretty);
+  merchant = pretty.toLowerCase();
   return { amount, merchant: pretty, cat: guessCategory(merchant), type, dateISO: date.toISOString().slice(0, 10) };
 }
 function parseMulti(raw) {
@@ -2000,7 +2043,8 @@ async function aiParse(text) {
       const d = new Date(today);
       d.setDate(d.getDate() - (parseInt(e.days_ago) || 0));
       const type = e.type === 'income' ? 'income' : 'expense';
-      const merchant = String(e.merchant || (type === 'income' ? t('income') : t('unknown'))).slice(0, 60);
+      let merchant = String(e.merchant || (type === 'income' ? t('income') : t('unknown'))).slice(0, 60);
+      if (type !== 'income') merchant = fuzzyMerchant(merchant);
       let cat = allCats().some(c => c.id === e.category) ? e.category : guessCategory(merchant);
       if (type !== 'income') { const l = learnedCategory(merchant); if (l) cat = l; }
       return { amount, merchant, cat: type === 'income' ? 'income' : cat, type, dateISO: d.toISOString().slice(0, 10) };
@@ -2098,16 +2142,9 @@ document.getElementById('cSave').onclick = async () => {
 };
 
 /* ================= voice ================= */
-let recLang = lsGet('spendlog.lang', 'en-GB');
+let recLang = LOCALES[uiLang] || 'en-GB';
 let aiVoice = lsGet('kaupa.aivoice', false);
-function renderLang() {
-  document.querySelectorAll('#langToggle .lt').forEach(b => {
-    b.classList.toggle('sel', b.dataset.l === recLang);
-    b.onclick = () => { recLang = b.dataset.l; lsSet('spendlog.lang', recLang); renderLang(); };
-  });
-  const v = document.getElementById('setLangVal');
-  if (v) v.textContent = ({ 'en-GB': 'EN', 'lt-LT': 'LT', 'de-DE': 'DE', 'es-ES': 'ES' })[recLang] || 'EN';
-}
+function renderLang() { recLang = LOCALES[uiLang] || 'en-GB'; }
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('micBtn');
 const micLabel = document.getElementById('micLabel');
@@ -2117,6 +2154,18 @@ let rec = null, listening = false;
 /* ===== AI voice (Whisper): record audio, transcribe on the server ===== */
 const canRecord = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
 let mediaRec = null, mediaStream = null, audioChunks = [], recActive = false, recTimer = null;
+let vadCtx = null, vadInt = null;
+function voiceHint() {
+  /* rank the user's own merchants by how often they use them — the best predictor of what they'll say next */
+  const freq = {};
+  entries.forEach(e => { if (e.type !== 'income') freq[e.merchant] = (freq[e.merchant] || 0) + 1; });
+  const mine = Object.entries(freq).sort((a, b) => b[1] - a[1]).map(x => x[0]).slice(0, 40);
+  return [...new Set(mine.concat(KNOWN_MERCHANTS))].slice(0, 75).join(', ');
+}
+function stopVad() {
+  if (vadInt) { clearInterval(vadInt); vadInt = null; }
+  if (vadCtx) { try { vadCtx.close(); } catch (e) {} vadCtx = null; }
+}
 function pickAudioMime() {
   const opts = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
   for (const m of opts) { try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; } catch (e) {} }
@@ -2132,8 +2181,11 @@ function blobToBase64(blob) {
 }
 function stopMicTracks() { try { mediaStream && mediaStream.getTracks().forEach(tr => tr.stop()); } catch (e) {} mediaStream = null; }
 async function aiVoiceStart() {
-  try { mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
-  catch (e) { transcriptEl.textContent = t('micBlocked'); return; }
+  try { mediaStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } }); }
+  catch (e) {
+    try { mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch (e2) { transcriptEl.textContent = t('micBlocked'); return; }
+  }
   audioChunks = [];
   const mime = pickAudioMime();
   try { mediaRec = mime ? new MediaRecorder(mediaStream, { mimeType: mime }) : new MediaRecorder(mediaStream); }
@@ -2147,10 +2199,33 @@ async function aiVoiceStart() {
   transcriptEl.textContent = t('listening');
   try { mediaRec.start(); } catch (e) { recActive = false; listening = false; micBtn.classList.remove('listening'); stopMicTracks(); return; }
   recTimer = setTimeout(() => { if (recActive) aiVoiceStop(); }, 20000);
+  /* silence auto-stop: end the recording ~1.6s after speech stops */
+  try {
+    vadCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const srcNode = vadCtx.createMediaStreamSource(mediaStream);
+    const an = vadCtx.createAnalyser();
+    an.fftSize = 2048;
+    srcNode.connect(an);
+    const buf = new Float32Array(an.fftSize);
+    let spoke = false, lastVoice = performance.now();
+    const started = performance.now();
+    vadInt = setInterval(() => {
+      if (!recActive) { stopVad(); return; }
+      an.getFloatTimeDomainData(buf);
+      let sum = 0;
+      for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+      const rms = Math.sqrt(sum / buf.length);
+      const now = performance.now();
+      if (rms > 0.015) { spoke = true; lastVoice = now; }
+      if (spoke && now - lastVoice > 1600) aiVoiceStop();
+      else if (!spoke && now - started > 8000) aiVoiceStop();
+    }, 120);
+  } catch (e) {}
 }
 function aiVoiceStop() {
   if (!recActive) return;
   recActive = false;
+  stopVad();
   if (recTimer) { clearTimeout(recTimer); recTimer = null; }
   micBtn.classList.remove('listening');
   micLabel.textContent = t('tapToAdd');
@@ -2166,7 +2241,7 @@ async function aiVoiceFinalize(mime) {
   try {
     const b64 = await blobToBase64(blob);
     const { data, error } = await sb.functions.invoke('parse-expense', {
-      body: { audio_base64: b64, mime: mime, lang: (recLang || 'en').slice(0, 2) },
+      body: { audio_base64: b64, mime: mime, lang: (recLang || 'en').slice(0, 2), hint: voiceHint() },
     });
     if (error) {
       let detail = '';
@@ -2937,11 +3012,20 @@ function projBase() {
     const ms = monthEntries(off);
     if (ms.length) base.push(ms);
   }
-  const src = base.length ? base.flat() : monthEntries(0);
   const n = Math.max(1, base.length);
-  const income = src.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0) / n;
+  const cur = monthEntries(0);
+  let src = base.length ? base.flat() : cur;
+  let divisor = base.length ? n : 1;
+  /* fallback: if past months hold no expenses (e.g. only imported income rows),
+     model spending from the current month so the page always reflects reality */
+  if (!src.some(e => e.type !== 'income') && cur.some(e => e.type !== 'income')) {
+    src = src.concat(cur.filter(e => e.type !== 'income'));
+    divisor = 1;
+  }
+  let income = src.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0) / divisor;
+  if (!income) income = cur.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
   const byCat = {};
-  src.filter(e => e.type !== 'income').forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount / n; });
+  src.filter(e => e.type !== 'income').forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount / divisor; });
   return { n: base.length, income, byCat };
 }
 function renderProjectionPage() {
@@ -3112,15 +3196,78 @@ function renderSettings() {
   document.getElementById('setBudgetsSub').textContent = budgetsUnavailable ? t('tempUnavailable') : (set ? t('nSet', { n: set }) + (overs ? t('nOverPlan', { n: overs }) : '') : t('setLimitsSub'));
   const av = document.getElementById('setAiVoiceVal');
   if (av) av.textContent = aiVoice ? t('on') : t('off');
+  const pv = document.getElementById('setPushVal');
+  if (pv) pv.textContent = pushOn ? t('on') : t('off');
 }
 document.getElementById('setSpaces').onclick = () => openSheet('menu');
 document.getElementById('setBudgets').onclick = () => switchTab('budgetspage');
-const REC_LANGS = ['en-GB', 'lt-LT', 'de-DE', 'es-ES'];
-document.getElementById('setLang').onclick = () => { recLang = REC_LANGS[(REC_LANGS.indexOf(recLang) + 1) % REC_LANGS.length]; lsSet('spendlog.lang', recLang); renderLang(); };
 document.getElementById('setAppLang').onclick = () => { setUiLang(UI_LANGS[(UI_LANGS.indexOf(uiLang) + 1) % UI_LANGS.length]); };
 document.getElementById('setAiVoice').onclick = () => {
   if (!canRecord) { alertMsg(t('voiceNoteShort')); return; }
   aiVoice = !aiVoice; lsSet('kaupa.aivoice', aiVoice); renderSettings();
+};
+
+/* ---------- push notifications ---------- */
+let pushOn = lsGet('kaupa.push', false);
+function urlB64ToUint8(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const b64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(b64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+const canPush = ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window);
+async function enablePush() {
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') { alertMsg(t('pushDenied')); return false; }
+  const reg = await navigator.serviceWorker.ready;
+  const { data, error } = await sb.functions.invoke('send-nudges', { body: { get_key: true } });
+  if (error || !data || !data.publicKey) throw new Error('no key — deploy send-nudges');
+  const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(data.publicKey) });
+  const j = sub.toJSON();
+  const { error: dbErr } = await sb.from('push_subscriptions').upsert({
+    user_id: session.user.id, endpoint: sub.endpoint,
+    p256dh: j.keys.p256dh, auth: j.keys.auth, lang: uiLang, tone: tone,
+  }, { onConflict: 'endpoint' });
+  if (dbErr) throw new Error(dbErr.message);
+  return true;
+}
+async function disablePush() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      await sb.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+      await sub.unsubscribe();
+    }
+  } catch (e) {}
+}
+async function refreshPushPrefs() {
+  /* keep the server copy of language + tone current, so nudges match the app */
+  if (!pushOn || !canPush || !session) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) await sb.from('push_subscriptions').update({ lang: uiLang, tone: tone }).eq('endpoint', sub.endpoint);
+  } catch (e) {}
+}
+document.getElementById('setPush').onclick = async () => {
+  if (!canPush) { alertMsg(t('pushUnsupported')); return; }
+  const row = document.getElementById('setPushVal');
+  if (pushOn) {
+    await disablePush();
+    pushOn = false; lsSet('kaupa.push', false); renderSettings();
+    return;
+  }
+  row.textContent = '…';
+  try {
+    const ok = await enablePush();
+    if (ok) { pushOn = true; lsSet('kaupa.push', true); }
+  } catch (e) {
+    alertMsg(t('pushFail', { msg: (e.message || 'error').slice(0, 80) }));
+  }
+  renderSettings();
 };
 document.getElementById('setSignOut').onclick = async () => { await sb.auth.signOut(); };
 document.getElementById('setCsvOut').onclick = () => exportCsv();
