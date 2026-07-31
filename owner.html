@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaupa — Owner stats</title>
+<style>
+  :root { --paper:#EDECE6; --card:#fff; --ink:#191813; --ink2:#4a4842; --muted:#8a887e; --sage:#5F8F63; --terra:#C4694A; --line:#dcdad2; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif; }
+  .wrap { max-width:640px; margin:0 auto; padding:36px 20px 80px; }
+  h1 { font-family:"Fraunces",Georgia,serif; font-size:28px; margin:0 0 2px; }
+  .sub { color:var(--muted); font-size:14px; margin-bottom:24px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px 18px 16px; }
+  .stat .k { font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  .stat .v { font-family:"Fraunces",Georgia,serif; font-size:34px; font-weight:600; margin-top:6px; letter-spacing:-0.01em; }
+  .stat .n { font-size:12.5px; color:var(--ink2); margin-top:2px; }
+  .big { grid-column:1 / -1; }
+  .big .v { color:var(--sage); }
+  .msg { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px; font-size:15px; line-height:1.5; }
+  .btn { display:inline-block; margin-top:14px; font:inherit; font-size:14px; font-weight:700; background:var(--ink); color:#fff; border:none; border-radius:999px; padding:11px 20px; cursor:pointer; text-decoration:none; }
+  .foot { margin-top:22px; color:var(--muted); font-size:12px; text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Kaupa &middot; Owner</h1>
+  <div class="sub" id="sub">Your private scoreboard &mdash; real usage, not downloads.</div>
+  <div id="content"><div class="msg">Loading…</div></div>
+  <div class="foot" id="foot"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPA_URL = 'https://mxdhsmfljqkyzuwdeoid.supabase.co';
+  const SUPA_KEY = 'sb_publishable_ss8w9HH-Ylocf4-L2SSRGw_6mmWs_nX';
+  const content = document.getElementById('content');
+  const foot = document.getElementById('foot');
+  if (!window.supabase) { content.innerHTML = '<div class="msg">Couldn&rsquo;t load — check your internet connection and reload.</div>'; throw new Error('supabase lib not loaded'); }
+  const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  function card(k, v, n) {
+    return '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v + '</div>' + (n ? '<div class="n">' + n + '</div>' : '') + '</div>';
+  }
+  function bigCard(k, v, n) {
+    return '<div class="stat big"><div class="k">' + k + '</div><div class="v">' + v + '</div>' + (n ? '<div class="n">' + n + '</div>' : '') + '</div>';
+  }
+
+  async function load() {
+    const { data: sess } = await sb.auth.getSession();
+    if (!sess || !sess.session) {
+      content.innerHTML = '<div class="msg">You&rsquo;re not signed in on this device.<br><br>Open the Kaupa app in this browser, sign in, then come back and reload this page. (This page shares the same login.)<br><a class="btn" href="./">Open Kaupa</a></div>';
+      return;
+    }
+    const { data, error } = await sb.rpc('owner_stats');
+    if (error) { content.innerHTML = '<div class="msg">Couldn&rsquo;t load stats: ' + error.message + '<br><br>Make sure you ran the owner_stats SQL in Supabase.</div>'; return; }
+    if (!data || data.error) { content.innerHTML = '<div class="msg">This account isn&rsquo;t the owner, so stats are hidden. Sign in with your owner email in the Kaupa app first.</div>'; return; }
+    const d = data;
+    content.innerHTML =
+      '<div class="grid">' +
+      bigCard('People using Kaupa', d.users, (d.new_7d || 0) + ' new this week &middot; ' + (d.new_30d || 0) + ' this month') +
+      card('Active this week', d.active_7d || 0, 'logged something in 7 days') +
+      card('Active this month', d.active_30d || 0, 'logged something in 30 days') +
+      card('Entries logged', d.tx, (d.tx_7d || 0) + ' in the last 7 days') +
+      card('Spaces created', d.spaces) +
+      card('Notifications on', d.push_on || 0, 'devices opted in') +
+      '</div>';
+    const now = new Date();
+    foot.textContent = 'Updated ' + now.toLocaleString();
+  }
+  load();
+</script>
+</body>
+</html>
