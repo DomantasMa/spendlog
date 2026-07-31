@@ -306,6 +306,18 @@
     font: inherit; font-size: 13.5px; font-weight: 600; background: var(--card); color: var(--ink-2);
     border: 1px solid var(--line); border-radius: 999px; padding: 11px 18px; cursor: pointer;
   }
+  .chatfab {
+    position: fixed; right: 16px; bottom: calc(88px + env(safe-area-inset-bottom));
+    width: 54px; height: 54px; border-radius: 50%; z-index: 35;
+    background: var(--ink); color: var(--card); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(25,24,19,0.35);
+  }
+  .chatfab svg { width: 24px; height: 24px; }
+  .chatlog { display: flex; flex-direction: column; gap: 8px; max-height: 46vh; overflow-y: auto; margin: 12px 0 4px; }
+  .cbub { max-width: 86%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+  .cbub.user { align-self: flex-end; background: var(--ink); color: var(--card); border-bottom-right-radius: 6px; }
+  .cbub.ai { align-self: flex-start; background: var(--card); color: var(--ink); border-bottom-left-radius: 6px; box-shadow: var(--shadow); }
   .bslider {
     -webkit-appearance: none; appearance: none; width: 100%; margin-top: 12px;
     height: 22px; background: transparent; cursor: pointer;
@@ -746,17 +758,7 @@
   <!-- ===== INSIGHTS ===== -->
   <section class="tab" id="tab-insights">
     <div class="pagetitle">Insights</div>
-    <div class="chartcard" style="margin-top:0;" id="askCard">
-      <h2 id="askTitle">Ask Kaupa</h2>
-      <div class="sub" id="askSub">Any question about this space&rsquo;s money &mdash; English or Lithuanian</div>
-      <div class="askline">
-        <input type="text" id="askInput" placeholder="How much at Lidl this month?" enterkeyhint="send" autocomplete="off">
-        <button id="askGo">Ask</button>
-      </div>
-      <div class="askhints" id="askHints"></div>
-      <div class="askanswer" id="askAnswer"></div>
-    </div>
-    <button class="darkcard" id="patternCard" style="display:none; cursor:default;">
+    <button class="darkcard" id="patternCard" style="display:none; margin-top:0; cursor:default;">
       <div class="klab"><span class="d" style="background:var(--sage)"></span><span id="patternLab">PATTERN SPOTTED</span></div>
       <div class="ktitle serif" id="patternTitle"></div>
       <div class="kbody" id="patternBody"></div>
@@ -887,7 +889,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer">Kaupa v3.3 &mdash; made by Domantas &amp; Claude.</div>
+    <div class="footer">Kaupa v3.4 &mdash; made by Domantas &amp; Claude.</div>
   </section>
 
 </div>
@@ -907,6 +909,11 @@
     <svg class="ic" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="7"/></svg><span id="tabLblSettings">Settings</span>
   </button>
 </div></nav>
+<button class="chatfab" id="chatFab" aria-label="Ask Kaupa">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+  </svg>
+</button>
 </div>
 
 <div class="sheetback" id="sheetBack"><div class="sheet" id="sheet"></div></div>
@@ -1628,7 +1635,6 @@ const STATIC_I18N = [
   ['#tab-home .footer', 'homeFooter'],
   ['#tab-activity .pagetitle', 'activity'], ['#actEmpty', 'nothingHere'],
   ['#tab-insights .pagetitle', 'tabInsights'],
-  ['#askTitle', 'askTitle'], ['#askSub', 'askSub'], ['#askGo', 'ask'],
   ['#patternLab', 'patternSpotted'], ['.tonebar .tl', 'suggestions'],
   ['#toneSeg [data-t="gentle"]', 'gentle'], ['#toneSeg [data-t="neutral"]', 'neutral'], ['#toneSeg [data-t="blunt"]', 'blunt'],
   ['#wiw2Title', 'whereItWent'], ['#catSub', 'catSub'], ['#catEmpty', 'noSpendMonth'], ['#tab-insights summary', 'viewTable'],
@@ -1650,7 +1656,7 @@ const STATIC_I18N = [
   ['#setSignOut .st', 'signOut'],
   ['#tabLblHome', 'tabHome'], ['#tabLblActivity', 'tabActivity'], ['#tabLblInsights', 'tabInsights'], ['#tabLblSettings', 'tabSettings'],
 ];
-const STATIC_I18N_PH = [['#typeInput', 'typePh'], ['#actSearch', 'searchPh'], ['#askInput', 'askPh']];
+const STATIC_I18N_PH = [['#typeInput', 'typePh'], ['#actSearch', 'searchPh']];
 function applyStaticI18n() {
   STATIC_I18N.forEach(([sel, key]) => {
     const n = document.querySelector(sel);
@@ -1664,7 +1670,6 @@ function applyStaticI18n() {
   if (av) av.textContent = UI_LANG_NAMES[uiLang];
   const ml = document.getElementById('micLabel');
   if (ml && !listeningState()) ml.textContent = t('tapToAdd');
-  if (typeof renderAskHints === 'function') renderAskHints();
 }
 function listeningState() { try { return !!listening; } catch (e) { return false; } }
 function setUiLang(lang) {
@@ -1837,7 +1842,7 @@ sb.auth.onAuthStateChange((_ev, s) => {
 
 async function switchSpace(id) {
   currentSpaceId = id; lsSet('spendlog.space', id);
-  closeSheet(); catFilter = null;
+  closeSheet(); catFilter = null; chatLog = [];
   await Promise.all([loadTx(), loadMembers(), loadBudgets()]);
   syncCustomCats();
   render();
@@ -3085,19 +3090,7 @@ async function clearBudget(cat) {
 }
 
 /* ================= ask (AI chat about this space) ================= */
-const askInput = document.getElementById('askInput');
-const askGo = document.getElementById('askGo');
-const askAnswerEl = document.getElementById('askAnswer');
-function renderAskHints() {
-  const box = document.getElementById('askHints');
-  box.textContent = '';
-  (ASK_HINTS_ALL[uiLang] || ASK_HINTS_ALL.en).forEach(h => {
-    const b = el('button', null, h);
-    b.onclick = () => { askInput.value = h; runAsk(); };
-    box.appendChild(b);
-  });
-}
-renderAskHints();
+let chatLog = [];
 function askRows() {
   return entries.slice(0, 2000).map(e => [
     e.dateISO,
@@ -3108,37 +3101,70 @@ function askRows() {
     memberCount > 1 ? (memberNames[e.user_id] || '') : '',
   ].join('|'));
 }
-async function runAsk() {
-  const q = askInput.value.trim();
-  if (!q || askGo.disabled) return;
-  askGo.disabled = true;
-  askAnswerEl.classList.add('show');
-  askAnswerEl.textContent = t('thinking');
-  try {
-    const space = spaces.find(s => s.id === currentSpaceId);
-    const { data, error } = await sb.functions.invoke('parse-expense', {
-      body: {
-        question: q,
-        expense_rows: askRows(),
-        space_name: space ? space.name : '',
-        lang: uiLang,
-        today: new Date().toISOString().slice(0, 10),
-      },
-    });
-    if (error) {
-      let detail = '';
-      try { if (error.context && error.context.clone) detail = await error.context.clone().text(); } catch (e2) {}
-      throw new Error(detail ? detail.slice(0, 120) : (error.message || 'network error'));
+function openChatSheet() {
+  sheet.textContent = '';
+  sheetBack.style.display = 'flex';
+  sheet.appendChild(el('h3', null, t('askTitle')));
+  sheet.appendChild(el('p', 'sheet-sub', t('askSub')));
+  const log = el('div', 'chatlog');
+  chatLog.forEach(m => log.appendChild(el('div', 'cbub ' + (m.role === 'user' ? 'user' : 'ai'), m.content)));
+  sheet.appendChild(log);
+  const hints = el('div', 'askhints');
+  sheet.appendChild(hints);
+  const row = el('div', 'askline');
+  const input = el('input'); input.type = 'text'; input.placeholder = t('askPh'); input.enterKeyHint = 'send'; input.autocomplete = 'off';
+  const go = el('button', null, t('ask'));
+  row.appendChild(input); row.appendChild(go);
+  sheet.appendChild(row);
+  const scrollEnd = () => { log.scrollTop = log.scrollHeight; };
+  async function send() {
+    const q = input.value.trim();
+    if (!q || go.disabled) return;
+    input.value = '';
+    hints.textContent = '';
+    chatLog.push({ role: 'user', content: q });
+    log.appendChild(el('div', 'cbub user', q));
+    const wait = el('div', 'cbub ai', t('thinking'));
+    log.appendChild(wait); scrollEnd();
+    go.disabled = true;
+    try {
+      const space = spaces.find(s => s.id === currentSpaceId);
+      const { data, error } = await sb.functions.invoke('parse-expense', {
+        body: {
+          question: q,
+          history: chatLog.slice(0, -1).slice(-8),
+          expense_rows: askRows(),
+          space_name: space ? space.name : '',
+          today: new Date().toISOString().slice(0, 10),
+          lang: uiLang,
+        },
+      });
+      if (error) {
+        let detail = '';
+        try { if (error.context && error.context.clone) detail = await error.context.clone().text(); } catch (e2) {}
+        throw new Error(detail ? detail.slice(0, 120) : (error.message || 'network error'));
+      }
+      if (!data || data.error || !data.answer) throw new Error((data && String(data.error).slice(0, 120)) || 'no answer');
+      wait.textContent = String(data.answer);
+      chatLog.push({ role: 'assistant', content: String(data.answer) });
+    } catch (e) {
+      wait.textContent = t('askFail', { msg: e.message || 'error' });
     }
-    if (!data || data.error || !data.answer) throw new Error((data && String(data.error).slice(0, 120)) || 'no answer');
-    askAnswerEl.textContent = String(data.answer);
-  } catch (e) {
-    askAnswerEl.textContent = t('askFail', { msg: e.message || 'error' });
+    go.disabled = false; scrollEnd();
   }
-  askGo.disabled = false;
+  if (!chatLog.length) {
+    (ASK_HINTS_ALL[uiLang] || ASK_HINTS_ALL.en).forEach(h => {
+      const b = el('button', null, h);
+      b.onclick = () => { input.value = h; send(); };
+      hints.appendChild(b);
+    });
+  }
+  go.onclick = send;
+  input.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); send(); } });
+  scrollEnd();
+  input.focus();
 }
-askGo.onclick = runAsk;
-askInput.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); runAsk(); } });
+document.getElementById('chatFab').onclick = openChatSheet;
 
 /* ================= sheets ================= */
 const sheetBack = document.getElementById('sheetBack');
