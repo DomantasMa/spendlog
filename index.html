@@ -889,7 +889,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer">Kaupa v3.4 &mdash; made by Domantas &amp; Claude.</div>
+    <div class="footer">Kaupa v3.5 &mdash; made by Domantas &amp; Claude.</div>
   </section>
 
 </div>
@@ -3137,6 +3137,7 @@ function openChatSheet() {
           space_name: space ? space.name : '',
           today: new Date().toISOString().slice(0, 10),
           lang: uiLang,
+          tone: tone,
         },
       });
       if (error) {
