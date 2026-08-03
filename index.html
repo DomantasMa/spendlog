@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="kaupa-version" content="4.9">
 <meta name="theme-color" content="#EDECE6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -607,6 +608,20 @@
   .pdfbox { width: 52px; height: 52px; border-radius: 12px; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); flex: none; }
   .it1 { font-size: 16px; font-weight: 700; }
   .it2 { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+  /* ================= motion ================= */
+  @keyframes kfadeup { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes kfade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes kpop { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: none; } }
+  .tab.active { animation: kfadeup 0.26s ease both; }
+  .login.open { animation: kfade 0.45s ease both; }
+  .confirm.open { animation: kpop 0.2s ease both; }
+  .sheet { animation: kpop 0.22s ease both; }
+  .invitecard, #pushPrompt .invitecard { animation: kfadeup 0.3s ease both; }
+  @media (prefers-reduced-motion: reduce) {
+    .tab.active, .login.open, .confirm.open, .sheet, .invitecard, #pushPrompt .invitecard { animation: none !important; }
+    .kbar { transition: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -781,7 +796,9 @@
       </details>
     </div>
     <div class="chartcard">
-      <h2 id="sixTitle">Six months</h2>
+      <div class="cardhead"><h2 id="sixTitle">Six months</h2>
+        <span class="toneseg" id="trendSeg"><button data-m="6" class="sel">6</button><button data-m="12">12</button></span>
+      </div>
       <div class="sub" id="sixSub">Total spend per month &mdash; tap a bar for the value</div>
       <div class="trend">
         <div class="plot" id="trendPlot"></div>
@@ -864,10 +881,6 @@
         <span><span class="st">App language</span><br><span class="ss">All screens and labels</span></span>
         <span class="sa" id="setAppLangVal">English</span>
       </button>
-      <button class="setrow" id="setAiVoice">
-        <span><span class="st" id="aiVoiceTitle">High-accuracy voice</span><br><span class="ss" id="aiVoiceSub">Sharper recognition, auto-on for Lithuanian. Uses a little data.</span></span>
-        <span class="sa" id="setAiVoiceVal">Off</span>
-      </button>
       <button class="setrow" id="setPush">
         <span><span class="st" id="pushTitle">Notifications</span><br><span class="ss" id="pushSub">Weekly recap and cheeky reminders</span></span>
         <span class="sa" id="setPushVal">Off</span>
@@ -878,12 +891,8 @@
         <span><span class="st">Import bank statement</span><br><span class="ss">PDF or CSV from any UK bank</span></span>
         <span class="sa">Import</span>
       </button>
-      <button class="setrow" id="setCsvIn">
-        <span><span class="st">Import Kaupa CSV</span><br><span class="ss">A file exported from this app</span></span>
-        <span class="sa">Import</span>
-      </button>
       <button class="setrow" id="setCsvOut">
-        <span><span class="st">Export CSV</span><br><span class="ss">This space &mdash; for Power BI or backup</span></span>
+        <span><span class="st">Export CSV</span><br><span class="ss" id="setCsvOutSub">Download this space &mdash; pick a date range</span></span>
         <span class="sa">Export</span>
       </button>
     </div>
@@ -893,7 +902,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer">Kaupa v4.6 &mdash; made by Domantas &amp; Claude.</div>
+    <div class="footer" id="verMark" style="display:none;" data-v="4.9"></div>
   </section>
 
 </div>
@@ -1126,6 +1135,7 @@ en: {
   spent: 'SPENT', earned: 'EARNED',
   spentMore: '{amt} more than {month} · {space}', spentLess: '{amt} less than {month} · {space}',
   firstMonth: 'First tracked month in this space', nothingYetTap: 'Nothing yet — tap above to add',
+  nothingMonth: 'Nothing spent in {month} yet', noIncomeMonth: 'No income in {month} yet',
   thisMonthInSpace: 'This month in this space', noIncomeSpace: 'No income in this space',
   whereItWent: 'Where it went', insightsLink: 'Insights', noSpendMonth: 'No spending this month yet.',
   history: 'History', month: 'Month', year: 'Year', allYears: 'All years', inProgress: 'in progress', allTime: 'All time',
@@ -1184,6 +1194,7 @@ en: {
   importBank: 'Import bank statement', pdfCsvBank: 'PDF or CSV from any UK bank',
   importKaupaCsv: 'Import Kaupa CSV', exportedFile: 'A file exported from this app',
   exportCsvLbl: 'Export CSV', forPowerBi: 'This space — for Power BI or backup', signOut: 'Sign out',
+  exportRangeSub: 'Download this space — pick a date range', exportSheetSub: 'Choose the dates to include from “{space}”. Great for Power BI or a backup.', from: 'From', to: 'To', download: 'Download CSV',
   tabHome: 'Home', tabActivity: 'Activity', tabInsights: 'Insights', tabSettings: 'Settings',
   spacesTitle: 'Spaces', spacesSub: 'Separate pots of money — personal, household, business. Tap to switch.',
   sharedSpace: 'Shared space', businessLbl: 'Business', personalLbl: 'Personal', newSpaceItem: '+ New space',
@@ -1242,6 +1253,7 @@ lt: {
   spent: 'IŠLEISTA', earned: 'UŽDIRBTA',
   spentMore: '{amt} daugiau nei {month} · {space}', spentLess: '{amt} mažiau nei {month} · {space}',
   firstMonth: 'Pirmas fiksuojamas mėnuo šioje erdvėje', nothingYetTap: 'Dar nieko — spausk viršuje',
+  nothingMonth: '{month} išlaidų dar nėra', noIncomeMonth: '{month} pajamų dar nėra',
   thisMonthInSpace: 'Šį mėnesį šioje erdvėje', noIncomeSpace: 'Šioje erdvėje pajamų nėra',
   whereItWent: 'Kur iškeliavo', insightsLink: 'Įžvalgos', noSpendMonth: 'Šį mėnesį išlaidų dar nėra.',
   history: 'Istorija', month: 'Mėnuo', year: 'Metai', allYears: 'Visi metai', inProgress: 'tebevyksta', allTime: 'Visas laikas',
@@ -1300,6 +1312,7 @@ lt: {
   importBank: 'Įkelti banko išrašą', pdfCsvBank: 'PDF arba CSV iš tavo banko',
   importKaupaCsv: 'Įkelti Kaupa CSV', exportedFile: 'Failas, eksportuotas iš šios programėlės',
   exportCsvLbl: 'Eksportuoti CSV', forPowerBi: 'Ši erdvė — Power BI ar atsarginei kopijai', signOut: 'Atsijungti',
+  exportRangeSub: 'Atsisiųsk šią erdvę — pasirink datų intervalą', exportSheetSub: 'Pasirink, kokias „{space}“ datas įtraukti. Puiku Power BI ar atsarginei kopijai.', from: 'Nuo', to: 'Iki', download: 'Atsisiųsti CSV',
   tabHome: 'Pradžia', tabActivity: 'Veikla', tabInsights: 'Įžvalgos', tabSettings: 'Nustatymai',
   spacesTitle: 'Erdvės', spacesSub: 'Atskiri pinigų katilai — asmeninis, šeimos, verslo. Spausk ir perjunk.',
   sharedSpace: 'Bendra erdvė', businessLbl: 'Verslas', personalLbl: 'Asmeninė', newSpaceItem: '+ Nauja erdvė',
@@ -1358,6 +1371,7 @@ de: {
   spent: 'AUSGEGEBEN', earned: 'VERDIENT',
   spentMore: '{amt} mehr als im {month} · {space}', spentLess: '{amt} weniger als im {month} · {space}',
   firstMonth: 'Erster erfasster Monat in diesem Bereich', nothingYetTap: 'Noch nichts — oben tippen',
+  nothingMonth: 'Noch nichts im {month} ausgegeben', noIncomeMonth: 'Noch keine Einnahmen im {month}',
   thisMonthInSpace: 'Diesen Monat in diesem Bereich', noIncomeSpace: 'Keine Einnahmen in diesem Bereich',
   whereItWent: 'Wohin es ging', insightsLink: 'Einblicke', noSpendMonth: 'Diesen Monat noch keine Ausgaben.',
   history: 'Verlauf', month: 'Monat', year: 'Jahr', allYears: 'Alle Jahre', inProgress: 'läuft noch', allTime: 'Gesamt',
@@ -1416,6 +1430,7 @@ de: {
   importBank: 'Kontoauszug importieren', pdfCsvBank: 'PDF oder CSV von deiner Bank',
   importKaupaCsv: 'Kaupa-CSV importieren', exportedFile: 'Eine aus dieser App exportierte Datei',
   exportCsvLbl: 'CSV exportieren', forPowerBi: 'Dieser Bereich — für Power BI oder Backup', signOut: 'Abmelden',
+  exportRangeSub: 'Diesen Bereich herunterladen — Zeitraum wählen', exportSheetSub: 'Wähle die Daten aus „{space}“, die enthalten sein sollen. Ideal für Power BI oder ein Backup.', from: 'Von', to: 'Bis', download: 'CSV herunterladen',
   tabHome: 'Start', tabActivity: 'Aktivität', tabInsights: 'Einblicke', tabSettings: 'Einstellungen',
   spacesTitle: 'Bereiche', spacesSub: 'Getrennte Geldtöpfe — privat, Haushalt, Geschäft. Zum Wechseln tippen.',
   sharedSpace: 'Geteilter Bereich', businessLbl: 'Geschäftlich', personalLbl: 'Privat', newSpaceItem: '+ Neuer Bereich',
@@ -1474,6 +1489,7 @@ es: {
   spent: 'GASTADO', earned: 'INGRESADO',
   spentMore: '{amt} más que en {month} · {space}', spentLess: '{amt} menos que en {month} · {space}',
   firstMonth: 'Primer mes registrado en este espacio', nothingYetTap: 'Nada aún: toca arriba',
+  nothingMonth: 'Nada gastado en {month} aún', noIncomeMonth: 'Sin ingresos en {month} aún',
   thisMonthInSpace: 'Este mes en este espacio', noIncomeSpace: 'Sin ingresos en este espacio',
   whereItWent: 'Adónde fue', insightsLink: 'Análisis', noSpendMonth: 'Aún no hay gastos este mes.',
   history: 'Historial', month: 'Mes', year: 'Año', allYears: 'Todos', inProgress: 'en curso', allTime: 'Todo el tiempo',
@@ -1532,6 +1548,7 @@ es: {
   importBank: 'Importar extracto bancario', pdfCsvBank: 'PDF o CSV de tu banco',
   importKaupaCsv: 'Importar CSV de Kaupa', exportedFile: 'Un archivo exportado desde esta app',
   exportCsvLbl: 'Exportar CSV', forPowerBi: 'Este espacio: para Power BI o copia de seguridad', signOut: 'Cerrar sesión',
+  exportRangeSub: 'Descarga este espacio: elige un rango de fechas', exportSheetSub: 'Elige las fechas de «{space}» que incluir. Ideal para Power BI o una copia.', from: 'Desde', to: 'Hasta', download: 'Descargar CSV',
   tabHome: 'Inicio', tabActivity: 'Actividad', tabInsights: 'Análisis', tabSettings: 'Ajustes',
   spacesTitle: 'Espacios', spacesSub: 'Fondos separados: personal, hogar, negocio. Toca para cambiar.',
   sharedSpace: 'Espacio compartido', businessLbl: 'Negocio', personalLbl: 'Personal', newSpaceItem: '+ Nuevo espacio',
@@ -1723,11 +1740,9 @@ const STATIC_I18N = [
   ['#setSpaces .st', 'spacesMembers'], ['#setSpaces .sa', 'open'],
   ['#setBudgets .st', 'budgets'], ['#setBudgets .sa', 'open'],
   ['#setAppLang .st', 'appLanguage'], ['#setAppLang .ss', 'appLangSub'],
-  ['#aiVoiceTitle', 'aiVoiceTitle'], ['#aiVoiceSub', 'aiVoiceSub'],
   ['#pushTitle', 'pushTitle'], ['#pushSub', 'pushSub'],
   ['#setBank .st', 'importBank'], ['#setBank .ss', 'pdfCsvBank'], ['#setBank .sa', 'importLbl'],
-  ['#setCsvIn .st', 'importKaupaCsv'], ['#setCsvIn .ss', 'exportedFile'], ['#setCsvIn .sa', 'importLbl'],
-  ['#setCsvOut .st', 'exportCsvLbl'], ['#setCsvOut .ss', 'forPowerBi'], ['#setCsvOut .sa', 'exportLbl'],
+  ['#setCsvOut .st', 'exportCsvLbl'], ['#setCsvOut .ss', 'exportRangeSub'], ['#setCsvOut .sa', 'exportLbl'],
   ['#setSignOut .st', 'signOut'],
   ['#tabLblHome', 'tabHome'], ['#tabLblActivity', 'tabActivity'], ['#tabLblInsights', 'tabInsights'], ['#tabLblSettings', 'tabSettings'],
 ];
@@ -2461,9 +2476,9 @@ function renderHome() {
   const diff = spent - prevSpent;
   document.getElementById('spentSub').textContent = prevSpent > 0
     ? t(diff >= 0 ? 'spentMore' : 'spentLess', { amt: fmt0(Math.abs(diff)), month: prevName, space: (spaces.find(s => s.id === currentSpaceId) || { name: '' }).name.toLowerCase() })
-    : (spent > 0 ? t('firstMonth') : t('nothingYetTap'));
+    : (spent > 0 ? t('firstMonth') : t('nothingMonth', { month: new Date().toLocaleDateString(loc(), { month: 'long' }) }));
   document.getElementById('earnedVal').textContent = fmt0(earned);
-  document.getElementById('earnedSub').textContent = earned > 0 ? t('thisMonthInSpace') : t('noIncomeSpace');
+  document.getElementById('earnedSub').textContent = earned > 0 ? t('thisMonthInSpace') : t('noIncomeMonth', { month: new Date().toLocaleDateString(loc(), { month: 'long' }) });
 
   const sug = computeSuggestions().filter(s => s.kind === 'over')[0];
   const ac = document.getElementById('alertCard');
@@ -2536,6 +2551,7 @@ function renderHome() {
 
 /* ---------- home: history card ---------- */
 let histMode = 'month';
+let trendMonths = 6;
 let histOffset = 0;
 function periodEntries() {
   if (histMode === 'month') return monthEntries(histOffset);
@@ -2631,6 +2647,9 @@ function renderLatest() {
 }
 document.querySelectorAll('#histSeg button').forEach(b => {
   b.onclick = () => { histMode = b.dataset.m; histOffset = 0; renderHistory(); };
+});
+document.querySelectorAll('#trendSeg button').forEach(b => {
+  b.onclick = () => { trendMonths = +b.dataset.m; renderInsights(); };
 });
 document.getElementById('histPrev').onclick = () => { histOffset -= 1; renderHistory(); };
 document.getElementById('histNext').onclick = () => { if (histOffset < 0) { histOffset += 1; renderHistory(); } };
@@ -2856,12 +2875,16 @@ function renderInsights() {
   });
 
   /* trend */
+  const trendTitle = document.getElementById('sixTitle');
+  if (trendTitle) trendTitle.textContent = trendMonths === 12 ? t('twelveMonths') : t('sixMonths');
+  document.querySelectorAll('#trendSeg button').forEach(b => b.classList.toggle('sel', +b.dataset.m === trendMonths));
   const plot = document.getElementById('trendPlot');
   const xlab = document.getElementById('trendLabels');
   plot.textContent = ''; xlab.textContent = '';
   const now = new Date();
+  const nMonths = trendMonths;
   const months = [];
-  for (let i = 5; i >= 0; i--) {
+  for (let i = nMonths - 1; i >= 0; i--) {
     const d = new Date(Date.UTC(now.getFullYear(), now.getMonth() - i, 1));
     months.push({ key: d.toISOString().slice(0, 7), label: d.toLocaleDateString(loc(), { month: 'short' }), total: 0 });
   }
@@ -2870,9 +2893,10 @@ function renderInsights() {
     if (mm) mm.total += e.amount;
   });
   const tmax = Math.max(1, ...months.map(m => m.total));
+  const lastIdx = months.length - 1;
   months.forEach((m, i) => {
-    const col = el('div', 'col' + (i < 5 ? ' dim' : ''));
-    if (i === 5 && m.total > 0) col.appendChild(el('div', 'cap', fmt0(m.total)));
+    const col = el('div', 'col' + (i < lastIdx ? ' dim' : ''));
+    if (i === lastIdx && m.total > 0) col.appendChild(el('div', 'cap', fmt0(m.total)));
     const bar = el('div', 'bar');
     bar.style.height = Math.max(2, Math.round(m.total / tmax * 92)) + '%';
     col.appendChild(bar);
@@ -2888,7 +2912,7 @@ function renderInsights() {
   const avg = withData.length ? withData.reduce((s, m) => s + m.total, 0) / withData.length : 0;
   const highest = withData.length ? Math.max(...withData.map(m => m.total)) : 0;
   const incomeThis = monthEntries(0).filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
-  const net = incomeThis - (months[5] ? months[5].total : 0);
+  const net = incomeThis - (months[months.length - 1] ? months[months.length - 1].total : 0);
   const mkStat = (label, value, color) => {
     const d = el('div');
     d.appendChild(el('div', 'kl', label));
@@ -2935,9 +2959,10 @@ function renderBudgetsPage() {
   cur.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
   const withLimits = allCats().filter(c => budgets[c.id]);
   const overs = withLimits.filter(c => (byCat[c.id] || 0) > budgets[c.id]).length;
+  const budMonth = new Date().toLocaleDateString(loc(), { month: 'long', year: 'numeric' });
   document.getElementById('budgetsSubT').textContent = budgetsUnavailable
     ? t('bUnavailable')
-    : (withLimits.length
+    : budMonth + ' \u00b7 ' + (withLimits.length
       ? t(withLimits.length === 1 ? 'bSub1' : 'bSubN', { o: overs, n: withLimits.length, space: space ? space.name : '' })
       : t('noLimitsYet', { space: space ? space.name : '' }));
   const box = document.getElementById('budgetsCards');
@@ -3241,18 +3266,13 @@ function renderSettings() {
   const set = Object.keys(budgets).length;
   const overs = computeSuggestions().filter(s => s.kind === 'over').length;
   document.getElementById('setBudgetsSub').textContent = budgetsUnavailable ? t('tempUnavailable') : (set ? t('nSet', { n: set }) + (overs ? t('nOverPlan', { n: overs }) : '') : t('setLimitsSub'));
-  const av = document.getElementById('setAiVoiceVal');
-  if (av) av.textContent = aiVoiceEffective() ? t('on') : t('off');
   const pv = document.getElementById('setPushVal');
   if (pv) pv.textContent = pushOn ? t('on') : t('off');
 }
 document.getElementById('setSpaces').onclick = () => openSheet('menu');
 document.getElementById('setBudgets').onclick = () => switchTab('budgetspage');
 document.getElementById('setAppLang').onclick = () => { setUiLang(UI_LANGS[(UI_LANGS.indexOf(uiLang) + 1) % UI_LANGS.length]); };
-document.getElementById('setAiVoice').onclick = () => {
-  if (!canRecord) { alertMsg(t('voiceNoteShort')); return; }
-  aiVoicePref = !aiVoiceEffective(); lsSet('kaupa.aivoice', aiVoicePref); renderSettings();
-};
+
 
 /* ---------- push notifications ---------- */
 let pushOn = lsGet('kaupa.push', false);
@@ -3346,7 +3366,7 @@ function renderPushPrompt() {
   box.appendChild(card);
 }
 document.getElementById('setSignOut').onclick = async () => { await sb.auth.signOut(); };
-document.getElementById('setCsvOut').onclick = () => exportCsv();
+document.getElementById('setCsvOut').onclick = () => openExportSheet();
 
 const bankInput = document.createElement('input');
 bankInput.type = 'file'; bankInput.accept = '.csv,.pdf,text/csv,application/pdf'; bankInput.style.display = 'none';
@@ -3355,24 +3375,50 @@ bankInput.onchange = () => { if (bankInput.files[0]) { openBankImport(bankInput.
 document.getElementById('setBank').onclick = () => bankInput.click();
 document.getElementById('importCard').onclick = () => bankInput.click();
 
-const csvInput = document.createElement('input');
-csvInput.type = 'file'; csvInput.accept = '.csv,text/csv'; csvInput.style.display = 'none';
-document.body.appendChild(csvInput);
-csvInput.onchange = () => { if (csvInput.files[0]) { importOwnCsv(csvInput.files[0]); csvInput.value = ''; } };
-document.getElementById('setCsvIn').onclick = () => csvInput.click();
 
-function exportCsv() {
+function exportCsv(fromISO, toISO) {
   const space = spaces.find(s => s.id === currentSpaceId);
   const esc = v => '"' + String(v).replace(/"/g, '""') + '"';
+  let list = entries.slice();
+  if (fromISO) list = list.filter(e => e.dateISO >= fromISO);
+  if (toISO) list = list.filter(e => e.dateISO <= toISO);
   const rows = [['Date', 'Type', 'Merchant', 'Category', 'Amount', 'AddedBy', 'Space'].join(',')];
-  entries.slice().sort((a, b) => a.dateISO.localeCompare(b.dateISO)).forEach(e => {
+  list.sort((a, b) => a.dateISO.localeCompare(b.dateISO)).forEach(e => {
     rows.push([e.dateISO, e.type, esc(e.merchant), esc(e.type === 'income' ? 'Income' : catNameEn(catById(e.cat))), e.amount.toFixed(2), esc(memberNames[e.user_id] || ''), esc(space ? space.name : '')].join(','));
   });
-  const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob(['\ufeff' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'kaupa-' + (space ? space.name.toLowerCase().replace(/\s+/g, '-') : 'export') + '.csv';
+  const tag = (fromISO || 'all') + '_' + (toISO || 'now');
+  a.download = 'kaupa-' + (space ? space.name.toLowerCase().replace(/\s+/g, '-') : 'export') + '-' + tag + '.csv';
   document.body.appendChild(a); a.click(); a.remove();
+}
+function openExportSheet() {
+  sheet.textContent = '';
+  sheetBack.style.display = 'flex';
+  const space = spaces.find(s => s.id === currentSpaceId);
+  sheet.appendChild(el('h3', null, t('exportCsvLbl')));
+  sheet.appendChild(el('p', 'sheet-sub', t('exportSheetSub', { space: space ? space.name : '' })));
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+  const yearStart = now.getFullYear() + '-01-01';
+  const fromIn = el('input'); fromIn.type = 'date'; fromIn.value = yearStart; fromIn.max = today;
+  const toIn = el('input'); toIn.type = 'date'; toIn.value = today; toIn.max = today;
+  const presets = el('div', 'pills');
+  const mk = (label, f, t2) => { const b = el('button', 'pill', label); b.onclick = () => { fromIn.value = f; toIn.value = t2; }; presets.appendChild(b); };
+  mk(t('month'), monthStart, today);
+  mk(t('year'), yearStart, today);
+  mk(t('allTime'), '', today);
+  sheet.appendChild(presets);
+  const lblRow = el('div', 'erow'); lblRow.style.marginTop = '10px';
+  const fromWrap = el('div'); fromWrap.style.flex = '1'; fromWrap.appendChild(el('div', 'ss', t('from'))); fromWrap.appendChild(fromIn); fromIn.style.width = '100%';
+  const toWrap = el('div'); toWrap.style.flex = '1'; toWrap.appendChild(el('div', 'ss', t('to'))); toWrap.appendChild(toIn); toIn.style.width = '100%';
+  lblRow.appendChild(fromWrap); lblRow.appendChild(toWrap);
+  sheet.appendChild(lblRow);
+  const go = el('button', 'sheet-primary', t('download'));
+  go.onclick = () => { exportCsv(fromIn.value || null, toIn.value || null); closeSheet(); };
+  sheet.appendChild(go);
 }
 async function importOwnCsv(f) {
   const text = await f.text();
