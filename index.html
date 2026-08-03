@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="kaupa-version" content="5.0">
+<meta name="kaupa-version" content="5.1">
 <meta name="theme-color" content="#EDECE6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -641,6 +641,11 @@
   @keyframes kLineIn { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   @keyframes kIntroWrap { 0%, 68% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
 
+  /* editable date on the confirm sheet */
+  .cdaterow { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 12px 0 2px; }
+  .cdaterow label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .cdaterow input[type=date] { font: inherit; font-size: 15px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
+
   @media (prefers-reduced-motion: reduce) {
     .tab.active, .login.open, .confirm.open, .sheet, .invitecard, #pushPrompt .invitecard { animation: none !important; }
     .kbar { transition: none !important; }
@@ -718,6 +723,10 @@
         <button class="tt" data-type="income">Income</button>
       </div>
       <div class="chips" id="cChips"></div>
+      <div class="cdaterow">
+        <label id="cDateLabel" for="cDate">Date</label>
+        <input type="date" id="cDate">
+      </div>
       <div class="row">
         <button class="btn-cancel" id="cCancel">Cancel</button>
         <button class="btn-primary" id="cSave">Save expense</button>
@@ -928,7 +937,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="5.0"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="5.1"></div>
   </section>
 
 </div>
@@ -2126,6 +2135,10 @@ function showConfirmMulti(list) {
   document.getElementById('cAmount').textContent = fmtGBP(Math.abs(total));
   document.getElementById('cAmount').style.color = '';
   document.getElementById('cMerchant').textContent = t('entriesCheck', { n: list.length });
+  const cDateM = document.getElementById('cDate');
+  cDateM.value = (list[0] && list[0].dateISO) || new Date().toISOString().slice(0, 10);
+  document.getElementById('cDateLabel').textContent = ({ en: 'Date', lt: 'Data', de: 'Datum', es: 'Fecha' })[uiLang] || 'Date';
+  cDateM.onchange = () => { if (!/^\d{4}-\d{2}-\d{2}$/.test(cDateM.value)) return; list.forEach(p => p.dateISO = cDateM.value); };
   document.getElementById('typeToggle').style.display = 'none';
   const chips = document.getElementById('cChips');
   chips.textContent = '';
@@ -2166,7 +2179,15 @@ function showConfirm(parsed) {
   chipsReset.style.alignItems = '';
   document.getElementById('cAmount').textContent = (parsed.type === 'income' ? '+' : '') + fmtGBP(parsed.amount);
   document.getElementById('cAmount').style.color = parsed.type === 'income' ? 'var(--good)' : '';
-  document.getElementById('cMerchant').textContent = parsed.merchant + ' · ' + new Date(parsed.dateISO).toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
+  document.getElementById('cMerchant').textContent = parsed.merchant + ' · ' + new Date(parsed.dateISO + 'T00:00:00').toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
+  const cDate = document.getElementById('cDate');
+  cDate.value = parsed.dateISO;
+  document.getElementById('cDateLabel').textContent = ({ en: 'Date', lt: 'Data', de: 'Datum', es: 'Fecha' })[uiLang] || 'Date';
+  cDate.onchange = () => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(cDate.value)) return;
+    pending.dateISO = cDate.value;
+    document.getElementById('cMerchant').textContent = parsed.merchant + ' · ' + new Date(pending.dateISO + 'T00:00:00').toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
+  };
   document.querySelectorAll('#typeToggle .tt').forEach(b => {
     b.classList.toggle('sel', b.dataset.type === parsed.type);
     b.onclick = () => { pending.type = b.dataset.type; showConfirm(pending); };
