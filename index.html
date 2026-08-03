@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="kaupa-version" content="5.2">
+<meta name="kaupa-version" content="5.3">
 <meta name="theme-color" content="#EDECE6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -368,7 +368,7 @@
   .catrow .bar { height: 16px; border-radius: 0 4px 4px 0; min-width: 3px; flex: none; max-width: calc(100% - 58px); transition: width .3s ease; }
   .catrow .val { font-size: 12.5px; font-weight: 700; color: var(--ink); white-space: nowrap; }
   .trend { margin-top: 16px; }
-  .trend .plot { display: flex; align-items: flex-end; gap: 14px; height: 120px; border-bottom: 1px solid var(--line); padding: 0 4px; }
+  .trend .plot { display: flex; align-items: flex-end; gap: 14px; height: 132px; border-bottom: 1px solid var(--line); padding: 16px 4px 0; }
   .trend .col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; cursor: pointer; }
   .trend .col .cap { font-size: 11px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
   .trend .col .bar { width: 22px; background: var(--seq); border-radius: 4px 4px 0 0; min-height: 2px; transition: height .3s ease; }
@@ -940,7 +940,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="5.2"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="5.3"></div>
   </section>
 
 </div>
@@ -2948,7 +2948,7 @@ function renderInsights() {
     const col = el('div', 'col' + (i < lastIdx ? ' dim' : ''));
     if (i === lastIdx && m.total > 0) col.appendChild(el('div', 'cap', fmt0(m.total)));
     const bar = el('div', 'bar');
-    bar.style.height = Math.max(2, Math.round(m.total / tmax * 92)) + '%';
+    bar.style.height = Math.max(2, Math.round(m.total / tmax * 82)) + '%';
     col.appendChild(bar);
     col.addEventListener('pointerdown', ev => showTip(ev.clientX, ev.clientY, fmtGBP(m.total), t('totalTip', { m: m.label })));
     plot.appendChild(col);
