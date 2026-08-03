@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="kaupa-version" content="4.9">
+<meta name="kaupa-version" content="5.0">
 <meta name="theme-color" content="#EDECE6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -618,13 +618,39 @@
   .confirm.open { animation: kpop 0.2s ease both; }
   .sheet { animation: kpop 0.22s ease both; }
   .invitecard, #pushPrompt .invitecard { animation: kfadeup 0.3s ease both; }
+
+  /* branded intro (plays once per app open, then dissolves) */
+  #kIntro {
+    position: fixed; inset: 0; z-index: 100000;
+    background: var(--paper);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    animation: kIntroWrap 1.5s ease forwards;
+  }
+  #kIntro .kmark {
+    font-family: "Fraunces", Georgia, serif; font-weight: 600;
+    font-size: 60px; letter-spacing: -0.01em; color: var(--ink); line-height: 1;
+    animation: kMarkIn 0.6s cubic-bezier(0.2,0.75,0.3,1) 0.05s both;
+  }
+  #kIntro .kmark i { color: var(--sage); font-style: normal; }
+  #kIntro .kline {
+    width: 70px; height: 3px; border-radius: 2px; background: var(--sage);
+    transform: scaleX(0); transform-origin: left center;
+    animation: kLineIn 0.5s cubic-bezier(0.4,0,0.2,1) 0.5s both;
+  }
+  @keyframes kMarkIn { from { opacity: 0; transform: translateY(9px) scale(0.9); } to { opacity: 1; transform: none; } }
+  @keyframes kLineIn { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes kIntroWrap { 0%, 68% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
+
   @media (prefers-reduced-motion: reduce) {
     .tab.active, .login.open, .confirm.open, .sheet, .invitecard, #pushPrompt .invitecard { animation: none !important; }
     .kbar { transition: none !important; }
+    #kIntro { display: none !important; }
   }
 </style>
 </head>
 <body>
+<div id="kIntro" aria-hidden="true"><div class="kmark">Kaupa<i>.</i></div><div class="kline"></div></div>
+<script>(function(){var i=document.getElementById('kIntro');if(!i)return;setTimeout(function(){if(i&&i.parentNode)i.parentNode.removeChild(i);},1650);})();</script>
 <span class="syncdot" id="syncDot"></span>
 
 <!-- ============ LOGIN ============ -->
@@ -902,7 +928,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="4.9"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="5.0"></div>
   </section>
 
 </div>
