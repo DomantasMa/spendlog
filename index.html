@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="kaupa-version" content="5.1">
+<meta name="kaupa-version" content="5.2">
 <meta name="theme-color" content="#EDECE6">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -445,6 +445,9 @@
   .spacerow .sav { width: 38px; height: 38px; border-radius: 50%; background: var(--sage-soft); color: var(--sage); display: flex; align-items: center; justify-content: center; font-weight: 700; }
   .spacerow .nm { font-size: 15px; font-weight: 700; }
   .spacerow .sb { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .spacerow .spaceopen { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; background: none; border: none; font: inherit; text-align: left; color: inherit; cursor: pointer; padding: 0; }
+  .spacerow .spacedel { flex: none; background: none; border: 1px solid var(--line); color: var(--bad); font: inherit; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 7px 12px; cursor: pointer; white-space: nowrap; }
+  .spacerow .spacedel.armed { background: var(--bad); color: #fff; border-color: var(--bad); }
   .budgetrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; }
   .budgetrow .bn { flex: 1; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .budgetrow .bn .dot { width: 9px; height: 9px; border-radius: 50%; }
@@ -937,7 +940,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="5.1"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="5.2"></div>
   </section>
 
 </div>
@@ -3592,14 +3595,50 @@ async function openSheet(mode) {
   if (mode === 'spaces') {
     sheet.appendChild(el('h3', null, t('spacesTitle')));
     sheet.appendChild(el('p', 'sheet-sub', t('spacesSub')));
+    const entriesWord = ({ en: 'entries', lt: 'įrašų', de: 'Einträge', es: 'entradas' })[uiLang] || 'entries';
+    const delWord = ({ en: 'Delete', lt: 'Ištrinti', de: 'Löschen', es: 'Borrar' })[uiLang] || 'Delete';
+    const delConfirmWord = ({ en: 'Delete?', lt: 'Ištrinti?', de: 'Löschen?', es: '¿Borrar?' })[uiLang] || 'Delete?';
     spaces.forEach(s => {
-      const row = el('button', 'spacerow' + (s.id === currentSpaceId ? ' cur' : ''));
+      const row = el('div', 'spacerow' + (s.id === currentSpaceId ? ' cur' : ''));
+      const open = el('button', 'spaceopen');
       const av = el('span', 'sav', s.name[0].toUpperCase());
       const txt = el('span');
       txt.appendChild(el('span', 'nm', s.name));
-      txt.appendChild(el('div', 'sb', s.kind === 'household' ? t('sharedSpace') : s.kind === 'business' ? t('businessLbl') : t('personalLbl')));
-      row.appendChild(av); row.appendChild(txt);
-      row.onclick = () => switchSpace(s.id);
+      const kindLbl = s.kind === 'household' ? t('sharedSpace') : s.kind === 'business' ? t('businessLbl') : t('personalLbl');
+      const subLine = el('div', 'sb', kindLbl);
+      txt.appendChild(subLine);
+      open.appendChild(av); open.appendChild(txt);
+      open.onclick = () => switchSpace(s.id);
+      row.appendChild(open);
+      // show entry count so identically-named spaces can be told apart
+      sb.from('transactions').select('id', { count: 'exact', head: true }).eq('space_id', s.id)
+        .then(({ count }) => { subLine.textContent = kindLbl + ' · ' + (count || 0) + ' ' + entriesWord; })
+        .catch(() => {});
+      // per-space delete (owner only, never the last remaining space)
+      if (s.created_by === session.user.id && spaces.length > 1) {
+        const del = el('button', 'spacedel', delWord);
+        let armed = false, timer = null;
+        del.onclick = async (ev) => {
+          ev.stopPropagation();
+          if (!armed) {
+            armed = true; del.classList.add('armed'); del.textContent = delConfirmWord;
+            timer = setTimeout(() => { armed = false; del.classList.remove('armed'); del.textContent = delWord; }, 3000);
+            return;
+          }
+          clearTimeout(timer);
+          del.disabled = true;
+          const { error } = await sb.from('spaces').delete().eq('id', s.id);
+          if (error) { del.disabled = false; alertMsg(t('deleteFailed')); return; }
+          if (s.id === currentSpaceId) {
+            await loadSpaces();
+            await switchSpace(spaces.length ? spaces[0].id : null);
+            openSheet('spaces');
+          } else {
+            await loadSpaces(); render(); openSheet('spaces');
+          }
+        };
+        row.appendChild(del);
+      }
       sheet.appendChild(row);
     });
     const plus = el('button', 'sheet-item', t('newSpaceItem'));
