@@ -649,6 +649,26 @@
   .cdaterow label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
   .cdaterow input[type=date] { font: inherit; font-size: 15px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; }
 
+  /* recurring */
+  .repeatrow { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 2px; }
+  .repeatrow label { font-size: 13px; font-weight: 600; color: var(--ink-2); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .repeatrow input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--sage); margin: 0; cursor: pointer; }
+  .repeatrow select { font: inherit; font-size: 14px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 6px 10px; margin: 0; }
+  .recdue { background: var(--ink); color: var(--paper); border-radius: 20px; padding: 16px 18px; margin-top: 16px; box-shadow: var(--shadow-big); }
+  .recdue .rl { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; display: flex; align-items: center; gap: 7px; }
+  .recdue .rt { font-family: "Fraunces", Georgia, serif; font-size: 19px; font-weight: 600; margin-top: 4px; }
+  .recdue .rb { font-size: 13.5px; opacity: 0.85; margin-top: 4px; line-height: 1.45; }
+  .recdue .rrow { display: flex; gap: 8px; margin-top: 14px; }
+  .recdue .rrow button { flex: 1; font: inherit; font-size: 14px; font-weight: 600; border-radius: 12px; padding: 10px; border: none; cursor: pointer; }
+  .recdue .rrow .radd { background: var(--paper); color: var(--ink); }
+  .recdue .rrow .rrev { background: rgba(255,255,255,0.14); color: var(--paper); }
+  .recrow { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .recrow .rinfo { flex: 1; min-width: 0; }
+  .recrow .rn { font-size: 14.5px; font-weight: 650; color: var(--ink); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .recrow .rs { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .recrow .ramt { font-size: 14.5px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .recrow .rstop { font: inherit; font-size: 12.5px; font-weight: 600; color: var(--bad); background: none; border: none; cursor: pointer; padding: 4px 6px; }
+
   @media (prefers-reduced-motion: reduce) {
     .tab.active, .login.open, .confirm.open, .sheet, .invitecard, #pushPrompt .invitecard { animation: none !important; }
     .kbar { transition: none !important; }
@@ -730,9 +750,27 @@
         <label id="cDateLabel" for="cDate">Date</label>
         <input type="date" id="cDate">
       </div>
+      <div class="repeatrow" id="cRepeatRow">
+        <label for="cRepeat"><input type="checkbox" id="cRepeat"><span id="cRepeatLabel">Repeat every</span></label>
+        <select id="cRepeatFreq">
+          <option value="monthly">month</option>
+          <option value="weekly">week</option>
+          <option value="yearly">year</option>
+        </select>
+      </div>
       <div class="row">
         <button class="btn-cancel" id="cCancel">Cancel</button>
         <button class="btn-primary" id="cSave">Save expense</button>
+      </div>
+    </div>
+
+    <div class="recdue" id="recDueCard" style="display:none;">
+      <div class="rl"><span>🔁</span><span id="recDueLab">Recurring ready</span></div>
+      <div class="rt" id="recDueTitle"></div>
+      <div class="rb" id="recDueBody"></div>
+      <div class="rrow">
+        <button class="radd" id="recDueAdd">Add all</button>
+        <button class="rrev" id="recDueReview">Review</button>
       </div>
     </div>
 
@@ -866,6 +904,17 @@
     <div id="budgetsCards"></div>
   </section>
 
+  <!-- ===== RECURRING PAGE ===== -->
+  <section class="tab" id="tab-recurringpage">
+    <div class="subhead">
+      <button class="backlink" id="recBack">‹ Back</button>
+    </div>
+    <div class="pagetitle" style="padding-top:6px;" id="recPageTitle">Recurring</div>
+    <div class="pagesub" id="recSubT">Bills and subscriptions that repeat. They appear ready to add on the day they're due.</div>
+    <div id="recList"></div>
+    <div class="empty" id="recEmpty" style="display:none;">Nothing recurring yet. Tick “Repeat” when you add an expense to set one up.</div>
+  </section>
+
   <!-- ===== PROJECTION PAGE ===== -->
   <section class="tab" id="tab-projectionpage">
     <div class="subhead">
@@ -915,6 +964,10 @@
         <span><span class="st">Budgets</span><br><span class="ss" id="setBudgetsSub">Set monthly limits per category</span></span>
         <span class="sa">Open</span>
       </button>
+      <button class="setrow" id="setRecurring">
+        <span><span class="st" id="setRecurringTitle">Recurring</span><br><span class="ss" id="setRecurringSub">Bills &amp; subscriptions that repeat</span></span>
+        <span class="sa" id="setRecurringVal">Open</span>
+      </button>
       <button class="setrow" id="setAppLang">
         <span><span class="st">App language</span><br><span class="ss">All screens and labels</span></span>
         <span class="sa" id="setAppLangVal">English</span>
@@ -940,7 +993,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="5.3"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="5.4"></div>
   </section>
 
 </div>
@@ -1865,6 +1918,118 @@ async function loadBudgets() {
   if (error) { budgetsUnavailable = true; return; }
   (data || []).forEach(b => { budgets[b.category] = Number(b.monthly_limit); });
 }
+
+/* ================= recurring ================= */
+let recurring = [];        // active recurring templates for the current space
+let recurringDue = [];     // subset whose next_due <= today
+let recurringUnavailable = false;
+const RECUR_STR = {
+  en: { repeat:'Repeat', monthly:'monthly', weekly:'weekly', yearly:'yearly', dueLab:'Recurring ready',
+        dueTitle:n=>n+' recurring ready', addAll:'Add all', manage:'Manage', pageTitle:'Recurring',
+        pageSub:'Bills and subscriptions that repeat — they appear ready to add on the day they’re due.',
+        empty:'Nothing recurring yet. Tick “Repeat” when you add an expense to set one up.',
+        setSub:'Bills & subscriptions that repeat', stop:'Stop', next:'next', every:{monthly:'monthly',weekly:'weekly',yearly:'yearly'} },
+  lt: { repeat:'Kartoti', monthly:'kas mėnesį', weekly:'kas savaitę', yearly:'kasmet', dueLab:'Pasikartojantys paruošti',
+        dueTitle:n=>'Paruošta pridėti: '+n, addAll:'Pridėti visus', manage:'Tvarkyti', pageTitle:'Pasikartojantys',
+        pageSub:'Sąskaitos ir prenumeratos, kurios kartojasi — jos pasirodo paruoštos pridėti tą dieną, kai reikia.',
+        empty:'Kol kas nieko pasikartojančio. Pridėdamas išlaidą pažymėk „Kartoti“.',
+        setSub:'Sąskaitos ir prenumeratos, kurios kartojasi', stop:'Sustabdyti', next:'kitas', every:{monthly:'kas mėnesį',weekly:'kas savaitę',yearly:'kasmet'} },
+  de: { repeat:'Wiederholen', monthly:'monatlich', weekly:'wöchentlich', yearly:'jährlich', dueLab:'Wiederkehrend bereit',
+        dueTitle:n=>n+' bereit zum Hinzufügen', addAll:'Alle hinzufügen', manage:'Verwalten', pageTitle:'Wiederkehrend',
+        pageSub:'Rechnungen und Abos, die sich wiederholen — sie erscheinen am Fälligkeitstag bereit zum Hinzufügen.',
+        empty:'Noch nichts Wiederkehrendes. Hake beim Hinzufügen „Wiederholen“ an.',
+        setSub:'Rechnungen & Abos, die sich wiederholen', stop:'Stopp', next:'nächste', every:{monthly:'monatlich',weekly:'wöchentlich',yearly:'jährlich'} },
+  es: { repeat:'Repetir', monthly:'mensual', weekly:'semanal', yearly:'anual', dueLab:'Recurrentes listos',
+        dueTitle:n=>n+' listos para añadir', addAll:'Añadir todos', manage:'Gestionar', pageTitle:'Recurrentes',
+        pageSub:'Facturas y suscripciones que se repiten — aparecen listas para añadir el día que toca.',
+        empty:'Nada recurrente aún. Marca «Repetir» al añadir un gasto para crear uno.',
+        setSub:'Facturas y suscripciones que se repiten', stop:'Parar', next:'próx.', every:{monthly:'mensual',weekly:'semanal',yearly:'anual'} },
+};
+function rstr() { return RECUR_STR[uiLang] || RECUR_STR.en; }
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function advanceDate(iso, freq) {
+  const d = new Date(iso + 'T00:00:00');
+  if (freq === 'weekly') { d.setDate(d.getDate() + 7); }
+  else if (freq === 'yearly') { d.setFullYear(d.getFullYear() + 1); }
+  else { // monthly: keep day-of-month, clamp to shorter months
+    const day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + 1);
+    const dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    d.setDate(Math.min(day, dim));
+  }
+  return d.toISOString().slice(0, 10);
+}
+async function loadRecurring() {
+  recurring = []; recurringDue = []; recurringUnavailable = false;
+  const { data, error } = await sb.from('recurring').select('*').eq('space_id', currentSpaceId).eq('active', true);
+  if (error) { recurringUnavailable = true; return; }
+  recurring = (data || []).map(r => ({ id: r.id, merchant: r.merchant, amount: Number(r.amount), cat: r.category, type: r.type || 'expense', freq: r.freq || 'monthly', nextDue: r.next_due }));
+  computeRecurringDue();
+}
+function computeRecurringDue() {
+  const today = todayISO();
+  recurringDue = recurring.filter(r => r.nextDue <= today);
+}
+async function createRecurring(p) {
+  const freq = p.repeatFreq || 'monthly';
+  const payload = { space_id: currentSpaceId, user_id: session.user.id, merchant: p.merchant, amount: p.amount,
+    category: p.type === 'income' ? 'income' : p.cat, type: p.type || 'expense', freq, next_due: advanceDate(p.dateISO, freq), active: true };
+  const { data, error } = await sb.from('recurring').insert(payload).select().single();
+  if (!error && data) recurring.push({ id: data.id, merchant: data.merchant, amount: Number(data.amount), cat: data.category, type: data.type, freq: data.freq, nextDue: data.next_due });
+  else if (error) alertMsg(t('couldNotSave'));
+}
+async function addAllDue() {
+  const today = todayISO();
+  for (const r of recurring) {
+    if (r.nextDue > today) continue;
+    let guard = 0;
+    while (r.nextDue <= today && guard < 24) {
+      await insertTx({ amount: r.amount, merchant: r.merchant, cat: r.cat, type: r.type, dateISO: r.nextDue, source: 'recurring' });
+      r.nextDue = advanceDate(r.nextDue, r.freq); guard++;
+    }
+    await sb.from('recurring').update({ next_due: r.nextDue }).eq('id', r.id);
+  }
+  computeRecurringDue(); renderRecurringDue(); render();
+}
+async function stopRecurring(id) {
+  await sb.from('recurring').delete().eq('id', id);
+  recurring = recurring.filter(r => r.id !== id);
+  computeRecurringDue(); renderRecurringDue(); renderRecurringPage();
+}
+function renderRecurringDue() {
+  const card = document.getElementById('recDueCard');
+  if (!card) return;
+  if (!recurringDue.length) { card.style.display = 'none'; return; }
+  const s = rstr();
+  document.getElementById('recDueLab').textContent = s.dueLab;
+  document.getElementById('recDueTitle').textContent = s.dueTitle(recurringDue.length);
+  document.getElementById('recDueBody').textContent = recurringDue.slice(0, 4)
+    .map(r => r.merchant + ' ' + fmtGBP(r.amount)).join(', ') + (recurringDue.length > 4 ? '…' : '');
+  document.getElementById('recDueAdd').textContent = s.addAll;
+  document.getElementById('recDueReview').textContent = s.manage;
+  card.style.display = 'block';
+}
+function renderRecurringPage() {
+  const s = rstr();
+  const tt = document.getElementById('recPageTitle'); if (tt) tt.textContent = s.pageTitle;
+  const st = document.getElementById('recSubT'); if (st) st.textContent = s.pageSub;
+  const box = document.getElementById('recList'); if (!box) return;
+  box.textContent = '';
+  const empty = document.getElementById('recEmpty');
+  if (!recurring.length) { if (empty) { empty.style.display = 'block'; empty.textContent = s.empty; } return; }
+  if (empty) empty.style.display = 'none';
+  recurring.slice().sort((a, b) => a.nextDue.localeCompare(b.nextDue)).forEach(r => {
+    const row = el('div', 'recrow');
+    const info = el('div', 'rinfo');
+    info.appendChild(el('div', 'rn', r.merchant));
+    const due = new Date(r.nextDue + 'T00:00:00').toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
+    info.appendChild(el('div', 'rs', (s.every[r.freq] || r.freq) + ' · ' + s.next + ' ' + due));
+    const amt = el('div', 'ramt', (r.type === 'income' ? '+' : '') + fmtGBP(r.amount));
+    const stop = el('button', 'rstop', s.stop);
+    stop.onclick = () => stopRecurring(r.id);
+    row.appendChild(info); row.appendChild(amt); row.appendChild(stop);
+    box.appendChild(row);
+  });
+}
 async function loadTx() {
   loading = true; setDot('busy');
   const { data, error } = await sb.from('transactions').select('*')
@@ -1942,7 +2107,7 @@ async function bootstrap() {
   const saved = lsGet('spendlog.space', null);
   currentSpaceId = spaces.some(s => s.id === saved) ? saved : spaces[0].id;
   fillProfile();
-  await Promise.all([loadTx(), loadMembers(), loadBudgets(), refreshInvites()]);
+  await Promise.all([loadTx(), loadMembers(), loadBudgets(), loadRecurring(), refreshInvites()]);
   syncCustomCats();
   render(); flushOutbox();
   refreshPushPrefs();
@@ -1972,7 +2137,7 @@ sb.auth.onAuthStateChange((_ev, s) => {
 async function switchSpace(id) {
   currentSpaceId = id; lsSet('spendlog.space', id);
   closeSheet(); catFilter = null; chatLog = [];
-  await Promise.all([loadTx(), loadMembers(), loadBudgets()]);
+  await Promise.all([loadTx(), loadMembers(), loadBudgets(), loadRecurring()]);
   syncCustomCats();
   render();
 }
@@ -2134,6 +2299,7 @@ let pending = null;
 const confirmEl = document.getElementById('confirm');
 function showConfirmMulti(list) {
   pending = { multi: list };
+  const rRowM = document.getElementById('cRepeatRow'); if (rRowM) rRowM.style.display = 'none';
   const total = list.reduce((s, p) => s + (p.type === 'income' ? -p.amount : p.amount), 0);
   document.getElementById('cAmount').textContent = fmtGBP(Math.abs(total));
   document.getElementById('cAmount').style.color = '';
@@ -2175,6 +2341,17 @@ function showConfirmMulti(list) {
 }
 function showConfirm(parsed) {
   pending = parsed;
+  // recurring toggle (single entries only)
+  const rRow = document.getElementById('cRepeatRow');
+  if (rRow) {
+    rRow.style.display = '';
+    const rChk = document.getElementById('cRepeat');
+    rChk.checked = false;
+    const s = rstr();
+    document.getElementById('cRepeatLabel').textContent = s.repeat;
+    const fs = document.getElementById('cRepeatFreq');
+    fs.options[0].textContent = s.monthly; fs.options[1].textContent = s.weekly; fs.options[2].textContent = s.yearly;
+  }
   document.getElementById('typeToggle').style.display = '';
   document.getElementById('cSave').textContent = parsed.type === 'income' ? t('saveIncome') : t('saveExpense');
   const chipsReset = document.getElementById('cChips');
@@ -2218,10 +2395,15 @@ function hideConfirm() { pending = null; confirmEl.classList.remove('open'); }
 document.getElementById('cCancel').onclick = hideConfirm;
 document.getElementById('cSave').onclick = async () => {
   if (!pending) return;
-  const p = pending; hideConfirm();
+  const p = pending;
+  if (!p.multi) {
+    const rChk = document.getElementById('cRepeat');
+    if (rChk && rChk.checked) { p.repeat = true; p.repeatFreq = document.getElementById('cRepeatFreq').value; }
+  }
+  hideConfirm();
   transcriptEl.textContent = '';
   if (p.multi) { for (const item of p.multi) await insertTx(item); }
-  else insertTx(p);
+  else { insertTx(p); if (p.repeat) await createRecurring(p); }
 };
 
 /* ================= voice ================= */
@@ -2425,7 +2607,7 @@ typeInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitTyped(
 /* ================= tabs ================= */
 function switchTab(name) {
   currentTab = name;
-  const hl = (name === 'budgetspage' || name === 'projectionpage') ? 'insights' : name;
+  const hl = (name === 'budgetspage' || name === 'projectionpage') ? 'insights' : (name === 'recurringpage' ? 'settings' : name);
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   document.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('sel', b.dataset.tab === hl));
   window.scrollTo(0, 0);
@@ -2505,8 +2687,10 @@ function render() {
   renderActivity();
   renderInsights();
   renderSettings();
+  renderRecurringDue();
   if (currentTab === 'budgetspage') renderBudgetsPage();
   if (currentTab === 'projectionpage') renderProjectionPage();
+  if (currentTab === 'recurringpage') renderRecurringPage();
 }
 
 function renderHome() {
@@ -3318,9 +3502,18 @@ function renderSettings() {
   document.getElementById('setBudgetsSub').textContent = budgetsUnavailable ? t('tempUnavailable') : (set ? t('nSet', { n: set }) + (overs ? t('nOverPlan', { n: overs }) : '') : t('setLimitsSub'));
   const pv = document.getElementById('setPushVal');
   if (pv) pv.textContent = pushOn ? t('on') : t('off');
+  const rs = rstr();
+  const rt = document.getElementById('setRecurringTitle'); if (rt) rt.textContent = rs.pageTitle;
+  const rsub = document.getElementById('setRecurringSub');
+  if (rsub) rsub.textContent = recurring.length ? (recurring.length + ' · ' + rs.setSub) : rs.setSub;
+  const rval = document.getElementById('setRecurringVal'); if (rval) rval.textContent = t('open');
 }
 document.getElementById('setSpaces').onclick = () => openSheet('menu');
 document.getElementById('setBudgets').onclick = () => switchTab('budgetspage');
+document.getElementById('setRecurring').onclick = () => switchTab('recurringpage');
+document.getElementById('recBack').onclick = () => switchTab('settings');
+document.getElementById('recDueAdd').onclick = () => addAllDue();
+document.getElementById('recDueReview').onclick = () => switchTab('recurringpage');
 document.getElementById('setAppLang').onclick = () => { setUiLang(UI_LANGS[(UI_LANGS.indexOf(uiLang) + 1) % UI_LANGS.length]); };
 
 
