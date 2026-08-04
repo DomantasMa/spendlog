@@ -676,6 +676,24 @@
   .safecard.neg .bignum { color: var(--terra); }
   .safecard .safesub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
 
+  /* savings goals */
+  .goalcard { background: var(--card); border-radius: 18px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--line); }
+  .goalcard .gh { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .goalcard .gn { font-size: 16px; font-weight: 700; color: var(--ink); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .goalcard .gtier { font-size: 11.5px; font-weight: 700; color: var(--sage); white-space: nowrap; }
+  .goalcard .gamt { font-size: 13px; color: var(--ink-2); font-weight: 600; margin-top: 6px; }
+  .goalcard .gbar { height: 10px; border-radius: 6px; background: var(--paper); border: 1px solid var(--line); margin-top: 8px; overflow: hidden; }
+  .goalcard .gfill { height: 100%; background: var(--sage); border-radius: 6px; transition: width 0.4s ease; }
+  .goalcard .gfill.done { background: var(--sage); }
+  .goalcard .geta { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .goalcard .geta.done { color: var(--sage); font-weight: 600; }
+  .goalcard .grow { display: flex; gap: 8px; margin-top: 12px; }
+  .goalcard .grow button { font: inherit; font-size: 13px; font-weight: 600; border-radius: 10px; padding: 8px 12px; cursor: pointer; }
+  .goalcard .gadd { background: var(--ink); color: var(--paper); border: none; }
+  .goalcard .gedit { background: var(--card); color: var(--ink-2); border: 1px solid var(--line); }
+  .goalcard .gdel { background: none; color: var(--bad); border: none; margin-left: auto; }
+  #newGoalBtn { width: 100%; font: inherit; font-size: 14.5px; font-weight: 600; padding: 13px; border-radius: 14px; border: 1px dashed var(--line); background: var(--card); color: var(--ink-2); cursor: pointer; margin-top: 4px; }
+
   @media (prefers-reduced-motion: reduce) {
     .tab.active, .login.open, .confirm.open, .sheet, .invitecard, #pushPrompt .invitecard { animation: none !important; }
     .kbar { transition: none !important; }
@@ -903,6 +921,7 @@
     </div>
     <div class="insbtns">
       <button class="insbtn light" id="budgetsBtn">Budgets</button>
+      <button class="insbtn light" id="goalsBtn">Goals</button>
       <button class="insbtn dark" id="projectBtn">Project forward</button>
     </div>
   </section>
@@ -915,6 +934,18 @@
     <div class="pagetitle" style="padding-top:6px;">Budgets</div>
     <div class="pagesub" id="budgetsSubT"></div>
     <div id="budgetsCards"></div>
+  </section>
+
+  <!-- ===== GOALS PAGE ===== -->
+  <section class="tab" id="tab-goalspage">
+    <div class="subhead">
+      <button class="backlink" id="goalsBack">‹ Back</button>
+    </div>
+    <div class="pagetitle" style="padding-top:6px;" id="goalsPageTitle">Goals</div>
+    <div class="pagesub" id="goalsSubT">Save toward something — Kaupa estimates when you’ll get there.</div>
+    <div id="goalsList"></div>
+    <div class="empty" id="goalsEmpty" style="display:none;"></div>
+    <button id="newGoalBtn">+ New goal</button>
   </section>
 
   <!-- ===== RECURRING PAGE ===== -->
@@ -1010,7 +1041,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="5.9"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="6.0"></div>
   </section>
 
 </div>
@@ -2082,6 +2113,180 @@ function renderRecurringPage() {
     box.appendChild(row);
   });
 }
+
+/* ================= savings goals ================= */
+let goals = [];
+let goalsUnavailable = false;
+const GOAL_STR = {
+  en: { pageTitle: 'Goals', pageSub: 'Save toward something — Kaupa estimates when you’ll get there.', btn: 'Goals',
+        newGoal: 'New goal', namePh: 'What are you saving for?', targetPh: 'Target amount (£)', deadlinePh: 'Target date — optional',
+        add: 'Add', cancel: 'Cancel', save: 'Save', of: 'of', addFunds: 'Add', contribute: 'Add to “{name}”', edit: 'Edit', del: 'Delete', amount: 'Amount (£)',
+        reached: 'Reached! 🎉', eta: '≈{amt}/mo spare · done around {date}', noSurplus: 'No spare cash to save at your current pace',
+        onTrack: 'On track for {date}', behind: 'Need {amt}/mo to hit {date}',
+        tiers: ['Just started', 'Good start', 'Halfway', 'Almost there', 'Reached! 🎉'],
+        empty: 'No goals yet. Tap “New goal” to start saving toward something.' },
+  lt: { pageTitle: 'Tikslai', pageSub: 'Taupyk kažkam — Kaupa apskaičiuos, kada pasieksi.', btn: 'Tikslai',
+        newGoal: 'Naujas tikslas', namePh: 'Kam taupai?', targetPh: 'Tikslo suma (£)', deadlinePh: 'Data — nebūtina',
+        add: 'Pridėti', cancel: 'Atšaukti', save: 'Išsaugoti', of: 'iš', addFunds: 'Papildyti', contribute: 'Papildyti „{name}“', edit: 'Keisti', del: 'Ištrinti', amount: 'Suma (£)',
+        reached: 'Pasiekta! 🎉', eta: '≈{amt}/mėn laisvų · maždaug {date}', noSurplus: 'Šiuo tempu laisvų lėšų taupymui nėra',
+        onTrack: 'Spėsi iki {date}', behind: 'Reikia {amt}/mėn iki {date}',
+        tiers: ['Tik pradėta', 'Gera pradžia', 'Pusiaukelė', 'Beveik', 'Pasiekta! 🎉'],
+        empty: 'Tikslų dar nėra. Spausk „Naujas tikslas“ ir pradėk taupyti.' },
+  de: { pageTitle: 'Ziele', pageSub: 'Spare auf etwas hin — Kaupa schätzt, wann du es erreichst.', btn: 'Ziele',
+        newGoal: 'Neues Ziel', namePh: 'Wofür sparst du?', targetPh: 'Zielbetrag (£)', deadlinePh: 'Datum — optional',
+        add: 'Hinzufügen', cancel: 'Abbrechen', save: 'Speichern', of: 'von', addFunds: 'Hinzufügen', contribute: 'Zu „{name}“ hinzufügen', edit: 'Bearbeiten', del: 'Löschen', amount: 'Betrag (£)',
+        reached: 'Erreicht! 🎉', eta: '≈{amt}/Mon. frei · etwa {date}', noSurplus: 'Kein freies Geld beim aktuellen Tempo',
+        onTrack: 'Schaffst du bis {date}', behind: '{amt}/Mon. nötig bis {date}',
+        tiers: ['Gerade erst', 'Guter Start', 'Halb', 'Fast', 'Erreicht! 🎉'],
+        empty: 'Noch keine Ziele. Tippe „Neues Ziel“, um zu sparen.' },
+  es: { pageTitle: 'Metas', pageSub: 'Ahorra para algo — Kaupa estima cuándo lo lograrás.', btn: 'Metas',
+        newGoal: 'Nueva meta', namePh: '¿Para qué ahorras?', targetPh: 'Cantidad objetivo (£)', deadlinePh: 'Fecha — opcional',
+        add: 'Añadir', cancel: 'Cancelar', save: 'Guardar', of: 'de', addFunds: 'Añadir', contribute: 'Añadir a «{name}»', edit: 'Editar', del: 'Eliminar', amount: 'Cantidad (£)',
+        reached: '¡Logrado! 🎉', eta: '≈{amt}/mes libre · hacia {date}', noSurplus: 'Sin dinero libre para ahorrar a este ritmo',
+        onTrack: 'Vas bien para {date}', behind: 'Necesitas {amt}/mes para {date}',
+        tiers: ['Recién empieza', 'Buen comienzo', 'A mitad', 'Casi', '¡Logrado! 🎉'],
+        empty: 'Aún no hay metas. Toca «Nueva meta» para empezar a ahorrar.' },
+};
+function gstr() { return GOAL_STR[uiLang] || GOAL_STR.en; }
+async function loadGoals() {
+  goals = []; goalsUnavailable = false;
+  const { data, error } = await sb.from('goals').select('*').eq('space_id', currentSpaceId).order('created_at');
+  if (error) { goalsUnavailable = true; return; }
+  goals = (data || []).map(g => ({ id: g.id, name: g.name, target: Number(g.target), saved: Number(g.saved), deadline: g.deadline }));
+}
+function fieldModal(opts) {
+  return new Promise(resolve => {
+    const back = el('div');
+    back.style.cssText = 'position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(25,24,19,0.32);padding:24px;';
+    const card = el('div');
+    card.style.cssText = 'background:var(--card);border-radius:22px;padding:20px;width:100%;max-width:360px;box-shadow:var(--shadow-big);';
+    const h = el('div', null, opts.title);
+    h.style.cssText = 'font-family:"Fraunces",Georgia,serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:10px;';
+    card.appendChild(h);
+    const inputs = {};
+    opts.fields.forEach(f => {
+      const lab = el('div', null, f.label);
+      lab.style.cssText = 'font-size:12px;font-weight:600;color:var(--muted);margin:10px 0 5px;';
+      const inp = el('input'); inp.type = f.type || 'text';
+      if (f.value != null && f.value !== '') inp.value = f.value;
+      if (f.type === 'number') inp.setAttribute('inputmode', 'decimal');
+      inp.setAttribute('autocomplete', 'off');
+      inp.style.cssText = 'width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 12px;';
+      card.appendChild(lab); card.appendChild(inp); inputs[f.key] = inp;
+    });
+    const row = el('div'); row.style.cssText = 'display:flex;gap:8px;margin-top:16px;';
+    const cancel = el('button', null, opts.cancelLabel);
+    cancel.style.cssText = 'flex:1;font:inherit;font-size:15px;font-weight:600;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);cursor:pointer;';
+    const ok = el('button', null, opts.okLabel);
+    ok.style.cssText = 'flex:1;font:inherit;font-size:15px;font-weight:600;padding:11px;border-radius:12px;border:none;background:var(--ink);color:var(--paper);cursor:pointer;';
+    row.appendChild(cancel); row.appendChild(ok); card.appendChild(row);
+    let done = false;
+    function close(v) { if (done) return; done = true; back.remove(); resolve(v); }
+    cancel.onclick = () => close(null);
+    ok.onclick = () => { const out = {}; for (const k in inputs) out[k] = inputs[k].value.trim(); close(out); };
+    back.addEventListener('click', e => { if (e.target === back) close(null); });
+    back.appendChild(card); document.body.appendChild(back);
+    setTimeout(() => { const f0 = opts.fields[0] && inputs[opts.fields[0].key]; if (f0) f0.focus(); }, 60);
+  });
+}
+async function newOrEditGoal(existing) {
+  const g = gstr();
+  const res = await fieldModal({
+    title: existing ? g.edit : g.newGoal, okLabel: existing ? g.save : g.add, cancelLabel: g.cancel,
+    fields: [
+      { key: 'name', label: g.namePh, type: 'text', value: existing ? existing.name : '' },
+      { key: 'target', label: g.targetPh, type: 'number', value: existing ? existing.target : '' },
+      { key: 'deadline', label: g.deadlinePh, type: 'date', value: existing && existing.deadline ? existing.deadline : '' },
+    ],
+  });
+  if (!res) return;
+  const name = (res.name || '').trim();
+  const target = parseFloat(res.target);
+  if (!name || !(target > 0)) return;
+  const deadline = /^\d{4}-\d{2}-\d{2}$/.test(res.deadline) ? res.deadline : null;
+  if (existing) {
+    const { error } = await sb.from('goals').update({ name, target, deadline }).eq('id', existing.id);
+    if (!error) { existing.name = name; existing.target = target; existing.deadline = deadline; }
+    else alertMsg(t('couldNotSave'));
+  } else {
+    const { data, error } = await sb.from('goals').insert({ space_id: currentSpaceId, user_id: session.user.id, name, target, saved: 0, deadline }).select().single();
+    if (!error && data) goals.push({ id: data.id, name: data.name, target: Number(data.target), saved: Number(data.saved), deadline: data.deadline });
+    else if (error) alertMsg(t('couldNotSave'));
+  }
+  renderGoalsPage();
+}
+async function contributeGoal(goal) {
+  const g = gstr();
+  const res = await fieldModal({ title: g.contribute.replace('{name}', goal.name), okLabel: g.add, cancelLabel: g.cancel,
+    fields: [{ key: 'amt', label: g.amount, type: 'number', value: '' }] });
+  if (!res) return;
+  const amt = parseFloat(res.amt);
+  if (!(amt > 0)) return;
+  const saved = Math.max(0, goal.saved + amt);
+  const { error } = await sb.from('goals').update({ saved }).eq('id', goal.id);
+  if (!error) { goal.saved = saved; renderGoalsPage(); }
+  else alertMsg(t('couldNotSave'));
+}
+async function deleteGoal(id) {
+  await sb.from('goals').delete().eq('id', id);
+  goals = goals.filter(x => x.id !== id);
+  renderGoalsPage();
+}
+function goalEta(goal) {
+  const g = gstr();
+  const remaining = goal.target - goal.saved;
+  if (remaining <= 0) return { text: g.reached, done: true };
+  const b = projBase();
+  const surplus = b.income - b.spend;
+  const fmtDate = d => d.toLocaleDateString(loc(), { month: 'short', year: 'numeric' });
+  if (goal.deadline) {
+    const dl = new Date(goal.deadline + 'T00:00:00');
+    const now = new Date();
+    const monthsLeft = Math.max(1, (dl.getFullYear() - now.getFullYear()) * 12 + (dl.getMonth() - now.getMonth()));
+    const needed = remaining / monthsLeft;
+    if (surplus >= needed) return { text: g.onTrack.replace('{date}', fmtDate(dl)) };
+    return { text: g.behind.replace('{amt}', fmtGBP(Math.ceil(needed))).replace('{date}', fmtDate(dl)) };
+  }
+  if (surplus > 0) {
+    const months = Math.ceil(remaining / surplus);
+    const eta = new Date(); eta.setMonth(eta.getMonth() + months);
+    return { text: g.eta.replace('{amt}', fmtGBP(Math.round(surplus))).replace('{date}', fmtDate(eta)) };
+  }
+  return { text: g.noSurplus };
+}
+function renderGoalsPage() {
+  const g = gstr();
+  const tt = document.getElementById('goalsPageTitle'); if (tt) tt.textContent = g.pageTitle;
+  const st = document.getElementById('goalsSubT'); if (st) st.textContent = g.pageSub;
+  const nb = document.getElementById('newGoalBtn'); if (nb) nb.textContent = '+ ' + g.newGoal;
+  const box = document.getElementById('goalsList'); if (!box) return;
+  box.textContent = '';
+  const empty = document.getElementById('goalsEmpty');
+  if (goalsUnavailable) { if (empty) { empty.style.display = 'block'; empty.textContent = t('tempUnavailable'); } return; }
+  if (!goals.length) { if (empty) { empty.style.display = 'block'; empty.textContent = g.empty; } return; }
+  if (empty) empty.style.display = 'none';
+  goals.forEach(goal => {
+    const pct = Math.max(0, Math.min(100, goal.target > 0 ? Math.round(goal.saved / goal.target * 100) : 0));
+    const tierIdx = pct >= 100 ? 4 : pct >= 75 ? 3 : pct >= 50 ? 2 : pct >= 25 ? 1 : 0;
+    const card = el('div', 'goalcard');
+    const head = el('div', 'gh');
+    head.appendChild(el('div', 'gn', goal.name));
+    head.appendChild(el('div', 'gtier', g.tiers[tierIdx]));
+    card.appendChild(head);
+    card.appendChild(el('div', 'gamt', fmtGBP(goal.saved) + ' ' + g.of + ' ' + fmtGBP(goal.target) + ' · ' + pct + '%'));
+    const bar = el('div', 'gbar'); const fill = el('div', 'gfill'); fill.style.width = pct + '%';
+    if (pct >= 100) fill.classList.add('done'); bar.appendChild(fill); card.appendChild(bar);
+    const eta = goalEta(goal);
+    const etaEl = el('div', 'geta', eta.text); if (eta.done) etaEl.classList.add('done'); card.appendChild(etaEl);
+    const row = el('div', 'grow');
+    const addb = el('button', 'gadd', '+ ' + g.addFunds); addb.onclick = () => contributeGoal(goal);
+    const editb = el('button', 'gedit', g.edit); editb.onclick = () => newOrEditGoal(goal);
+    const delb = el('button', 'gdel', g.del); delb.onclick = () => deleteGoal(goal.id);
+    row.appendChild(addb); row.appendChild(editb); row.appendChild(delb);
+    card.appendChild(row);
+    box.appendChild(card);
+  });
+}
 async function loadTx() {
   loading = true; setDot('busy');
   const { data, error } = await sb.from('transactions').select('*')
@@ -2159,7 +2364,7 @@ async function bootstrap() {
   const saved = lsGet('spendlog.space', null);
   currentSpaceId = spaces.some(s => s.id === saved) ? saved : spaces[0].id;
   fillProfile();
-  await Promise.all([loadTx(), loadMembers(), loadBudgets(), loadRecurring(), refreshInvites()]);
+  await Promise.all([loadTx(), loadMembers(), loadBudgets(), loadRecurring(), loadGoals(), refreshInvites()]);
   syncCustomCats();
   render(); flushOutbox();
   refreshPushPrefs();
@@ -2189,7 +2394,7 @@ sb.auth.onAuthStateChange((_ev, s) => {
 async function switchSpace(id) {
   currentSpaceId = id; lsSet('spendlog.space', id);
   closeSheet(); catFilter = null; chatLog = [];
-  await Promise.all([loadTx(), loadMembers(), loadBudgets(), loadRecurring()]);
+  await Promise.all([loadTx(), loadMembers(), loadBudgets(), loadRecurring(), loadGoals()]);
   syncCustomCats();
   render();
 }
@@ -2659,7 +2864,7 @@ typeInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitTyped(
 /* ================= tabs ================= */
 function switchTab(name) {
   currentTab = name;
-  const hl = (name === 'budgetspage' || name === 'projectionpage') ? 'insights' : (name === 'recurringpage' ? 'settings' : name);
+  const hl = (name === 'budgetspage' || name === 'projectionpage' || name === 'goalspage') ? 'insights' : (name === 'recurringpage' ? 'settings' : name);
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
   document.querySelectorAll('.tabbtn').forEach(b => b.classList.toggle('sel', b.dataset.tab === hl));
   window.scrollTo(0, 0);
@@ -2743,6 +2948,7 @@ function render() {
   if (currentTab === 'budgetspage') renderBudgetsPage();
   if (currentTab === 'projectionpage') renderProjectionPage();
   if (currentTab === 'recurringpage') renderRecurringPage();
+  if (currentTab === 'goalspage') renderGoalsPage();
 }
 
 const SAFE_STR = {
@@ -3064,6 +3270,7 @@ document.getElementById('actSearch').addEventListener('input', e => { searchQ = 
 
 /* ---------- insights ---------- */
 function renderInsights() {
+  const gb = document.getElementById('goalsBtn'); if (gb) gb.textContent = gstr().btn;
   const cur = monthEntries(0);
   const exp = cur.filter(e => e.type !== 'income');
   const total = exp.reduce((s, e) => s + e.amount, 0);
@@ -3570,6 +3777,9 @@ function openProjection() {
 }
 document.getElementById('budgetsBtn').onclick = () => switchTab('budgetspage');
 document.getElementById('projectBtn').onclick = () => switchTab('projectionpage');
+document.getElementById('goalsBtn').onclick = () => switchTab('goalspage');
+document.getElementById('newGoalBtn').onclick = () => newOrEditGoal();
+document.getElementById('goalsBack').onclick = () => switchTab('insights');
 
 /* ---------- settings ---------- */
 function renderSettings() {
