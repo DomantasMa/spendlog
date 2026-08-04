@@ -993,7 +993,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="5.4"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="5.5"></div>
   </section>
 
 </div>
@@ -1981,11 +1981,13 @@ async function addAllDue() {
   const today = todayISO();
   for (const r of recurring) {
     if (r.nextDue > today) continue;
-    let guard = 0;
-    while (r.nextDue <= today && guard < 24) {
-      await insertTx({ amount: r.amount, merchant: r.merchant, cat: r.cat, type: r.type, dateISO: r.nextDue, source: 'recurring' });
-      r.nextDue = advanceDate(r.nextDue, r.freq); guard++;
-    }
+    // forward-only: add exactly ONE entry for the current occurrence, dated today —
+    // never backfill the months between an old start date and now.
+    await insertTx({ amount: r.amount, merchant: r.merchant, cat: r.cat, type: r.type, dateISO: today, source: 'recurring' });
+    // fast-forward the schedule to the next future date WITHOUT creating the skipped periods
+    let nd = advanceDate(r.nextDue, r.freq), guard = 0;
+    while (nd <= today && guard < 600) { nd = advanceDate(nd, r.freq); guard++; }
+    r.nextDue = nd;
     await sb.from('recurring').update({ next_due: r.nextDue }).eq('id', r.id);
   }
   computeRecurringDue(); renderRecurringDue(); render();
