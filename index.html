@@ -1049,7 +1049,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="6.3"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="6.4"></div>
   </section>
 
 </div>
@@ -3048,7 +3048,7 @@ const INFO_STR = {
     safe: 'Your income logged this month, minus what you’ve spent, minus any recurring bills still due this month. What’s genuinely free to spend.',
     goals: 'Each goal fills on its own from your monthly leftover (income minus spending). With several goals, the leftover fills them in the order you created them.',
     budgets: 'Set a monthly cap for a category. The bar shows how much of it you’ve spent this month, and the nudges warn you as you near or pass it.',
-    wiw: 'This month’s spending split by category. Tap any slice or row to see the entries behind it.',
+    wiw: 'This month’s spending split by category. Tap a category in the list to see the entries behind it.',
     history: 'Money in versus out for the period you pick — this month, a whole year, or all time.',
     sixmonth: 'Your total spending in each of the last months. Tap a bar to see that month’s exact figure.',
     recurring: 'Mark an expense as repeating and it’s saved here. On its due date it appears on your home screen, ready to add in one tap.',
@@ -3057,7 +3057,7 @@ const INFO_STR = {
     safe: 'Šį mėnesį įrašytos pajamos, atėmus išleistą sumą ir šio mėnesio dar nesumokėtas pasikartojančias sąskaitas. Tiek gali laisvai išleisti.',
     goals: 'Kiekvienas tikslas pildosi pats iš mėnesio likučio (pajamos minus išlaidos). Jei tikslų keli, likutis pildo juos sukūrimo eilės tvarka.',
     budgets: 'Nustatyk mėnesio limitą kategorijai. Juosta rodo, kiek jo išleista, o patarimai perspėja artėjant ar viršijus.',
-    wiw: 'Šio mėnesio išlaidos pagal kategorijas. Palietęs dalį ar eilutę pamatysi įrašus.',
+    wiw: 'Šio mėnesio išlaidos pagal kategorijas. Palietęs kategoriją sąraše pamatysi įrašus.',
     history: 'Pajamos ir išlaidos pasirinktu laikotarpiu — šį mėnesį, metus ar visą laiką.',
     sixmonth: 'Bendros išlaidos kiekvieną paskutinių mėnesių. Palietęs stulpelį pamatysi tikslią sumą.',
     recurring: 'Pažymėk išlaidą kaip pasikartojančią ir ji išsaugoma čia. Atėjus terminui ji pasirodo pradžios ekrane, paruošta pridėti vienu paspaudimu.',
@@ -3066,7 +3066,7 @@ const INFO_STR = {
     safe: 'Dein diesen Monat erfasstes Einkommen, minus Ausgaben, minus noch offene wiederkehrende Rechnungen dieses Monats. Das ist frei verfügbar.',
     goals: 'Jedes Ziel füllt sich selbst aus deinem Monatsrest (Einnahmen minus Ausgaben). Bei mehreren Zielen füllt der Rest sie in der Reihenfolge ihrer Erstellung.',
     budgets: 'Lege ein Monatslimit je Kategorie fest. Der Balken zeigt, wie viel davon ausgegeben ist; Hinweise warnen, wenn es knapp wird oder überschritten ist.',
-    wiw: 'Die Ausgaben dieses Monats nach Kategorie. Tippe ein Segment oder eine Zeile an, um die Einträge zu sehen.',
+    wiw: 'Die Ausgaben dieses Monats nach Kategorie. Tippe eine Kategorie in der Liste an, um die Einträge zu sehen.',
     history: 'Einnahmen gegen Ausgaben im gewählten Zeitraum — diesen Monat, ein Jahr oder gesamt.',
     sixmonth: 'Gesamtausgaben je Monat der letzten Monate. Tippe einen Balken für den genauen Wert an.',
     recurring: 'Markiere eine Ausgabe als wiederkehrend, dann wird sie hier gespeichert. Am Fälligkeitstag erscheint sie auf dem Startbildschirm, bereit zum Hinzufügen mit einem Tipp.',
@@ -3075,7 +3075,7 @@ const INFO_STR = {
     safe: 'Tus ingresos registrados este mes, menos lo gastado, menos las facturas recurrentes aún pendientes del mes. Eso es lo que tienes libre.',
     goals: 'Cada meta se llena sola con tu sobrante mensual (ingresos menos gastos). Si tienes varias, el sobrante las llena en el orden en que las creaste.',
     budgets: 'Fija un límite mensual por categoría. La barra muestra cuánto has gastado, y los avisos te alertan al acercarte o pasarte.',
-    wiw: 'El gasto de este mes por categoría. Toca una porción o fila para ver los movimientos.',
+    wiw: 'El gasto de este mes por categoría. Toca una categoría de la lista para ver los movimientos.',
     history: 'Ingresos frente a gastos en el periodo que elijas: este mes, un año o todo.',
     sixmonth: 'El gasto total de cada uno de los últimos meses. Toca una barra para ver la cifra exacta.',
     recurring: 'Marca un gasto como recurrente y se guarda aquí. En su fecha aparece en la pantalla de inicio, listo para añadir con un toque.',
@@ -3186,6 +3186,8 @@ function renderHome() {
     sortedH.slice(0, 4).forEach(([cid, amt]) => {
       const c = catById(cid);
       const lr = el('div', 'legrow');
+      lr.style.cursor = 'pointer';
+      lr.onclick = () => { catFilter = cid; switchTab('activity'); };
       const dot = el('span', 'dot'); dot.style.background = 'var(--s' + c.slot + ')';
       lr.appendChild(dot);
       lr.appendChild(el('span', 'ln', catLabel(c)));
