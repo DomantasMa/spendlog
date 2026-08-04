@@ -993,7 +993,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="5.5"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="5.6"></div>
   </section>
 
 </div>
@@ -1100,8 +1100,40 @@ function syncCustomCats() {
   customCats = Object.values(seen).sort((a, b) => a.name.localeCompare(b.name));
   saveLocalCats();
 }
-function promptNewCategory() {
-  const name = window.prompt(t('newCatPrompt'));
+const NP_STR = {
+  en: { add: 'Add', cancel: 'Cancel' }, lt: { add: 'Pridėti', cancel: 'Atšaukti' },
+  de: { add: 'Hinzufügen', cancel: 'Abbrechen' }, es: { add: 'Añadir', cancel: 'Cancelar' },
+};
+function namePrompt(title) {
+  return new Promise(resolve => {
+    const back = el('div');
+    back.style.cssText = 'position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(25,24,19,0.32);padding:24px;';
+    const card = el('div');
+    card.style.cssText = 'background:var(--card);border-radius:22px;padding:20px;width:100%;max-width:340px;box-shadow:var(--shadow-big);';
+    const h = el('div', null, title);
+    h.style.cssText = 'font-family:"Fraunces",Georgia,serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:14px;';
+    const inp = el('input'); inp.type = 'text'; inp.setAttribute('autocomplete', 'off'); inp.setAttribute('enterkeyhint', 'done');
+    inp.style.cssText = 'width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:11px 13px;';
+    const row = el('div'); row.style.cssText = 'display:flex;gap:8px;margin-top:16px;';
+    const s = NP_STR[uiLang] || NP_STR.en;
+    const cancel = el('button', null, s.cancel);
+    cancel.style.cssText = 'flex:1;font:inherit;font-size:15px;font-weight:600;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);cursor:pointer;';
+    const ok = el('button', null, s.add);
+    ok.style.cssText = 'flex:1;font:inherit;font-size:15px;font-weight:600;padding:11px;border-radius:12px;border:none;background:var(--ink);color:var(--paper);cursor:pointer;';
+    let done = false;
+    function close(v) { if (done) return; done = true; back.remove(); resolve(v); }
+    cancel.onclick = () => close(null);
+    ok.onclick = () => close(inp.value.trim() || null);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); close(inp.value.trim() || null); } else if (e.key === 'Escape') { close(null); } });
+    back.addEventListener('click', e => { if (e.target === back) close(null); });
+    row.appendChild(cancel); row.appendChild(ok);
+    card.appendChild(h); card.appendChild(inp); card.appendChild(row);
+    back.appendChild(card); document.body.appendChild(back);
+    setTimeout(() => inp.focus(), 60);
+  });
+}
+async function promptNewCategory() {
+  const name = await namePrompt(t('newCatPrompt'));
   if (!name || !name.trim()) return null;
   return addCustomCat(name);
 }
@@ -1114,9 +1146,9 @@ function fillCatSelect(sel, selectedId, onPick) {
   });
   const nw = el('option', null, t('newCatOpt')); nw.value = '__new';
   sel.appendChild(nw);
-  sel.onchange = () => {
+  sel.onchange = async () => {
     if (sel.value === '__new') {
-      const meta = promptNewCategory();
+      const meta = await promptNewCategory();
       if (meta) { selectedId = meta.id; onPick(meta.id); }
       fillCatSelect(sel, selectedId, onPick);
     } else { selectedId = sel.value; onPick(sel.value); }
@@ -1976,6 +2008,7 @@ async function createRecurring(p) {
   const { data, error } = await sb.from('recurring').insert(payload).select().single();
   if (!error && data) recurring.push({ id: data.id, merchant: data.merchant, amount: Number(data.amount), cat: data.category, type: data.type, freq: data.freq, nextDue: data.next_due });
   else if (error) alertMsg(t('couldNotSave'));
+  computeRecurringDue(); renderRecurringDue();
 }
 async function addAllDue() {
   const today = todayISO();
@@ -2387,7 +2420,7 @@ function showConfirm(parsed) {
     });
     const nb = el('button', 'chip');
     nb.appendChild(document.createTextNode(t('plusNew')));
-    nb.onclick = () => { const m = promptNewCategory(); if (m) { pending.cat = m.id; } showConfirm(pending); };
+    nb.onclick = async () => { const m = await promptNewCategory(); if (m) { pending.cat = m.id; } showConfirm(pending); };
     chips.appendChild(nb);
   }
   confirmEl.classList.add('open');
@@ -3284,7 +3317,7 @@ function renderBudgetsPage() {
   const addCatBtn = el('button', 'badjust', t('newCategoryBtn'));
   addCatBtn.style.display = 'block';
   addCatBtn.style.margin = '14px auto 4px';
-  addCatBtn.onclick = () => { if (promptNewCategory()) { render(); renderBudgetsPage(); } };
+  addCatBtn.onclick = async () => { if (await promptNewCategory()) { render(); renderBudgetsPage(); } };
   box.appendChild(addCatBtn);
 }
 
