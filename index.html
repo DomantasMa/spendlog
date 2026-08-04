@@ -687,6 +687,7 @@
   .goalcard .gfill.done { background: var(--sage); }
   .goalcard .geta { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
   .goalcard .geta.done { color: var(--sage); font-weight: 600; }
+  .goalcard .gnote { font-size: 11.5px; color: var(--muted); margin-top: 6px; opacity: 0.85; }
   .goalcard .grow { display: flex; gap: 8px; margin-top: 12px; }
   .goalcard .grow button { font: inherit; font-size: 13px; font-weight: 600; border-radius: 10px; padding: 8px 12px; cursor: pointer; }
   .goalcard .gadd { background: var(--ink); color: var(--paper); border: none; }
@@ -800,9 +801,10 @@
     </div>
 
     <div class="safecard" id="safeCard" style="display:none;">
-      <div class="sl" id="safeLab">SAFE TO SPEND</div>
+      <div style="display:flex;align-items:center;"><span class="sl" id="safeLab">SAFE TO SPEND</span><button class="infodot" data-info="safe">i</button></div>
       <div class="bignum serif" id="safeVal">£0</div>
       <div class="safesub" id="safeSub"></div>
+      <div class="infobox" data-infobox="safe" style="display:none;"></div>
     </div>
 
     <div class="tiles">
@@ -826,19 +828,21 @@
     </div>
 
     <div class="chartcard">
-      <div class="cardhead"><h2 id="wiwTitle">Where it went</h2><button class="cardlink" id="wiwLink">Insights</button></div>
+      <div class="cardhead"><div style="display:flex;align-items:center;"><h2 id="wiwTitle">Where it went</h2><button class="infodot" data-info="wiw">i</button></div><button class="cardlink" id="wiwLink">Insights</button></div>
+      <div class="infobox" data-infobox="wiw" style="display:none;"></div>
       <div class="donutrow" id="donutRow"></div>
       <div class="empty" id="wiwEmpty" style="display:none;">No spending this month yet.</div>
     </div>
 
     <div class="chartcard">
-      <div class="cardhead"><h2 id="histTitle">History</h2>
+      <div class="cardhead"><div style="display:flex;align-items:center;"><h2 id="histTitle">History</h2><button class="infodot" data-info="history">i</button></div>
         <span class="toneseg" id="histSeg">
           <button data-m="month" class="sel">Month</button>
           <button data-m="year">Year</button>
           <button data-m="all">All years</button>
         </span>
       </div>
+      <div class="infobox" data-infobox="history" style="display:none;"></div>
       <div class="histnav">
         <button class="histchev" id="histPrev">‹</button>
         <div class="histlab">
@@ -903,9 +907,10 @@
       </details>
     </div>
     <div class="chartcard">
-      <div class="cardhead"><h2 id="sixTitle">Six months</h2>
+      <div class="cardhead"><div style="display:flex;align-items:center;"><h2 id="sixTitle">Six months</h2><button class="infodot" data-info="sixmonth">i</button></div>
         <span class="toneseg" id="trendSeg"><button data-m="6" class="sel">6</button><button data-m="12">12</button></span>
       </div>
+      <div class="infobox" data-infobox="sixmonth" style="display:none;"></div>
       <div class="sub" id="sixSub">Total spend per month &mdash; tap a bar for the value</div>
       <div class="trend">
         <div class="plot" id="trendPlot"></div>
@@ -932,7 +937,8 @@
       <button class="backlink" id="budgetsBack">‹ Back</button>
     </div>
     <div class="pagetitle" style="padding-top:6px;">Budgets</div>
-    <div class="pagesub" id="budgetsSubT"></div>
+    <div style="display:flex;align-items:center;"><span class="pagesub" id="budgetsSubT"></span><button class="infodot" data-info="budgets">i</button></div>
+    <div class="infobox" data-infobox="budgets" style="display:none;"></div>
     <div id="budgetsCards"></div>
   </section>
 
@@ -942,7 +948,8 @@
       <button class="backlink" id="goalsBack">‹ Back</button>
     </div>
     <div class="pagetitle" style="padding-top:6px;" id="goalsPageTitle">Goals</div>
-    <div class="pagesub" id="goalsSubT">Save toward something — Kaupa estimates when you’ll get there.</div>
+    <div style="display:flex;align-items:center;"><span class="pagesub" id="goalsSubT">Save toward something — Kaupa estimates when you’ll get there.</span><button class="infodot" data-info="goals">i</button></div>
+    <div class="infobox" data-infobox="goals" style="display:none;"></div>
     <div id="goalsList"></div>
     <div class="empty" id="goalsEmpty" style="display:none;"></div>
     <button id="newGoalBtn">+ New goal</button>
@@ -954,7 +961,8 @@
       <button class="backlink" id="recBack">‹ Back</button>
     </div>
     <div class="pagetitle" style="padding-top:6px;" id="recPageTitle">Recurring</div>
-    <div class="pagesub" id="recSubT">Bills and subscriptions that repeat. They appear ready to add on the day they're due.</div>
+    <div style="display:flex;align-items:center;"><span class="pagesub" id="recSubT">Bills and subscriptions that repeat. They appear ready to add on the day they're due.</span><button class="infodot" data-info="recurring">i</button></div>
+    <div class="infobox" data-infobox="recurring" style="display:none;"></div>
     <div id="recList"></div>
     <div class="empty" id="recEmpty" style="display:none;">Nothing recurring yet. Tick “Repeat” when you add an expense to set one up.</div>
   </section>
@@ -1041,7 +1049,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="6.0"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="6.2"></div>
   </section>
 
 </div>
@@ -2124,6 +2132,7 @@ const GOAL_STR = {
         reached: 'Reached! 🎉', eta: '≈{amt}/mo spare · done around {date}', noSurplus: 'No spare cash to save at your current pace',
         onTrack: 'On track for {date}', behind: 'Need {amt}/mo to hit {date}',
         tiers: ['Just started', 'Good start', 'Halfway', 'Almost there', 'Reached! 🎉'],
+        autoNote: 'Fills automatically from your monthly leftover',
         empty: 'No goals yet. Tap “New goal” to start saving toward something.' },
   lt: { pageTitle: 'Tikslai', pageSub: 'Taupyk kažkam — Kaupa apskaičiuos, kada pasieksi.', btn: 'Tikslai',
         newGoal: 'Naujas tikslas', namePh: 'Kam taupai?', targetPh: 'Tikslo suma (£)', deadlinePh: 'Data — nebūtina',
@@ -2131,6 +2140,7 @@ const GOAL_STR = {
         reached: 'Pasiekta! 🎉', eta: '≈{amt}/mėn laisvų · maždaug {date}', noSurplus: 'Šiuo tempu laisvų lėšų taupymui nėra',
         onTrack: 'Spėsi iki {date}', behind: 'Reikia {amt}/mėn iki {date}',
         tiers: ['Tik pradėta', 'Gera pradžia', 'Pusiaukelė', 'Beveik', 'Pasiekta! 🎉'],
+        autoNote: 'Pildosi automatiškai iš mėnesio likučio',
         empty: 'Tikslų dar nėra. Spausk „Naujas tikslas“ ir pradėk taupyti.' },
   de: { pageTitle: 'Ziele', pageSub: 'Spare auf etwas hin — Kaupa schätzt, wann du es erreichst.', btn: 'Ziele',
         newGoal: 'Neues Ziel', namePh: 'Wofür sparst du?', targetPh: 'Zielbetrag (£)', deadlinePh: 'Datum — optional',
@@ -2138,6 +2148,7 @@ const GOAL_STR = {
         reached: 'Erreicht! 🎉', eta: '≈{amt}/Mon. frei · etwa {date}', noSurplus: 'Kein freies Geld beim aktuellen Tempo',
         onTrack: 'Schaffst du bis {date}', behind: '{amt}/Mon. nötig bis {date}',
         tiers: ['Gerade erst', 'Guter Start', 'Halb', 'Fast', 'Erreicht! 🎉'],
+        autoNote: 'Füllt sich automatisch aus deinem Monatsrest',
         empty: 'Noch keine Ziele. Tippe „Neues Ziel“, um zu sparen.' },
   es: { pageTitle: 'Metas', pageSub: 'Ahorra para algo — Kaupa estima cuándo lo lograrás.', btn: 'Metas',
         newGoal: 'Nueva meta', namePh: '¿Para qué ahorras?', targetPh: 'Cantidad objetivo (£)', deadlinePh: 'Fecha — opcional',
@@ -2145,6 +2156,7 @@ const GOAL_STR = {
         reached: '¡Logrado! 🎉', eta: '≈{amt}/mes libre · hacia {date}', noSurplus: 'Sin dinero libre para ahorrar a este ritmo',
         onTrack: 'Vas bien para {date}', behind: 'Necesitas {amt}/mes para {date}',
         tiers: ['Recién empieza', 'Buen comienzo', 'A mitad', 'Casi', '¡Logrado! 🎉'],
+        autoNote: 'Se llena automáticamente con tu sobrante mensual',
         empty: 'Aún no hay metas. Toca «Nueva meta» para empezar a ahorrar.' },
 };
 function gstr() { return GOAL_STR[uiLang] || GOAL_STR.en; }
@@ -2152,7 +2164,34 @@ async function loadGoals() {
   goals = []; goalsUnavailable = false;
   const { data, error } = await sb.from('goals').select('*').eq('space_id', currentSpaceId).order('created_at');
   if (error) { goalsUnavailable = true; return; }
-  goals = (data || []).map(g => ({ id: g.id, name: g.name, target: Number(g.target), saved: Number(g.saved), deadline: g.deadline }));
+  goals = (data || []).map(g => ({ id: g.id, name: g.name, target: Number(g.target), saved: Number(g.saved), deadline: g.deadline, created: g.created_at }));
+}
+/* Auto-fill: your monthly leftover (income − spend) accumulates and flows into
+   your goals in the order you created them — first fills up, then the next. */
+function autoSavedPool() {
+  if (!goals.length) return 0;
+  const now = new Date();
+  const nowYM = now.getFullYear() * 12 + now.getMonth();
+  let startYM = nowYM;
+  goals.forEach(g => {
+    const c = g.created ? new Date(g.created) : now;
+    const cym = c.getFullYear() * 12 + c.getMonth();
+    if (cym < startYM) startYM = cym;
+  });
+  let pool = 0;
+  for (let ym = startYM; ym <= nowYM; ym++) {
+    const ms = monthEntries(ym - nowYM);
+    const inc = ms.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+    const sp = ms.filter(e => e.type !== 'income').reduce((s, e) => s + e.amount, 0);
+    pool += inc - sp;
+  }
+  return Math.max(0, pool);
+}
+function goalAllocations() {
+  let pool = autoSavedPool();
+  const alloc = {};
+  goals.forEach(g => { const a = Math.max(0, Math.min(pool, g.target)); alloc[g.id] = a; pool -= a; });
+  return alloc;
 }
 function fieldModal(opts) {
   return new Promise(resolve => {
@@ -2265,24 +2304,26 @@ function renderGoalsPage() {
   if (goalsUnavailable) { if (empty) { empty.style.display = 'block'; empty.textContent = t('tempUnavailable'); } return; }
   if (!goals.length) { if (empty) { empty.style.display = 'block'; empty.textContent = g.empty; } return; }
   if (empty) empty.style.display = 'none';
+  const alloc = goalAllocations();
   goals.forEach(goal => {
-    const pct = Math.max(0, Math.min(100, goal.target > 0 ? Math.round(goal.saved / goal.target * 100) : 0));
+    const saved = alloc[goal.id] || 0;
+    const pct = Math.max(0, Math.min(100, goal.target > 0 ? Math.round(saved / goal.target * 100) : 0));
     const tierIdx = pct >= 100 ? 4 : pct >= 75 ? 3 : pct >= 50 ? 2 : pct >= 25 ? 1 : 0;
     const card = el('div', 'goalcard');
     const head = el('div', 'gh');
     head.appendChild(el('div', 'gn', goal.name));
     head.appendChild(el('div', 'gtier', g.tiers[tierIdx]));
     card.appendChild(head);
-    card.appendChild(el('div', 'gamt', fmtGBP(goal.saved) + ' ' + g.of + ' ' + fmtGBP(goal.target) + ' · ' + pct + '%'));
+    card.appendChild(el('div', 'gamt', fmtGBP(saved) + ' ' + g.of + ' ' + fmtGBP(goal.target) + ' · ' + pct + '%'));
     const bar = el('div', 'gbar'); const fill = el('div', 'gfill'); fill.style.width = pct + '%';
     if (pct >= 100) fill.classList.add('done'); bar.appendChild(fill); card.appendChild(bar);
-    const eta = goalEta(goal);
+    const eta = goalEta({ ...goal, saved });
     const etaEl = el('div', 'geta', eta.text); if (eta.done) etaEl.classList.add('done'); card.appendChild(etaEl);
+    card.appendChild(el('div', 'gnote', g.autoNote));
     const row = el('div', 'grow');
-    const addb = el('button', 'gadd', '+ ' + g.addFunds); addb.onclick = () => contributeGoal(goal);
     const editb = el('button', 'gedit', g.edit); editb.onclick = () => newOrEditGoal(goal);
     const delb = el('button', 'gdel', g.del); delb.onclick = () => deleteGoal(goal.id);
-    row.appendChild(addb); row.appendChild(editb); row.appendChild(delb);
+    row.appendChild(editb); row.appendChild(delb);
     card.appendChild(row);
     box.appendChild(card);
   });
@@ -2958,6 +2999,54 @@ const SAFE_STR = {
   es: { lab: 'LIBRE PARA GASTAR', inc: 'ingresos', spent: 'gastado', bills: 'facturas', setTitle: 'Libre para gastar', setSub: 'Mostrarlo en la pantalla de inicio' },
 };
 let safeOn = lsGet('kaupa.safe', false);
+const INFO_STR = {
+  en: {
+    safe: 'Your income logged this month, minus what you’ve spent, minus any recurring bills still due this month. What’s genuinely free to spend.',
+    goals: 'Each goal fills on its own from your monthly leftover (income minus spending). With several goals, the leftover fills them in the order you created them.',
+    budgets: 'Set a monthly cap for a category. The bar shows how much of it you’ve spent this month, and the nudges warn you as you near or pass it.',
+    wiw: 'This month’s spending split by category. Tap any slice or row to see the entries behind it.',
+    history: 'Money in versus out for the period you pick — this month, a whole year, or all time.',
+    sixmonth: 'Your total spending in each of the last months. Tap a bar to see that month’s exact figure.',
+    recurring: 'Mark an expense as repeating and it’s saved here. On its due date it appears on your home screen, ready to add in one tap.',
+  },
+  lt: {
+    safe: 'Šį mėnesį įrašytos pajamos, atėmus išleistą sumą ir šio mėnesio dar nesumokėtas pasikartojančias sąskaitas. Tiek gali laisvai išleisti.',
+    goals: 'Kiekvienas tikslas pildosi pats iš mėnesio likučio (pajamos minus išlaidos). Jei tikslų keli, likutis pildo juos sukūrimo eilės tvarka.',
+    budgets: 'Nustatyk mėnesio limitą kategorijai. Juosta rodo, kiek jo išleista, o patarimai perspėja artėjant ar viršijus.',
+    wiw: 'Šio mėnesio išlaidos pagal kategorijas. Palietęs dalį ar eilutę pamatysi įrašus.',
+    history: 'Pajamos ir išlaidos pasirinktu laikotarpiu — šį mėnesį, metus ar visą laiką.',
+    sixmonth: 'Bendros išlaidos kiekvieną paskutinių mėnesių. Palietęs stulpelį pamatysi tikslią sumą.',
+    recurring: 'Pažymėk išlaidą kaip pasikartojančią ir ji išsaugoma čia. Atėjus terminui ji pasirodo pradžios ekrane, paruošta pridėti vienu paspaudimu.',
+  },
+  de: {
+    safe: 'Dein diesen Monat erfasstes Einkommen, minus Ausgaben, minus noch offene wiederkehrende Rechnungen dieses Monats. Das ist frei verfügbar.',
+    goals: 'Jedes Ziel füllt sich selbst aus deinem Monatsrest (Einnahmen minus Ausgaben). Bei mehreren Zielen füllt der Rest sie in der Reihenfolge ihrer Erstellung.',
+    budgets: 'Lege ein Monatslimit je Kategorie fest. Der Balken zeigt, wie viel davon ausgegeben ist; Hinweise warnen, wenn es knapp wird oder überschritten ist.',
+    wiw: 'Die Ausgaben dieses Monats nach Kategorie. Tippe ein Segment oder eine Zeile an, um die Einträge zu sehen.',
+    history: 'Einnahmen gegen Ausgaben im gewählten Zeitraum — diesen Monat, ein Jahr oder gesamt.',
+    sixmonth: 'Gesamtausgaben je Monat der letzten Monate. Tippe einen Balken für den genauen Wert an.',
+    recurring: 'Markiere eine Ausgabe als wiederkehrend, dann wird sie hier gespeichert. Am Fälligkeitstag erscheint sie auf dem Startbildschirm, bereit zum Hinzufügen mit einem Tipp.',
+  },
+  es: {
+    safe: 'Tus ingresos registrados este mes, menos lo gastado, menos las facturas recurrentes aún pendientes del mes. Eso es lo que tienes libre.',
+    goals: 'Cada meta se llena sola con tu sobrante mensual (ingresos menos gastos). Si tienes varias, el sobrante las llena en el orden en que las creaste.',
+    budgets: 'Fija un límite mensual por categoría. La barra muestra cuánto has gastado, y los avisos te alertan al acercarte o pasarte.',
+    wiw: 'El gasto de este mes por categoría. Toca una porción o fila para ver los movimientos.',
+    history: 'Ingresos frente a gastos en el periodo que elijas: este mes, un año o todo.',
+    sixmonth: 'El gasto total de cada uno de los últimos meses. Toca una barra para ver la cifra exacta.',
+    recurring: 'Marca un gasto como recurrente y se guarda aquí. En su fecha aparece en la pantalla de inicio, listo para añadir con un toque.',
+  },
+};
+document.addEventListener('click', e => {
+  const dot = e.target.closest && e.target.closest('.infodot[data-info]');
+  if (!dot) return;
+  const key = dot.getAttribute('data-info');
+  const box = document.querySelector('.infobox[data-infobox="' + key + '"]');
+  if (!box) return;
+  const m = INFO_STR[uiLang] || INFO_STR.en;
+  box.textContent = m[key] || INFO_STR.en[key] || '';
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+});
 function renderHome() {
   const space = spaces.find(s => s.id === currentSpaceId);
   document.getElementById('spaceName').textContent = space ? space.name : '—';
