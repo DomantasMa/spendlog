@@ -669,6 +669,13 @@
   .recrow .ramt { font-size: 14.5px; font-weight: 700; color: var(--ink); white-space: nowrap; }
   .recrow .rstop { font: inherit; font-size: 12.5px; font-weight: 600; color: var(--bad); background: none; border: none; cursor: pointer; padding: 4px 6px; }
 
+  /* safe to spend */
+  .safecard { background: var(--card); border-radius: 20px; padding: 16px 18px; margin-top: 16px; box-shadow: var(--shadow); border: 1px solid var(--line); }
+  .safecard .sl { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); }
+  .safecard .bignum { font-size: 38px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.1; margin-top: 4px; color: var(--sage); }
+  .safecard.neg .bignum { color: var(--terra); }
+  .safecard .safesub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
   @media (prefers-reduced-motion: reduce) {
     .tab.active, .login.open, .confirm.open, .sheet, .invitecard, #pushPrompt .invitecard { animation: none !important; }
     .kbar { transition: none !important; }
@@ -772,6 +779,12 @@
         <button class="radd" id="recDueAdd">Add all</button>
         <button class="rrev" id="recDueReview">Review</button>
       </div>
+    </div>
+
+    <div class="safecard" id="safeCard" style="display:none;">
+      <div class="sl" id="safeLab">SAFE TO SPEND</div>
+      <div class="bignum serif" id="safeVal">£0</div>
+      <div class="safesub" id="safeSub"></div>
     </div>
 
     <div class="tiles">
@@ -993,7 +1006,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="5.6"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="5.7"></div>
   </section>
 
 </div>
@@ -2728,6 +2741,12 @@ function render() {
   if (currentTab === 'recurringpage') renderRecurringPage();
 }
 
+const SAFE_STR = {
+  en: { lab: 'SAFE TO SPEND', inc: 'in', spent: 'spent', bills: 'bills due' },
+  lt: { lab: 'GALIMA IŠLEISTI', inc: 'pajamų', spent: 'išleista', bills: 'sąskaitoms' },
+  de: { lab: 'FREI VERFÜGBAR', inc: 'Einnahmen', spent: 'ausgegeben', bills: 'Rechnungen' },
+  es: { lab: 'LIBRE PARA GASTAR', inc: 'ingresos', spent: 'gastado', bills: 'facturas' },
+};
 function renderHome() {
   const space = spaces.find(s => s.id === currentSpaceId);
   document.getElementById('spaceName').textContent = space ? space.name : '—';
@@ -2748,6 +2767,24 @@ function renderHome() {
     : (spent > 0 ? t('firstMonth') : t('nothingMonth', { month: new Date().toLocaleDateString(loc(), { month: 'long' }) }));
   document.getElementById('earnedVal').textContent = fmt0(earned);
   document.getElementById('earnedSub').textContent = earned > 0 ? t('thisMonthInSpace') : t('noIncomeMonth', { month: new Date().toLocaleDateString(loc(), { month: 'long' }) });
+
+  // safe to spend = income − spent − recurring bills still due this month (only shown once income is logged)
+  const safeCard = document.getElementById('safeCard');
+  const ym = new Date().toISOString().slice(0, 7);
+  const upcomingBills = recurring.filter(r => r.type !== 'income' && r.nextDue && r.nextDue.slice(0, 7) === ym).reduce((s, r) => s + r.amount, 0);
+  if (earned > 0) {
+    const safe = earned - spent - upcomingBills;
+    const ss = SAFE_STR[uiLang] || SAFE_STR.en;
+    document.getElementById('safeLab').textContent = ss.lab;
+    document.getElementById('safeVal').textContent = (safe < 0 ? '-' : '') + fmt0(Math.abs(safe));
+    let sub = fmtGBP(earned) + ' ' + ss.inc + ' · ' + fmtGBP(spent) + ' ' + ss.spent;
+    if (upcomingBills > 0) sub += ' · ' + fmtGBP(upcomingBills) + ' ' + ss.bills;
+    document.getElementById('safeSub').textContent = sub;
+    safeCard.classList.toggle('neg', safe < 0);
+    safeCard.style.display = 'block';
+  } else {
+    safeCard.style.display = 'none';
+  }
 
   const sug = computeSuggestions().filter(s => s.kind === 'over')[0];
   const ac = document.getElementById('alertCard');
