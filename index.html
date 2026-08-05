@@ -1118,7 +1118,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="6.8"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="6.9"></div>
   </section>
 
 </div>
@@ -1347,8 +1347,11 @@ let currentTab = 'home';
 let tone = lsGet('kaupa.tone', 'neutral');
 let loading = false;
 
-const fmtGBP = n => '£' + n.toLocaleString('en-GB', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
-const fmt0 = n => '£' + Math.round(n).toLocaleString('en-GB');
+/* currency follows the app language: English → £ (GBP), Lithuanian/German/Spanish → € (EUR) */
+const CUR = { en: { sym: '£', code: 'GBP' }, lt: { sym: '€', code: 'EUR' }, de: { sym: '€', code: 'EUR' }, es: { sym: '€', code: 'EUR' } };
+function curSym() { return (CUR[uiLang] || CUR.en).sym; }
+const fmtGBP = n => curSym() + n.toLocaleString(loc(), { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const fmt0 = n => curSym() + Math.round(n).toLocaleString(loc());
 const monthName = d => d.toLocaleDateString(loc(), { month: 'long' });
 /* ================= i18n ================= */
 let uiLang = lsGet('kaupa.uilang', 'en');
@@ -1540,7 +1543,7 @@ lt: {
   noLimitsYet: 'Limitų dar nėra — spausk „Koreguoti“ prie kategorijos · {space}',
   spentLbl: 'išleista {amt}', noLimit: 'Be limito', overBy: 'viršyta {amt}', leftAmt: 'liko {amt}',
   ofLimit: '{a} iš {b}', noMonthlyLimit: 'Mėnesio limitas nenustatytas', adjust: 'Koreguoti',
-  monthlyLimitPh: 'Mėnesio limitas £', save: 'Išsaugoti', remove: 'Pašalinti',
+  monthlyLimitPh: 'Mėnesio limitas €', save: 'Išsaugoti', remove: 'Pašalinti',
   projection: 'Prognozė', reset: 'Iš naujo', keptPerMonth: 'SUTAUPOMA PER MĖNESĮ',
   pctKept: '{pct}% pajamų sutaupoma', pctOver: '{pct}% daugiau nei pajamos', noIncomeRec: 'pajamų neužfiksuota',
   keepThisUp: 'Taip tęsdamas iki {when} būsi atsidėjęs {amt}.',
@@ -1658,7 +1661,7 @@ de: {
   noLimitsYet: 'Noch keine Limits — tippe bei einer Kategorie auf „Anpassen“ · {space}',
   spentLbl: '{amt} ausgegeben', noLimit: 'Kein Limit', overBy: '{amt} drüber', leftAmt: '{amt} übrig',
   ofLimit: '{a} von {b}', noMonthlyLimit: 'Kein Monatslimit festgelegt', adjust: 'Anpassen',
-  monthlyLimitPh: 'Monatslimit £', save: 'Speichern', remove: 'Entfernen',
+  monthlyLimitPh: 'Monatslimit €', save: 'Speichern', remove: 'Entfernen',
   projection: 'Prognose', reset: 'Zurücksetzen', keptPerMonth: 'GESPART PRO MONAT',
   pctKept: '{pct}% des Einkommens gespart', pctOver: '{pct}% über dem Einkommen', noIncomeRec: 'keine Einnahmen erfasst',
   keepThisUp: 'Wenn das so bleibt, hast du bis {when} {amt} zurückgelegt.',
@@ -1776,7 +1779,7 @@ es: {
   noLimitsYet: 'Sin límites aún: pulsa «Ajustar» en una categoría · {space}',
   spentLbl: '{amt} gastado', noLimit: 'Sin límite', overBy: '{amt} de más', leftAmt: 'quedan {amt}',
   ofLimit: '{a} de {b}', noMonthlyLimit: 'Sin límite mensual', adjust: 'Ajustar',
-  monthlyLimitPh: 'Límite mensual £', save: 'Guardar', remove: 'Quitar',
+  monthlyLimitPh: 'Límite mensual €', save: 'Guardar', remove: 'Quitar',
   projection: 'Proyección', reset: 'Restablecer', keptPerMonth: 'AHORRO AL MES',
   pctKept: '{pct}% de los ingresos ahorrado', pctOver: '{pct}% por encima de los ingresos', noIncomeRec: 'sin ingresos registrados',
   keepThisUp: 'Si sigues así, habrás apartado {amt} para {when}.',
@@ -2008,6 +2011,11 @@ function applyStaticI18n() {
   if (av) av.textContent = UI_LANG_NAMES[uiLang];
   const ml = document.getElementById('micLabel');
   if (ml && !listeningState()) ml.textContent = t('tapToAdd');
+  // reset the static zero placeholders to the current currency (overwritten on render anyway)
+  ['cAmount', 'safeVal', 'spentVal', 'earnedVal'].forEach(id => {
+    const n = document.getElementById(id);
+    if (n && /^[£€]?0$/.test(n.textContent.trim())) n.textContent = curSym() + '0';
+  });
 }
 function listeningState() { try { return !!listening; } catch (e) { return false; } }
 function setUiLang(lang) {
@@ -2206,8 +2214,8 @@ const GOAL_STR = {
         day: 'day', days: 'days', weeks: 'weeks', months: 'months',
         empty: 'No goals yet. Tap “New goal” to start saving toward something.' },
   lt: { pageTitle: 'Tikslai', pageSub: 'Taupyk kažkam — Kaupa apskaičiuos, kada pasieksi.', btn: 'Tikslai',
-        newGoal: 'Naujas tikslas', namePh: 'Kam taupai?', targetPh: 'Tikslo suma (£)', deadlinePh: 'Data — nebūtina',
-        add: 'Pridėti', cancel: 'Atšaukti', save: 'Išsaugoti', of: 'iš', addFunds: 'Papildyti', contribute: 'Papildyti „{name}“', edit: 'Keisti', del: 'Ištrinti', amount: 'Suma (£)',
+        newGoal: 'Naujas tikslas', namePh: 'Kam taupai?', targetPh: 'Tikslo suma (€)', deadlinePh: 'Data — nebūtina',
+        add: 'Pridėti', cancel: 'Atšaukti', save: 'Išsaugoti', of: 'iš', addFunds: 'Papildyti', contribute: 'Papildyti „{name}“', edit: 'Keisti', del: 'Ištrinti', amount: 'Suma (€)',
         reached: 'Pasiekta! 🎉', eta: '≈{amt}/mėn laisvų · maždaug {date}', noSurplus: 'Šiuo tempu laisvų lėšų taupymui nėra',
         onTrack: 'Spėsi iki {date}', behind: 'Reikia {amt}/mėn iki {date}',
         tiers: ['Tik pradėta', 'Gera pradžia', 'Pusiaukelė', 'Beveik', 'Pasiekta! 🎉'],
@@ -2216,8 +2224,8 @@ const GOAL_STR = {
         day: 'd.', days: 'd.', weeks: 'sav.', months: 'mėn.',
         empty: 'Tikslų dar nėra. Spausk „Naujas tikslas“ ir pradėk taupyti.' },
   de: { pageTitle: 'Ziele', pageSub: 'Spare auf etwas hin — Kaupa schätzt, wann du es erreichst.', btn: 'Ziele',
-        newGoal: 'Neues Ziel', namePh: 'Wofür sparst du?', targetPh: 'Zielbetrag (£)', deadlinePh: 'Datum — optional',
-        add: 'Hinzufügen', cancel: 'Abbrechen', save: 'Speichern', of: 'von', addFunds: 'Hinzufügen', contribute: 'Zu „{name}“ hinzufügen', edit: 'Bearbeiten', del: 'Löschen', amount: 'Betrag (£)',
+        newGoal: 'Neues Ziel', namePh: 'Wofür sparst du?', targetPh: 'Zielbetrag (€)', deadlinePh: 'Datum — optional',
+        add: 'Hinzufügen', cancel: 'Abbrechen', save: 'Speichern', of: 'von', addFunds: 'Hinzufügen', contribute: 'Zu „{name}“ hinzufügen', edit: 'Bearbeiten', del: 'Löschen', amount: 'Betrag (€)',
         reached: 'Erreicht! 🎉', eta: '≈{amt}/Mon. frei · etwa {date}', noSurplus: 'Kein freies Geld beim aktuellen Tempo',
         onTrack: 'Schaffst du bis {date}', behind: '{amt}/Mon. nötig bis {date}',
         tiers: ['Gerade erst', 'Guter Start', 'Halb', 'Fast', 'Erreicht! 🎉'],
@@ -2226,8 +2234,8 @@ const GOAL_STR = {
         day: 'Tag', days: 'Tagen', weeks: 'Wochen', months: 'Monaten',
         empty: 'Noch keine Ziele. Tippe „Neues Ziel“, um zu sparen.' },
   es: { pageTitle: 'Metas', pageSub: 'Ahorra para algo — Kaupa estima cuándo lo lograrás.', btn: 'Metas',
-        newGoal: 'Nueva meta', namePh: '¿Para qué ahorras?', targetPh: 'Cantidad objetivo (£)', deadlinePh: 'Fecha — opcional',
-        add: 'Añadir', cancel: 'Cancelar', save: 'Guardar', of: 'de', addFunds: 'Añadir', contribute: 'Añadir a «{name}»', edit: 'Editar', del: 'Eliminar', amount: 'Cantidad (£)',
+        newGoal: 'Nueva meta', namePh: '¿Para qué ahorras?', targetPh: 'Cantidad objetivo (€)', deadlinePh: 'Fecha — opcional',
+        add: 'Añadir', cancel: 'Cancelar', save: 'Guardar', of: 'de', addFunds: 'Añadir', contribute: 'Añadir a «{name}»', edit: 'Editar', del: 'Eliminar', amount: 'Cantidad (€)',
         reached: '¡Logrado! 🎉', eta: '≈{amt}/mes libre · hacia {date}', noSurplus: 'Sin dinero libre para ahorrar a este ritmo',
         onTrack: 'Vas bien para {date}', behind: 'Necesitas {amt}/mes para {date}',
         tiers: ['Recién empieza', 'Buen comienzo', 'A mitad', 'Casi', '¡Logrado! 🎉'],
