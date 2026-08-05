@@ -1044,12 +1044,18 @@
       </button>
     </div>
     <div class="setcard">
+      <button class="setrow" id="setHelp">
+        <span><span class="st" id="setHelpTitle">Help &amp; feedback</span><br><span class="ss" id="setHelpSub">Questions or ideas? Email us</span></span>
+        <span class="sa" id="setHelpVal">Email</span>
+      </button>
+    </div>
+    <div class="setcard">
       <button class="setrow" id="setSignOut">
         <span><span class="st" style="color:var(--bad)">Sign out</span></span>
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="6.4"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="6.7"></div>
   </section>
 
 </div>
@@ -2268,6 +2274,66 @@ function fieldModal(opts) {
     setTimeout(() => { const f0 = opts.fields[0] && inputs[opts.fields[0].key]; if (f0) f0.focus(); }, 60);
   });
 }
+function feedbackSheet() {
+  const s = HELP_STR[uiLang] || HELP_STR.en;
+  let type = 'suggestion';
+  const back = el('div');
+  back.style.cssText = 'position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(25,24,19,0.32);padding:24px;';
+  const card = el('div');
+  card.style.cssText = 'background:var(--card);border-radius:22px;padding:20px;width:100%;max-width:360px;box-shadow:var(--shadow-big);';
+  function close() { back.remove(); }
+  function build() {
+    card.textContent = '';
+    const h = el('div', null, s.title);
+    h.style.cssText = 'font-family:"Fraunces",Georgia,serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:12px;';
+    card.appendChild(h);
+    const seg = el('div'); seg.style.cssText = 'display:flex;gap:6px;margin-bottom:12px;';
+    [['suggestion', s.suggestion], ['contact', s.contact]].forEach(([k, label]) => {
+      const btn = el('button', null, label);
+      const on = type === k;
+      btn.style.cssText = 'flex:1;font:inherit;font-size:13.5px;font-weight:600;padding:9px;border-radius:10px;cursor:pointer;border:1px solid var(--line);' + (on ? 'background:var(--ink);color:var(--paper);' : 'background:var(--card);color:var(--ink-2);');
+      btn.onclick = () => { type = k; build(); };
+      seg.appendChild(btn);
+    });
+    card.appendChild(seg);
+    const ta = el('textarea'); ta.placeholder = s.placeholder; ta.rows = 4;
+    ta.style.cssText = 'width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:11px 13px;resize:none;box-sizing:border-box;';
+    card.appendChild(ta);
+    const row = el('div'); row.style.cssText = 'display:flex;gap:8px;margin-top:14px;';
+    const cancel = el('button', null, s.cancel);
+    cancel.style.cssText = 'flex:1;font:inherit;font-size:15px;font-weight:600;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);cursor:pointer;';
+    const send = el('button', null, s.send);
+    send.style.cssText = 'flex:1;font:inherit;font-size:15px;font-weight:600;padding:11px;border-radius:12px;border:none;background:var(--ink);color:var(--paper);cursor:pointer;';
+    cancel.onclick = close;
+    send.onclick = async () => {
+      const msg = ta.value.trim(); if (!msg) { ta.focus(); return; }
+      send.disabled = true; send.style.opacity = '0.6';
+      const vm = document.getElementById('verMark'); const v = vm ? vm.getAttribute('data-v') : '';
+      const em = (session && session.user && session.user.email) || null;
+      try {
+        await sb.from('feedback').insert({ type, message: msg, email: em, user_id: session && session.user ? session.user.id : null, space_id: currentSpaceId, app_version: v });
+      } catch (e) { /* best effort — still thank the user */ }
+      // email it to the team (best effort; table insert above is the durable record)
+      try { sb.functions.invoke('send-feedback', { body: { type, message: msg, email: em, app_version: v } }); } catch (e) {}
+      thanks();
+    };
+    row.appendChild(cancel); row.appendChild(send); card.appendChild(row);
+    setTimeout(() => ta.focus(), 60);
+  }
+  function thanks() {
+    card.textContent = '';
+    const ic = el('div', null, '💚'); ic.style.cssText = 'font-size:34px;text-align:center;margin-bottom:8px;';
+    const msg = el('div', null, type === 'contact' ? s.thanksContact : s.thanksSuggestion);
+    msg.style.cssText = 'font-size:15px;line-height:1.5;color:var(--ink);text-align:center;';
+    const done = el('button', null, s.done);
+    done.style.cssText = 'width:100%;font:inherit;font-size:15px;font-weight:600;padding:11px;border-radius:12px;border:none;background:var(--ink);color:var(--paper);cursor:pointer;margin-top:16px;';
+    done.onclick = close;
+    card.appendChild(ic); card.appendChild(msg); card.appendChild(done);
+  }
+  build();
+  back.addEventListener('click', e => { if (e.target === back) close(); });
+  back.appendChild(card); document.body.appendChild(back);
+}
 async function newOrEditGoal(existing) {
   const g = gstr();
   const res = await fieldModal({
@@ -3036,6 +3102,24 @@ function render() {
   if (currentTab === 'goalspage') renderGoalsPage();
 }
 
+const HELP_STR = {
+  en: { title: 'Help & feedback', sub: 'Send a suggestion or contact us', val: '',
+        suggestion: 'Suggestion', contact: 'Contact us', placeholder: 'Your message…', send: 'Send', cancel: 'Cancel', done: 'Done',
+        thanksSuggestion: 'Thanks for the feedback — we’re always looking for ways to improve Kaupa.',
+        thanksContact: 'Thanks for reaching out — we’ll get back to you shortly.' },
+  lt: { title: 'Pagalba ir atsiliepimai', sub: 'Pasiūlyk arba susisiek su mumis', val: '',
+        suggestion: 'Pasiūlymas', contact: 'Susisiekti', placeholder: 'Tavo žinutė…', send: 'Siųsti', cancel: 'Atšaukti', done: 'Gerai',
+        thanksSuggestion: 'Ačiū už atsiliepimą — nuolat ieškome būdų tobulinti Kaupa.',
+        thanksContact: 'Ačiū, kad parašei — netrukus susisieksime.' },
+  de: { title: 'Hilfe & Feedback', sub: 'Vorschlag senden oder Kontakt', val: '',
+        suggestion: 'Vorschlag', contact: 'Kontakt', placeholder: 'Deine Nachricht…', send: 'Senden', cancel: 'Abbrechen', done: 'Fertig',
+        thanksSuggestion: 'Danke für dein Feedback — wir verbessern Kaupa ständig.',
+        thanksContact: 'Danke für deine Nachricht — wir melden uns in Kürze.' },
+  es: { title: 'Ayuda y sugerencias', sub: 'Envía una sugerencia o contáctanos', val: '',
+        suggestion: 'Sugerencia', contact: 'Contacto', placeholder: 'Tu mensaje…', send: 'Enviar', cancel: 'Cancelar', done: 'Hecho',
+        thanksSuggestion: 'Gracias por tu opinión — siempre buscamos mejorar Kaupa.',
+        thanksContact: 'Gracias por escribirnos — te responderemos pronto.' },
+};
 const SAFE_STR = {
   en: { lab: 'SAFE TO SPEND', inc: 'in', spent: 'spent', bills: 'bills due', setTitle: 'Safe to spend', setSub: 'Show it on your home screen' },
   lt: { lab: 'GALIMA IŠLEISTI', inc: 'pajamų', spent: 'išleista', bills: 'sąskaitoms', setTitle: 'Galima išleisti', setSub: 'Rodyti pradžios ekrane' },
@@ -3933,11 +4017,16 @@ function renderSettings() {
   const sfT = document.getElementById('setSafeTitle'); if (sfT) sfT.textContent = ss.setTitle;
   const sfS = document.getElementById('setSafeSub'); if (sfS) sfS.textContent = ss.setSub;
   const sfV = document.getElementById('setSafeVal'); if (sfV) sfV.textContent = safeOn ? t('on') : t('off');
+  const hs = HELP_STR[uiLang] || HELP_STR.en;
+  const hT = document.getElementById('setHelpTitle'); if (hT) hT.textContent = hs.title;
+  const hSub = document.getElementById('setHelpSub'); if (hSub) hSub.textContent = hs.sub;
+  const hV = document.getElementById('setHelpVal'); if (hV) hV.textContent = hs.val;
 }
 document.getElementById('setSpaces').onclick = () => openSheet('menu');
 document.getElementById('setBudgets').onclick = () => switchTab('budgetspage');
 document.getElementById('setRecurring').onclick = () => switchTab('recurringpage');
 document.getElementById('setSafe').onclick = () => { safeOn = !safeOn; lsSet('kaupa.safe', safeOn); renderSettings(); render(); };
+document.getElementById('setHelp').onclick = () => feedbackSheet();
 document.getElementById('recBack').onclick = () => switchTab('settings');
 document.getElementById('recDueAdd').onclick = () => addAllDue();
 document.getElementById('recDueReview').onclick = () => switchTab('recurringpage');
