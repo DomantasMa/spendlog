@@ -130,6 +130,62 @@
     border-radius: 999px; padding: 13px; cursor: pointer;
   }
 
+  /* ================= monthly wrapped ================= */
+  .wrapcard {
+    margin-top: 12px; border-radius: 20px; padding: 16px 18px; cursor: pointer;
+    background: linear-gradient(135deg, #26433b 0%, #1b1b17 78%);
+    color: #F2F1EA; box-shadow: var(--shadow); position: relative; overflow: hidden;
+  }
+  .wrapcard .wpl { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; opacity: 0.72; }
+  .wrapcard .wpt { font-family: "Fraunces", Georgia, serif; font-size: 21px; font-weight: 600; margin-top: 4px; }
+  .wrapcard .wpb { font-size: 13.5px; opacity: 0.82; margin-top: 3px; line-height: 1.4; }
+  .wrapcard .wprow { display: flex; gap: 8px; margin-top: 13px; }
+  .wrapcard .wpopen {
+    flex: 1.6; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+    background: #F2F1EA; color: #1b1b17; border: none; border-radius: 999px; padding: 12px;
+  }
+  .wrapcard .wplater {
+    flex: 1; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    background: rgba(255,255,255,0.08); color: #F2F1EA; border: 1px solid rgba(242,241,234,0.28);
+    border-radius: 999px; padding: 12px;
+  }
+  .wrapcard .wpstar { position: absolute; right: -18px; top: -18px; font-size: 96px; opacity: 0.10; transform: rotate(-12deg); }
+
+  #wrapOverlay {
+    position: fixed; inset: 0; z-index: 300; display: flex; flex-direction: column;
+    background: #14140f; color: #F2F1EA;
+    padding: calc(16px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+  }
+  #wrapOverlay .wtop { display: flex; align-items: center; gap: 10px; }
+  #wrapOverlay .wdots { display: flex; gap: 5px; flex: 1; }
+  #wrapOverlay .wdot { flex: 1; height: 3px; border-radius: 2px; background: rgba(242,241,234,0.24); transition: background 0.2s; }
+  #wrapOverlay .wdot.on { background: #F2F1EA; }
+  #wrapOverlay .wclose {
+    font: inherit; font-size: 22px; line-height: 1; color: #F2F1EA; background: none; border: none;
+    cursor: pointer; padding: 0 4px; opacity: 0.8;
+  }
+  #wrapOverlay .wstage { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
+  #wrapOverlay .wzone { position: absolute; top: 0; bottom: 0; width: 40%; z-index: 2; cursor: pointer; }
+  #wrapOverlay .wzone.left { left: 0; }
+  #wrapOverlay .wzone.right { right: 0; width: 60%; }
+  #wrapOverlay .wcard { text-align: center; max-width: 360px; padding: 0 6px; animation: wpop 0.42s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes wpop { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+  #wrapOverlay .wclab { font-size: 12px; font-weight: 800; letter-spacing: 0.16em; color: var(--sage); opacity: 0.95; }
+  #wrapOverlay .wcbig { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 58px; line-height: 1.02; margin: 14px 0 6px; letter-spacing: -0.01em; }
+  #wrapOverlay .wcbig.sm { font-size: 40px; }
+  #wrapOverlay .wcsub { font-size: 17px; line-height: 1.45; opacity: 0.86; }
+  #wrapOverlay .wcemoji { font-size: 46px; margin-bottom: 8px; }
+  #wrapOverlay .wactions { position: relative; z-index: 3; display: flex; gap: 10px; margin-top: 26px; justify-content: center; }
+  #wrapOverlay .wshare {
+    font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+    background: #F2F1EA; color: #14140f; border: none; border-radius: 999px; padding: 13px 26px;
+  }
+  #wrapOverlay .wdone {
+    font: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+    background: rgba(255,255,255,0.08); color: #F2F1EA; border: 1px solid rgba(242,241,234,0.28);
+    border-radius: 999px; padding: 13px 24px;
+  }
+
   /* ================= capture ================= */
   .capturezone { display: flex; flex-direction: column; align-items: center; padding: 26px 0 6px; }
   .bigmic {
@@ -743,6 +799,7 @@
     <div class="monthlabel" id="monthLabel">JULY 2026</div>
     <div id="inviteBanners"></div>
     <div id="pushPrompt"></div>
+    <div id="wrapPrompt"></div>
 
     <div class="capturezone">
       <button class="bigmic" id="micBtn">
@@ -1043,6 +1100,12 @@
         <span class="sa">Export</span>
       </button>
     </div>
+    <div class="setcard" id="setWrappedCard" style="display:none;">
+      <button class="setrow" id="setWrapped">
+        <span><span class="st" id="setWrappedTitle">Monthly recap</span><br><span class="ss" id="setWrappedSub">Replay last month, wrapped</span></span>
+        <span class="sa" id="setWrappedVal">View</span>
+      </button>
+    </div>
     <div class="setcard">
       <button class="setrow" id="setHelp">
         <span><span class="st" id="setHelpTitle">Help &amp; feedback</span><br><span class="ss" id="setHelpSub">Questions or ideas? Email us</span></span>
@@ -1055,7 +1118,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="6.7"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="6.8"></div>
   </section>
 
 </div>
@@ -3175,6 +3238,281 @@ document.addEventListener('click', e => {
   box.textContent = m[key] || INFO_STR.en[key] || '';
   box.style.display = box.style.display === 'none' ? 'block' : 'none';
 });
+
+/* ================= monthly wrapped ================= */
+const WRAP_STR = {
+  en: {
+    promptLab: 'YOUR MONTH, WRAPPED', promptTitle: '{month} in review',
+    promptBody: 'A quick look back at where your money went.',
+    open: 'See it', later: 'Maybe later',
+    introLab: 'LOOKING BACK AT', introSub: 'Here’s how your month went.',
+    spentLab: 'YOU SPENT', spentMore: '{amt} more than {prev}', spentLess: '{amt} less than {prev}',
+    spentSame: 'about the same as {prev}', spentFirst: 'your first month tracked here',
+    catLab: 'BIGGEST CATEGORY', catSub: '{amt} — {pct}% of everything',
+    splurgeLab: 'BIGGEST SINGLE BUY', splurgeSub: 'at {merchant}',
+    merchLab: 'MOST VISITED', merchSub: '{n} times · {amt} in total',
+    daysLab: 'YOU LOGGED', daysBig: '{entries} entries', daysSub: 'across {days} days',
+    keptLab: 'YOU KEPT', keptSub: 'out of {earned} earned', keptNegBig: 'Over budget',
+    keptNegSub: 'you spent {amt} more than you earned', closeLab: 'THAT’S A WRAP',
+    share: 'Share', done: 'Done', shareTag: 'my month with Kaupa',
+    setTitle: 'Monthly recap', setSub: 'Replay last month, wrapped', view: 'View',
+    close: {
+      gentle: 'Every entry is a small act of care. See you next month. 🤍',
+      neutral: 'Another month, all accounted for. Onto the next one.',
+      blunt: 'That’s where it all went. No surprises next month, yeah?',
+    },
+  },
+  lt: {
+    promptLab: 'TAVO MĖNESIO APŽVALGA', promptTitle: '{month} apžvalga',
+    promptBody: 'Greita apžvalga, kur nukeliavo pinigai.',
+    open: 'Žiūrėti', later: 'Gal vėliau',
+    introLab: 'ŽVELGIAM ATGAL Į', introSub: 'Štai koks buvo tavo mėnuo.',
+    spentLab: 'IŠLEIDAI', spentMore: '{amt} daugiau nei {prev}', spentLess: '{amt} mažiau nei {prev}',
+    spentSame: 'panašiai kaip {prev}', spentFirst: 'pirmas tavo mėnuo čia',
+    catLab: 'DIDŽIAUSIA KATEGORIJA', catSub: '{amt} — {pct}% visų išlaidų',
+    splurgeLab: 'DIDŽIAUSIAS PIRKINYS', splurgeSub: '{merchant}',
+    merchLab: 'DAŽNIAUSIA VIETA', merchSub: '{n} k. · iš viso {amt}',
+    daysLab: 'ĮRAŠEI', daysBig: '{entries} įrašų', daysSub: 'per {days} d.',
+    keptLab: 'PASILIKAI', keptSub: 'iš {earned} pajamų', keptNegBig: 'Viršyta',
+    keptNegSub: 'išleidai {amt} daugiau nei uždirbai', closeLab: 'TIEK ŠĮ KARTĄ',
+    share: 'Dalintis', done: 'Gerai', shareTag: 'mano mėnuo su Kaupa',
+    setTitle: 'Mėnesio apžvalga', setSub: 'Peržiūrėti praėjusį mėnesį', view: 'Žiūrėti',
+    close: {
+      gentle: 'Kiekvienas įrašas — mažas rūpestis savimi. Iki kito mėnesio. 🤍',
+      neutral: 'Dar vienas mėnuo, viskas suskaičiuota. Pirmyn.',
+      blunt: 'Štai kur viskas nukeliavo. Kitą mėnesį jokių staigmenų, ane?',
+    },
+  },
+  de: {
+    promptLab: 'DEIN MONAT, KOMPAKT', promptTitle: '{month} im Rückblick',
+    promptBody: 'Ein kurzer Blick zurück, wohin dein Geld ging.',
+    open: 'Ansehen', later: 'Später',
+    introLab: 'RÜCKBLICK AUF', introSub: 'So lief dein Monat.',
+    spentLab: 'DU HAST AUSGEGEBEN', spentMore: '{amt} mehr als {prev}', spentLess: '{amt} weniger als {prev}',
+    spentSame: 'etwa so viel wie {prev}', spentFirst: 'dein erster Monat hier',
+    catLab: 'GRÖSSTE KATEGORIE', catSub: '{amt} — {pct}% von allem',
+    splurgeLab: 'GRÖSSTER EINZELKAUF', splurgeSub: 'bei {merchant}',
+    merchLab: 'AM HÄUFIGSTEN', merchSub: '{n}-mal · {amt} gesamt',
+    daysLab: 'DU HAST ERFASST', daysBig: '{entries} Einträge', daysSub: 'an {days} Tagen',
+    keptLab: 'DU HAST BEHALTEN', keptSub: 'von {earned} Einnahmen', keptNegBig: 'Überzogen',
+    keptNegSub: 'du hast {amt} mehr ausgegeben als eingenommen', closeLab: 'DAS WAR’S',
+    share: 'Teilen', done: 'Fertig', shareTag: 'mein Monat mit Kaupa',
+    setTitle: 'Monatsrückblick', setSub: 'Letzten Monat erneut ansehen', view: 'Ansehen',
+    close: {
+      gentle: 'Jeder Eintrag ist ein kleines Stück Fürsorge. Bis nächsten Monat. 🤍',
+      neutral: 'Noch ein Monat, alles erfasst. Auf zum nächsten.',
+      blunt: 'Da ist es hin. Nächsten Monat keine Überraschungen, ja?',
+    },
+  },
+  es: {
+    promptLab: 'TU MES, RESUMIDO', promptTitle: 'Resumen de {month}',
+    promptBody: 'Un vistazo rápido a dónde fue tu dinero.',
+    open: 'Ver', later: 'Más tarde',
+    introLab: 'REPASANDO', introSub: 'Así fue tu mes.',
+    spentLab: 'GASTASTE', spentMore: '{amt} más que {prev}', spentLess: '{amt} menos que {prev}',
+    spentSame: 'casi lo mismo que {prev}', spentFirst: 'tu primer mes aquí',
+    catLab: 'CATEGORÍA MAYOR', catSub: '{amt} — {pct}% de todo',
+    splurgeLab: 'COMPRA MÁS GRANDE', splurgeSub: 'en {merchant}',
+    merchLab: 'MÁS VISITADO', merchSub: '{n} veces · {amt} en total',
+    daysLab: 'REGISTRASTE', daysBig: '{entries} apuntes', daysSub: 'en {days} días',
+    keptLab: 'TE QUEDASTE', keptSub: 'de {earned} ingresados', keptNegBig: 'Te pasaste',
+    keptNegSub: 'gastaste {amt} más de lo que ingresaste', closeLab: 'ESO ES TODO',
+    share: 'Compartir', done: 'Hecho', shareTag: 'mi mes con Kaupa',
+    setTitle: 'Resumen mensual', setSub: 'Ver de nuevo el mes pasado', view: 'Ver',
+    close: {
+      gentle: 'Cada apunte es un pequeño gesto de cuidado. Hasta el próximo mes. 🤍',
+      neutral: 'Otro mes, todo contabilizado. A por el siguiente.',
+      blunt: 'Ahí es donde fue todo. El mes que viene sin sorpresas, ¿vale?',
+    },
+  },
+};
+function wstr() { return WRAP_STR[uiLang] || WRAP_STR.en; }
+function wfill(str, vars) { return String(str).replace(/\{(\w+)\}/g, (_, k) => (vars && vars[k] != null) ? String(vars[k]) : ''); }
+
+function computeWrapped(off) {
+  off = (off == null) ? -1 : off;
+  const es = monthEntries(off);
+  const exp = es.filter(e => e.type !== 'income');
+  const inc = es.filter(e => e.type === 'income');
+  const spent = exp.reduce((s, e) => s + e.amount, 0);
+  const earned = inc.reduce((s, e) => s + e.amount, 0);
+  const prevSpent = monthEntries(off - 1).filter(e => e.type !== 'income').reduce((s, e) => s + e.amount, 0);
+  const byCat = {};
+  exp.forEach(e => { byCat[e.cat] = (byCat[e.cat] || 0) + e.amount; });
+  const cats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  const topCat = cats[0] ? { id: cats[0][0], amt: cats[0][1], pct: spent ? Math.round(cats[0][1] / spent * 100) : 0 } : null;
+  let splurge = null;
+  exp.forEach(e => { if (!splurge || e.amount > splurge.amount) splurge = e; });
+  const mc = {};
+  exp.forEach(e => { const m = (e.merchant || '').trim(); if (!m) return; if (!mc[m]) mc[m] = { n: 0, amt: 0 }; mc[m].n++; mc[m].amt += e.amount; });
+  const merch = Object.entries(mc).sort((a, b) => b[1].n - a[1].n || b[1].amt - a[1].amt)[0];
+  const topMerch = merch ? { name: merch[0], n: merch[1].n, amt: merch[1].amt } : null;
+  const days = new Set(exp.map(e => e.dateISO)).size;
+  const md = new Date(monthStartISO(off) + 'T00:00:00Z');
+  return {
+    off, key: monthStartISO(off).slice(0, 7),
+    monthName: md.toLocaleDateString(loc(), { month: 'long' }),
+    prevName: new Date(monthStartISO(off - 1) + 'T00:00:00Z').toLocaleDateString(loc(), { month: 'long' }),
+    spent, earned, prevSpent, kept: earned > 0 ? earned - spent : null,
+    topCat, splurge, topMerch, days, entries: exp.length,
+  };
+}
+
+function wrappedCards(w) {
+  const S = wstr(); const cards = [];
+  cards.push({ emoji: '📖', lab: S.introLab, big: w.monthName, bigSm: true, sub: S.introSub });
+  // spent vs previous
+  let ssub;
+  const d = w.spent - w.prevSpent;
+  if (w.prevSpent <= 0) ssub = S.spentFirst;
+  else if (Math.abs(d) < Math.max(5, w.prevSpent * 0.03)) ssub = wfill(S.spentSame, { prev: w.prevName });
+  else ssub = wfill(d > 0 ? S.spentMore : S.spentLess, { amt: fmt0(Math.abs(d)), prev: w.prevName });
+  cards.push({ emoji: '💸', lab: S.spentLab, big: fmt0(w.spent), sub: ssub });
+  if (w.topCat) cards.push({ emoji: '🥇', lab: S.catLab, big: catLabel(catById(w.topCat.id)), bigSm: true, sub: wfill(S.catSub, { amt: fmt0(w.topCat.amt), pct: w.topCat.pct }) });
+  if (w.splurge && w.splurge.amount > 0) cards.push({ emoji: '💥', lab: S.splurgeLab, big: fmt0(w.splurge.amount), sub: wfill(S.splurgeSub, { merchant: (w.splurge.merchant || '—') }) });
+  if (w.topMerch && w.topMerch.n >= 2) cards.push({ emoji: '📍', lab: S.merchLab, big: w.topMerch.name, bigSm: true, sub: wfill(S.merchSub, { n: w.topMerch.n, amt: fmt0(w.topMerch.amt) }) });
+  cards.push({ emoji: '✍️', lab: S.daysLab, big: wfill(S.daysBig, { entries: w.entries }), bigSm: true, sub: wfill(S.daysSub, { days: w.days }) });
+  if (w.kept != null) {
+    if (w.kept >= 0) cards.push({ emoji: '🌱', lab: S.keptLab, big: fmt0(w.kept), sub: wfill(S.keptSub, { earned: fmt0(w.earned) }) });
+    else cards.push({ emoji: '⚠️', lab: S.keptLab, big: S.keptNegBig, bigSm: true, sub: wfill(S.keptNegSub, { amt: fmt0(-w.kept) }) });
+  }
+  cards.push({ emoji: '🎉', lab: S.closeLab, big: w.monthName, bigSm: true, sub: (S.close[tone] || S.close.neutral), closing: true });
+  return cards;
+}
+
+function openWrapped(off) {
+  const w = computeWrapped(off == null ? -1 : off);
+  const S = wstr();
+  const cards = wrappedCards(w);
+  let i = 0;
+  const old = document.getElementById('wrapOverlay'); if (old) old.remove();
+  const back = el('div'); back.id = 'wrapOverlay';
+  const top = el('div', 'wtop');
+  const dots = el('div', 'wdots');
+  cards.forEach(() => dots.appendChild(el('div', 'wdot')));
+  const close = el('button', 'wclose', '✕');
+  top.appendChild(dots); top.appendChild(close);
+  const stage = el('div', 'wstage');
+  const zoneL = el('div', 'wzone left'); const zoneR = el('div', 'wzone right');
+  stage.appendChild(zoneL); stage.appendChild(zoneR);
+  const holder = el('div'); holder.style.cssText = 'position:relative;z-index:1;width:100%;display:flex;justify-content:center;';
+  stage.appendChild(holder);
+  back.appendChild(top); back.appendChild(stage);
+
+  function finish() { lsSet('kaupa.wrappedSeen', w.key); back.remove(); if (typeof renderWrapPrompt === 'function') renderWrapPrompt(); }
+  function draw() {
+    Array.from(dots.children).forEach((d, k) => d.classList.toggle('on', k <= i));
+    holder.textContent = '';
+    const c = cards[i];
+    const card = el('div', 'wcard');
+    if (c.emoji) card.appendChild(el('div', 'wcemoji', c.emoji));
+    card.appendChild(el('div', 'wclab', c.lab));
+    const big = el('div', 'wcbig' + (c.bigSm ? ' sm' : ''), c.big);
+    card.appendChild(big);
+    if (c.sub) card.appendChild(el('div', 'wcsub', c.sub));
+    if (c.closing) {
+      const acts = el('div', 'wactions');
+      const sh = el('button', 'wshare', '↗ ' + S.share);
+      sh.onclick = (ev) => { ev.stopPropagation(); shareWrapped(w); };
+      const dn = el('button', 'wdone', S.done);
+      dn.onclick = (ev) => { ev.stopPropagation(); finish(); };
+      acts.appendChild(sh); acts.appendChild(dn);
+      card.appendChild(acts);
+    }
+    holder.appendChild(card);
+  }
+  function next() { if (i < cards.length - 1) { i++; draw(); } else finish(); }
+  function prev() { if (i > 0) { i--; draw(); } }
+  zoneR.onclick = next; zoneL.onclick = prev;
+  close.onclick = finish;
+  // swipe
+  let sx = null;
+  back.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  back.addEventListener('touchend', e => {
+    if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null;
+    if (dx < -40) next(); else if (dx > 40) prev();
+  }, { passive: true });
+  document.body.appendChild(back);
+  draw();
+}
+
+function shareWrapped(w) {
+  const S = wstr();
+  const cv = document.createElement('canvas');
+  cv.width = 1080; cv.height = 1350;
+  const g = cv.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 1080, 1350);
+  grad.addColorStop(0, '#26433b'); grad.addColorStop(0.8, '#1b1b17');
+  g.fillStyle = grad; g.fillRect(0, 0, 1080, 1350);
+  g.textAlign = 'left';
+  g.fillStyle = '#F2F1EA';
+  g.font = '700 46px "Fraunces", Georgia, serif';
+  g.fillText('Kaupa', 90, 150);
+  g.font = '800 30px Inter, system-ui, sans-serif';
+  g.fillStyle = '#7fae83';
+  g.fillText(w.monthName.toUpperCase() + ' · ' + S.promptLab, 90, 210);
+  const rows = [];
+  rows.push([S.spentLab, fmt0(w.spent)]);
+  if (w.topCat) rows.push([S.catLab, catLabel(catById(w.topCat.id)) + ' · ' + fmt0(w.topCat.amt)]);
+  if (w.topMerch && w.topMerch.n >= 2) rows.push([S.merchLab, w.topMerch.name + ' · ' + w.topMerch.n + '×']);
+  rows.push([S.daysLab, wfill(S.daysBig, { entries: w.entries }) + ' · ' + wfill(S.daysSub, { days: w.days })]);
+  if (w.kept != null && w.kept >= 0) rows.push([S.keptLab, fmt0(w.kept)]);
+  let y = 360;
+  rows.forEach(([lab, val]) => {
+    g.fillStyle = 'rgba(242,241,234,0.6)';
+    g.font = '800 26px Inter, system-ui, sans-serif';
+    g.fillText(String(lab), 90, y);
+    g.fillStyle = '#F2F1EA';
+    g.font = '600 62px "Fraunces", Georgia, serif';
+    const val2 = String(val).length > 26 ? String(val).slice(0, 25) + '…' : String(val);
+    g.fillText(val2, 90, y + 74);
+    y += 168;
+  });
+  g.fillStyle = 'rgba(242,241,234,0.55)';
+  g.font = '500 30px Inter, system-ui, sans-serif';
+  g.fillText(S.shareTag, 90, 1270);
+  cv.toBlob(async (blob) => {
+    if (!blob) return;
+    const file = new File([blob], 'kaupa-' + w.key + '.png', { type: 'image/png' });
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Kaupa', text: S.shareTag });
+        return;
+      }
+    } catch (e) { /* fall through to download */ }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = file.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }, 'image/png');
+}
+
+function wrappedReady() {
+  const w = computeWrapped(-1);
+  return w.entries >= 4 && lsGet('kaupa.wrappedSeen', '') !== w.key;
+}
+function renderWrapPrompt() {
+  const host = document.getElementById('wrapPrompt');
+  if (!host) return;
+  host.textContent = '';
+  if (!wrappedReady()) return;
+  const w = computeWrapped(-1); const S = wstr();
+  const card = el('div', 'wrapcard');
+  card.appendChild(el('div', 'wpstar', '✦'));
+  card.appendChild(el('div', 'wpl', S.promptLab));
+  card.appendChild(el('div', 'wpt', wfill(S.promptTitle, { month: w.monthName })));
+  card.appendChild(el('div', 'wpb', S.promptBody));
+  const row = el('div', 'wprow');
+  const open = el('button', 'wpopen', S.open);
+  open.onclick = (e) => { e.stopPropagation(); openWrapped(-1); };
+  const later = el('button', 'wplater', S.later);
+  later.onclick = (e) => { e.stopPropagation(); lsSet('kaupa.wrappedSeen', w.key); renderWrapPrompt(); };
+  row.appendChild(open); row.appendChild(later);
+  card.appendChild(row);
+  card.onclick = () => openWrapped(-1);
+  host.appendChild(card);
+}
+
 function renderHome() {
   const space = spaces.find(s => s.id === currentSpaceId);
   document.getElementById('spaceName').textContent = space ? space.name : '—';
@@ -3182,6 +3520,7 @@ function renderHome() {
   document.getElementById('spaceSub').textContent = memberCount > 1 ? t('sharedPeople', { n: memberCount }) : t('justYou');
   document.getElementById('monthLabel').textContent = new Date().toLocaleDateString(loc(), { month: 'long', year: 'numeric' }).toUpperCase();
   if (typeof renderPushPrompt === 'function') renderPushPrompt();
+  if (typeof renderWrapPrompt === 'function') renderWrapPrompt();
 
   const cur = monthEntries(0), prev = monthEntries(-1);
   const spent = cur.filter(e => e.type !== 'income').reduce((s, e) => s + e.amount, 0);
@@ -4017,6 +4356,13 @@ function renderSettings() {
   const sfT = document.getElementById('setSafeTitle'); if (sfT) sfT.textContent = ss.setTitle;
   const sfS = document.getElementById('setSafeSub'); if (sfS) sfS.textContent = ss.setSub;
   const sfV = document.getElementById('setSafeVal'); if (sfV) sfV.textContent = safeOn ? t('on') : t('off');
+  const ws = wstr();
+  const wCard = document.getElementById('setWrappedCard');
+  const wHas = computeWrapped(-1).entries >= 4;
+  if (wCard) wCard.style.display = wHas ? 'block' : 'none';
+  const wT = document.getElementById('setWrappedTitle'); if (wT) wT.textContent = ws.setTitle;
+  const wSub = document.getElementById('setWrappedSub'); if (wSub) wSub.textContent = ws.setSub;
+  const wV = document.getElementById('setWrappedVal'); if (wV) wV.textContent = ws.view;
   const hs = HELP_STR[uiLang] || HELP_STR.en;
   const hT = document.getElementById('setHelpTitle'); if (hT) hT.textContent = hs.title;
   const hSub = document.getElementById('setHelpSub'); if (hSub) hSub.textContent = hs.sub;
@@ -4027,6 +4373,7 @@ document.getElementById('setBudgets').onclick = () => switchTab('budgetspage');
 document.getElementById('setRecurring').onclick = () => switchTab('recurringpage');
 document.getElementById('setSafe').onclick = () => { safeOn = !safeOn; lsSet('kaupa.safe', safeOn); renderSettings(); render(); };
 document.getElementById('setHelp').onclick = () => feedbackSheet();
+document.getElementById('setWrapped').onclick = () => openWrapped(-1);
 document.getElementById('recBack').onclick = () => switchTab('settings');
 document.getElementById('recDueAdd').onclick = () => addAllDue();
 document.getElementById('recDueReview').onclick = () => switchTab('recurringpage');
