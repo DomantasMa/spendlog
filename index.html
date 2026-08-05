@@ -43,6 +43,7 @@
     background: var(--paper);
     color: var(--ink);
     min-height: 100vh;
+    overflow-x: hidden;
   }
   .serif { font-family: "Fraunces", Georgia, serif; }
   .wrap { max-width: 440px; margin: 0 auto; padding: 0 18px 110px; }
@@ -149,7 +150,7 @@
     background: rgba(255,255,255,0.08); color: #F2F1EA; border: 1px solid rgba(242,241,234,0.28);
     border-radius: 999px; padding: 12px;
   }
-  .wrapcard .wpstar { position: absolute; right: -18px; top: -18px; font-size: 96px; opacity: 0.10; transform: rotate(-12deg); }
+  .wrapcard .wpstar { position: absolute; right: 6px; top: -14px; font-size: 92px; opacity: 0.10; transform: rotate(-12deg); pointer-events: none; }
 
   #wrapOverlay {
     position: fixed; inset: 0; z-index: 300; display: flex; flex-direction: column;
@@ -1118,7 +1119,7 @@
         <span class="sa"></span>
       </button>
     </div>
-    <div class="footer" id="verMark" style="display:none;" data-v="6.9"></div>
+    <div class="footer" id="verMark" style="display:none;" data-v="7.0"></div>
   </section>
 
 </div>
@@ -3336,6 +3337,7 @@ const WRAP_STR = {
 };
 function wstr() { return WRAP_STR[uiLang] || WRAP_STR.en; }
 function wfill(str, vars) { return String(str).replace(/\{(\w+)\}/g, (_, k) => (vars && vars[k] != null) ? String(vars[k]) : ''); }
+function capFirst(s) { s = String(s || ''); return s ? s.charAt(0).toLocaleUpperCase(loc()) + s.slice(1) : s; }
 
 function computeWrapped(off) {
   off = (off == null) ? -1 : off;
@@ -3359,7 +3361,9 @@ function computeWrapped(off) {
   const md = new Date(monthStartISO(off) + 'T00:00:00Z');
   return {
     off, key: monthStartISO(off).slice(0, 7),
-    monthName: md.toLocaleDateString(loc(), { month: 'long' }),
+    // capitalised for standalone headlines (Lithuanian/Spanish months are lower-case by default)
+    monthName: capFirst(md.toLocaleDateString(loc(), { month: 'long' })),
+    // prevName stays lower-case — it appears mid-sentence ("daugiau nei liepa"), where lower-case is correct
     prevName: new Date(monthStartISO(off - 1) + 'T00:00:00Z').toLocaleDateString(loc(), { month: 'long' }),
     spent, earned, prevSpent, kept: earned > 0 ? earned - spent : null,
     topCat, splurge, topMerch, days, entries: exp.length,
